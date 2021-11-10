@@ -2,10 +2,10 @@
 
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Http\Middleware\EncryptCookies;
-use Filament\Http\Middleware\RedirectIfAuthenticated;
-use Filament\Http\Middleware\VerifyCsrfToken;
+use Filament\Http\Middleware\MirrorConfigToSubpackages;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
@@ -48,8 +48,7 @@ return [
     */
 
     'auth' => [
-        'guard' => env('FILAMENT_AUTH_GUARD', 'filament'),
-        'logout_redirect_route' => 'filament.auth.login',
+        'guard' => env('FILAMENT_AUTH_GUARD', 'web'),
     ],
 
     /*
@@ -84,21 +83,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Roles
-    |--------------------------------------------------------------------------
-    |
-    | This is the namespace and directory that Filament will automatically
-    | register roles from.
-    |
-    */
-
-    'roles' => [
-        'namespace' => 'App\\Filament\\Roles',
-        'path' => app_path('Filament/Roles'),
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
     | Widgets
     |--------------------------------------------------------------------------
     |
@@ -118,6 +102,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Default Avatar Provider
+    |--------------------------------------------------------------------------
+    |
+    | This is the service that will be used to retrieve default avatars if one
+    | has not been uploaded.
+    |
+    */
+
+    'default_avatar_provider' => \Filament\AvatarProviders\UiAvatarProvider::class,
+
+    /*
+    |--------------------------------------------------------------------------
     | Default Filesystem Disk
     |--------------------------------------------------------------------------
     |
@@ -130,30 +126,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | User Resource
-    |--------------------------------------------------------------------------
-    |
-    | This is the user resource class that Filament will use to generate tables
-    | and forms to manage users.
-    |
-    */
-
-    'user_resource' => \Filament\Resources\UserResource::class,
-
-    /*
-    |--------------------------------------------------------------------------
-    | Avatar Provider
-    |--------------------------------------------------------------------------
-    |
-    | This is the service that will be used to retrieve default avatars if one
-    | has not been uploaded.
-    |
-    */
-
-    'avatar_provider' => \Filament\AvatarProviders\GravatarProvider::class,
-
-    /*
-    |--------------------------------------------------------------------------
     | Middleware
     |--------------------------------------------------------------------------
     |
@@ -163,46 +135,16 @@ return [
     */
 
     'middleware' => [
-        'auth' => [
-            Authenticate::class,
-        ],
-        'base' => [
-            EncryptCookies::class,
-            AddQueuedCookiesToResponse::class,
-            StartSession::class,
-            AuthenticateSession::class,
-            ShareErrorsFromSession::class,
-            VerifyCsrfToken::class,
-            SubstituteBindings::class,
-            DispatchServingFilamentEvent::class,
-        ],
-        'guest' => [
-            RedirectIfAuthenticated::class,
-        ],
+        EncryptCookies::class,
+        AddQueuedCookiesToResponse::class,
+        StartSession::class,
+        AuthenticateSession::class,
+        ShareErrorsFromSession::class,
+        VerifyCsrfToken::class,
+        SubstituteBindings::class,
+        DispatchServingFilamentEvent::class,
+        MirrorConfigToSubpackages::class,
+        Authenticate::class,
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Cache
-    |--------------------------------------------------------------------------
-    |
-    | This is the cache disk Filament will use, you may use any of the disks
-    | defined in the `config/filesystems.php`.
-    |
-    */
-
-    'cache_disk' => env('FILAMENT_CACHE_DISK', 'local'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Cache Path Prefix
-    |--------------------------------------------------------------------------
-    |
-    | This is the cache path prefix used by Filament. It is relative to the
-    | disk defined above.
-    |
-    */
-
-    'cache_path_prefix' => 'filament/cache',
 
 ];

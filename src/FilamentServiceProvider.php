@@ -2,265 +2,117 @@
 
 namespace Filament;
 
-use BladeUI\Icons\Factory as BladeUIFactory;
-use Filament\Models\User;
-use Filament\Pages\Page;
+use Filament\Facades\Filament;
+use Filament\Http\Livewire\GlobalSearch;
+use Filament\Pages\Dashboard;
 use Filament\Resources\Resource;
-use Filament\Roles\Role;
-use Filament\View\Components;
 use Filament\Widgets\Widget;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\Livewire;
 use ReflectionClass;
-use Symfony\Component\Finder\SplFileInfo;
+use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
+use SplFileInfo;
 
-class FilamentServiceProvider extends ServiceProvider
+class FilamentServiceProvider extends PackageServiceProvider
 {
-    public function boot()
+    public function configurePackage(Package $package): void
     {
-        $this->bootCommands();
-        $this->bootDirectives();
-        $this->bootLivewireComponents();
-        $this->bootLoaders();
-        $this->bootPublishing();
-
-        $this->configure();
+        $package
+            ->name('filament')
+            ->hasConfigFile()
+            ->hasRoutes(['web'])
+            ->hasTranslations()
+            ->hasViews();
     }
 
-    public function register()
+    public function boot(): void
     {
-        $this->app->singleton(FilamentManager::class, function () {
-            return new FilamentManager;
+        parent::boot();
+
+        $this->bootLivewireComponents();
+    }
+
+    public function register(): void
+    {
+        parent::register();
+
+        $this->app->singleton('filament', function (): FilamentManager {
+            return new FilamentManager();
         });
 
         $this->mergeConfigFrom(__DIR__ . '/../config/filament.php', 'filament');
 
-        $this->registerIcons();
+        $this->discoverPages();
+        $this->discoverResources();
+        $this->discoverWidgets();
 
-        $this->discoverFilamentPages();
-        $this->discoverFilamentResources();
-        $this->discoverFilamentRoles();
-        $this->discoverFilamentWidgets();
-    }
-
-    protected function bootCommands()
-    {
-        if (! $this->app->runningInConsole()) {
-            return;
-        }
-
-        $this->commands($commands = [
-            Commands\MakeColumnCommand::class,
-            Commands\MakeFieldCommand::class,
-            Commands\MakeFilterCommand::class,
-            Commands\MakeFormComponentCommand::class,
-            Commands\MakePageCommand::class,
-            Commands\MakeRelationManagerCommand::class,
-            Commands\MakeResourceCommand::class,
-            Commands\MakeRoleCommand::class,
-            Commands\MakeThemeCommand::class,
-            Commands\MakeUserCommand::class,
-            Commands\MakeWidgetCommand::class,
-            Commands\UpgradeCommand::class,
+        Filament::registerPages([
+            Dashboard::class,
         ]);
-
-        $aliases = [];
-
-        foreach ($commands as $command) {
-            $class = 'Filament\\Commands\\Aliases\\' . class_basename($command);
-
-            if (! class_exists($class)) {
-                continue;
-            }
-
-            $aliases[] = $class;
-        }
-
-        $this->commands($aliases);
     }
 
-    protected function bootDirectives()
+    protected function bootLivewireComponents(): void
     {
-        Blade::directive('pushonce', function ($expression) {
-            [$pushName, $pushSub] = explode(':', trim(substr($expression, 1, -1)));
-            $key = '__pushonce_' . str_replace('-', '_', $pushName) . '_' . str_replace('-', '_', $pushSub);
+        Livewire::component('filament.global-search', GlobalSearch::class);
 
-            return "<?php if(! isset(\$__env->{$key})): \$__env->{$key} = 1; \$__env->startPush('{$pushName}'); ?>";
-        });
-
-        Blade::directive('endpushonce', function () {
-            return '<?php $__env->stopPush(); endif; ?>';
-        });
-    }
-
-    protected function bootLivewireComponents()
-    {
-        $this->registerLivewireComponentDirectory(__DIR__ . '/Http/Livewire', 'Filament\\Http\\Livewire', 'filament.core.');
-        $this->registerLivewireComponentDirectory(__DIR__ . '/Resources', 'Filament\\Resources', 'filament.core.resources.');
+        $this->registerLivewireComponentDirectory(__DIR__ . '/Pages', 'Filament\\Pages', 'filament.pages.');
+        $this->registerLivewireComponentDirectory(__DIR__ . '/Resources', 'Filament\\Resources', 'filament.resources.');
         $this->registerLivewireComponentDirectory(app_path('Filament'), 'App\\Filament', 'filament.');
     }
 
-    protected function bootLoaders()
-    {
-        $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
-
-        $this->loadViewComponentsAs('filament', [
-            'avatar' => Components\Avatar::class,
-            'image' => Components\Image::class,
-            'nav' => Components\Nav::class,
-        ]);
-
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'filament');
-
-        if (Filament::shouldRunMigrations() && $this->app->runningInConsole()) {
-            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        }
-
-        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'filament');
-    }
-
-    protected function bootPublishing()
-    {
-        if (! $this->app->runningInConsole()) {
-            return;
-        }
-
-        $this->publishes([
-            __DIR__ . '/../dist' => public_path('vendor/filament'),
-        ], 'filament-assets');
-
-        $this->publishes([
-            __DIR__ . '/../config/filament.php' => config_path('filament.php'),
-        ], 'filament-config');
-
-        $this->publishes([
-            __DIR__ . '/../resources/lang' => resource_path('lang/vendor/filament'),
-            __DIR__ . '/../packages/forms/resources/lang' => resource_path('lang/vendor/forms'),
-            __DIR__ . '/../packages/tables/resources/lang' => resource_path('lang/vendor/tables'),
-        ], 'filament-lang');
-
-        $this->publishes([
-            __DIR__ . '/../stubs' => base_path('stubs/filament'),
-        ], 'filament-stubs');
-
-        $this->publishes([
-            __DIR__ . '/../stubs/UserResource.stub' => app_path('Filament/Resources/UserResource.php'),
-        ], 'filament-user-resource');
-
-        $this->publishes([
-            __DIR__ . '/../resources/views' => resource_path('views/vendor/filament'),
-        ], 'filament-views');
-    }
-
-    protected function configure()
-    {
-        $this->app->booted(function () {
-            $this->app['config']->set('auth.guards.filament', [
-                'driver' => 'session',
-                'provider' => 'filament_users',
-            ]);
-
-            $this->app['config']->set('auth.passwords.filament_users', [
-                'provider' => 'filament_users',
-                'table' => 'filament_password_resets',
-                'expire' => 60,
-                'throttle' => 60,
-            ]);
-
-            $this->app['config']->set('auth.providers.filament_users', [
-                'driver' => 'eloquent',
-                'model' => User::class,
-            ]);
-
-            $this->app['config']->set('forms', [
-                'default_attachment_upload_route' => 'filament.form-attachments.upload',
-                'default_filesystem_disk' => $this->app['config']->get('filament.default_filesystem_disk'),
-            ]);
-        });
-    }
-
-    protected function discoverFilamentPages()
+    protected function discoverPages(): void
     {
         $filesystem = new Filesystem();
 
         $filesystem->ensureDirectoryExists(config('filament.pages.path'));
 
-        collect($filesystem->allFiles(config('filament.pages.path')))
-            ->map(function ($file) {
+        Filament::registerPages(collect($filesystem->allFiles(config('filament.pages.path')))
+            ->map(function (SplFileInfo $file): string {
                 return (string) Str::of(config('filament.pages.namespace'))
                     ->append('\\', $file->getRelativePathname())
                     ->replace(['/', '.php'], ['\\', '']);
             })
-            ->filter(function ($class) {
-                return is_subclass_of($class, Page::class) &&
-                    ! (new ReflectionClass($class))->isAbstract();
-            })
-            ->each(fn ($page) => Filament::registerPage($page));
+            ->filter(fn (string $class): bool => is_subclass_of($class, Page::class) && (! (new ReflectionClass($class))->isAbstract()))
+            ->toArray());
     }
 
-    protected function discoverFilamentResources()
+    protected function discoverResources(): void
     {
         $filesystem = new Filesystem();
 
         $filesystem->ensureDirectoryExists(config('filament.resources.path'));
 
-        collect($filesystem->allFiles(config('filament.resources.path')))
-            ->map(function ($file) {
+        Filament::registerResources(collect($filesystem->allFiles(config('filament.resources.path')))
+            ->map(function (SplFileInfo $file): string {
                 return (string) Str::of(config('filament.resources.namespace'))
                     ->append('\\', $file->getRelativePathname())
                     ->replace(['/', '.php'], ['\\', '']);
             })
-            ->filter(function ($class) {
-                return is_subclass_of($class, Resource::class) &&
-                    ! (new ReflectionClass($class))->isAbstract();
-            })
-            ->each(fn ($resource) => Filament::registerResource($resource));
+            ->filter(fn (string $class): bool => is_subclass_of($class, Resource::class) && (! (new ReflectionClass($class))->isAbstract()))
+            ->toArray());
     }
 
-    protected function discoverFilamentRoles()
-    {
-        $filesystem = new Filesystem();
-
-        $filesystem->ensureDirectoryExists(config('filament.roles.path'));
-
-        collect($filesystem->allFiles(config('filament.roles.path')))
-            ->map(function ($file) {
-                return (string) Str::of(config('filament.roles.namespace'))
-                    ->append('\\', $file->getRelativePathname())
-                    ->replace(['/', '.php'], ['\\', '']);
-            })
-            ->filter(function ($class) {
-                return is_subclass_of($class, Role::class) &&
-                    ! (new ReflectionClass($class))->isAbstract();
-            })
-            ->each(fn ($role) => Filament::registerRole($role));
-    }
-
-    protected function discoverFilamentWidgets()
+    protected function discoverWidgets(): void
     {
         $filesystem = new Filesystem();
 
         $filesystem->ensureDirectoryExists(config('filament.widgets.path'));
 
-        collect($filesystem->allFiles(config('filament.widgets.path')))
-            ->map(function ($file) {
+        Filament::registerWidgets(collect($filesystem->allFiles(config('filament.widgets.path')))
+            ->map(function (SplFileInfo $file): string {
                 return (string) Str::of(config('filament.widgets.namespace'))
                     ->append('\\', $file->getRelativePathname())
                     ->replace(['/', '.php'], ['\\', '']);
             })
-            ->filter(function ($class) {
-                return is_subclass_of($class, Widget::class) &&
-                    ! (new ReflectionClass($class))->isAbstract();
-            })
-            ->each(fn ($widget) => Filament::registerWidget($widget));
+            ->filter(fn ($class): bool => is_subclass_of($class, Widget::class) && (! (new ReflectionClass($class))->isAbstract()))
+            ->toArray());
     }
 
-    protected function mergeConfig(array $original, array $merging)
+    protected function mergeConfig(array $original, array $merging): array
     {
         $array = array_merge($original, $merging);
 
@@ -287,24 +139,14 @@ class FilamentServiceProvider extends ServiceProvider
         return $array;
     }
 
-    protected function mergeConfigFrom($path, $key)
+    protected function mergeConfigFrom($path, $key): void
     {
         $config = $this->app['config']->get($key, []);
 
         $this->app['config']->set($key, $this->mergeConfig(require $path, $config));
     }
 
-    protected function registerIcons()
-    {
-        $this->callAfterResolving(BladeUIFactory::class, function (BladeUIFactory $factory) {
-            $factory->add('filamenticons', [
-                'path' => __DIR__ . '/../resources/svg',
-                'prefix' => 'filamenticon',
-            ]);
-        });
-    }
-
-    protected function registerLivewireComponentDirectory($directory, $namespace, $aliasPrefix = '')
+    protected function registerLivewireComponentDirectory(string $directory, string $namespace, string $aliasPrefix = ''): void
     {
         $filesystem = new Filesystem();
 
@@ -313,15 +155,13 @@ class FilamentServiceProvider extends ServiceProvider
         }
 
         collect($filesystem->allFiles($directory))
-            ->map(function (SplFileInfo $file) use ($namespace) {
+            ->map(function (SplFileInfo $file) use ($namespace): string {
                 return (string) Str::of($namespace)
                     ->append('\\', $file->getRelativePathname())
                     ->replace(['/', '.php'], ['\\', '']);
             })
-            ->filter(function ($class) {
-                return is_subclass_of($class, Component::class) && ! (new ReflectionClass($class))->isAbstract();
-            })
-            ->each(function ($class) use ($namespace, $aliasPrefix) {
+            ->filter(fn (string $class): bool => is_subclass_of($class, Component::class) && (! (new ReflectionClass($class))->isAbstract()))
+            ->each(function (string $class) use ($namespace, $aliasPrefix): void {
                 $alias = Str::of($class)
                     ->after($namespace . '\\')
                     ->replace(['/', '\\'], '.')

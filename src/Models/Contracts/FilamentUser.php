@@ -4,13 +4,7 @@ namespace Filament\Models\Contracts;
 
 interface FilamentUser
 {
-    public function canAccessFilament();
+    public function canAccessFilament(): bool;
 
-    public static function getFilamentAdminColumn();
-
-    public static function getFilamentRolesColumn();
-
-    public static function getFilamentUserColumn();
-
-    public function isFilamentAdmin();
+    public function getFilamentName(): string;
 }

@@ -2,27 +2,34 @@
 
 namespace Filament\Http\Middleware;
 
+use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 
 class Authenticate extends Middleware
 {
-    protected function authenticate($request, array $guards)
+    protected function authenticate($request, array $guards): void
     {
-        $guard = config('filament.auth.guard');
+        $guardName = config('filament.auth.guard');
+        $guard = $this->auth->guard($guardName);
 
-        if ($this->auth->guard($guard)->check()) {
-            abort_unless($this->auth->guard($guard)->user()->canAccessFilament(), 403);
+        if (! $guard->check()) {
+            $this->unauthenticated($request, $guards);
 
-            return $this->auth->shouldUse($guard);
+            return;
         }
 
-        $this->unauthenticated($request, $guards);
+        $this->auth->shouldUse($guardName);
+
+        $user = $this->auth->user();
+
+        abort_unless(
+            $user instanceof FilamentUser && $user->canAccessFilament(),
+            404,
+        );
     }
 
-    protected function redirectTo($request)
+    protected function redirectTo($request): string
     {
-        if (! $request->expectsJson()) {
-            return route('filament.auth.login');
-        }
+        return route('login');
     }
 }

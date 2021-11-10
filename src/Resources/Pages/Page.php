@@ -2,49 +2,58 @@
 
 namespace Filament\Resources\Pages;
 
-use Filament\Resources\Concerns\CanCallHooks;
-use Filament\Resources\Route;
-use Illuminate\Support\Str;
+use Filament\Pages\Page as BasePage;
 
-class Page extends \Filament\Pages\Page
+class Page extends BasePage
 {
-    use CanCallHooks;
+    protected static ?string $breadcrumb = null;
 
-    public static $resource;
+    protected static string $resource;
 
-    public static function generateUrl($parameters = [], $absolute = true)
+    public static function route(string $path): array
     {
-        return route(static::getResource()::getRouteNamePrefix() . '.' . static::getResource()::getSlug() . '.' . static::route()->name, $parameters, $absolute);
+        return [
+            'class' => static::class,
+            'route' => $path,
+        ];
     }
 
-    public static function getModel()
+    public function getBreadcrumb(): string
+    {
+        return static::$breadcrumb ?? static::getTitle();
+    }
+
+    protected function getBreadcrumbs(): array
+    {
+        $resource = static::getResource();
+
+        return [
+            $resource::getUrl() => $resource::getBreadcrumb(),
+            $this->getBreadcrumb(),
+        ];
+    }
+
+    public static function authorizeResourceAccess(): void
+    {
+        abort_unless(static::getResource()::canAccess(), 403);
+    }
+
+    public static function getModel(): string
     {
         return static::getResource()::getModel();
     }
 
-    public static function getQuery()
-    {
-        return static::getModel()::query();
-    }
-
-    public static function getResource()
+    public static function getResource(): string
     {
         return static::$resource;
     }
 
-    public static function routeTo($uri, $name)
+    protected function callHook(string $hook): void
     {
-        return new Route(static::class, $uri, $name);
-    }
-
-    protected function authorize($action)
-    {
-        $method = (string) Str::of($action)->ucfirst()->prepend('can');
-
-        if (! method_exists($this, $method)) {
-            return true;
+        if (! method_exists($this, $hook)) {
+            return;
         }
 
-        abort_unless($this->{$method}() ?? true, 403);
+        $this->{$hook}();
     }
 }

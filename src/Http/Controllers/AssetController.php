@@ -2,29 +2,19 @@
 
 namespace Filament\Http\Controllers;
 
-use Illuminate\Support\Str;
-
 class AssetController
 {
     public function __invoke($path)
     {
         switch ($path) {
-            case 'css/filament.css':
-                return $this->pretendResponseIsFile(__DIR__ . '/../../../dist/css/filament.css', 'text/css; charset=utf-8');
-            case 'css/filament.css.map':
-                return $this->pretendResponseIsFile(__DIR__ . '/../../../dist/css/filament.css.map', 'text/css; charset=utf-8');
-            case 'js/filament.js':
-                return $this->pretendResponseIsFile(__DIR__ . '/../../../dist/js/filament.js', 'application/javascript; charset=utf-8');
-            case 'js/filament.js.map':
-                return $this->pretendResponseIsFile(__DIR__ . '/../../../dist/js/filament.js.map', 'application/json; charset=utf-8');
-        }
-
-        if (Str::endsWith($path, '.js')) {
-            return $this->pretendResponseIsFile($path, 'application/javascript; charset=utf-8');
-        }
-
-        if (Str::endsWith($path, '.css')) {
-            return $this->pretendResponseIsFile($path, 'text/css; charset=utf-8');
+            case 'app.css':
+                return $this->pretendResponseIsFile(__DIR__ . '/../../../dist/app.css', 'text/css; charset=utf-8');
+            case 'app.css.map':
+                return $this->pretendResponseIsFile(__DIR__ . '/../../../dist/app.css.map', 'text/css; charset=utf-8');
+            case 'app.js':
+                return $this->pretendResponseIsFile(__DIR__ . '/../../../dist/app.js', 'application/javascript; charset=utf-8');
+            case 'app.js.map':
+                return $this->pretendResponseIsFile(__DIR__ . '/../../../dist/app.js.map', 'application/json; charset=utf-8');
         }
 
         abort(404);

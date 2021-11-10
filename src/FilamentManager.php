@@ -2,227 +2,170 @@
 
 namespace Filament;
 
-use Composer\InstalledVersions;
-use Filament\AvatarProviders\GravatarProvider;
-use Filament\Events\ServingFilament;
-use Filament\Resources\UserResource;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Gate;
+use Filament\Models\Contracts\HasAvatar;
 
 class FilamentManager
 {
-    public $authorizations = [];
+    protected bool $isNavigationMounted = false;
 
-    public $pages = [];
+    protected array $navigationGroups = [];
 
-    public $resources = [];
+    protected array $navigationItems = [];
 
-    public $roles = [];
+    protected array $pages = [];
 
-    public $scriptData = [];
+    protected array $resources = [];
 
-    public $scripts = [];
+    protected array $scripts = [];
 
-    public $shouldRunMigrations = true;
+    protected array $scriptData = [];
 
-    public $styles = [];
+    protected array $styles = [];
 
-    public $widgets = [];
+    protected array $widgets = [];
 
-    public function auth()
+    public function mountNavigation(): void
     {
-        return Auth::guard(config('filament.auth.guard', 'filament'));
-    }
-
-    public function avatarProvider()
-    {
-        $provider = config('filament.avatar_provider', GravatarProvider::class);
-
-        return new $provider;
-    }
-
-    public function can($action, $target)
-    {
-        $user = $this->auth()->user();
-
-        if ($user->isFilamentAdmin()) {
-            return true;
+        foreach (static::getPages() as $page) {
+            $page::registerNavigationItems();
         }
 
-        $targetClass = is_object($target) ? get_class($target) : $target;
-
-        if (count($this->authorizations[$targetClass] ?? [])) {
-            $mode = $this->authorizations[$targetClass][0]->mode;
-
-            $fallback = [
-                'allow' => false,
-                'deny' => true,
-            ][$mode];
-
-            foreach ($this->authorizations[$targetClass] as $authorization) {
-                if ($mode !== $authorization->mode) {
-                    continue;
-                }
-
-                if (! $user->hasFilamentRole($authorization->role)) {
-                    continue;
-                }
-
-                if (in_array($action, $authorization->exceptActions)) {
-                    continue;
-                }
-
-                if (in_array($action, $authorization->onlyActions)) {
-                    if ($mode === 'allow') {
-                        return true;
-                    }
-
-                    if ($mode === 'deny') {
-                        $fallback = false;
-
-                        continue;
-                    }
-                }
-
-                if (count($authorization->onlyActions)) {
-                    continue;
-                }
-
-                return [
-                    'allow' => true,
-                    'deny' => false,
-                ][$mode];
-            }
-
-            return $fallback;
+        foreach (static::getResources() as $resource) {
+            $resource::registerNavigationItems();
         }
 
-        $policy = Gate::getPolicyFor($targetClass);
-
-        if ($policy === null || ! method_exists($policy, $action)) {
-            return true;
-        }
-
-        return Gate::forUser($user)->check($action, $target);
+        $this->isNavigationMounted = true;
     }
 
-    public function getAuthorizations()
+    public function registerNavigationGroups(array $groups): void
     {
-        return $this->authorizations;
+        $this->navigationGroups = array_merge($this->navigationGroups, $groups);
     }
 
-    public function getPages()
+    public function registerNavigationItems(array $items): void
+    {
+        $this->navigationItems = array_merge($this->navigationItems, $items);
+    }
+
+    public function registerPages(array $pages): void
+    {
+        $this->pages = array_merge($this->pages, $pages);
+    }
+
+    public function registerResources(array $resources): void
+    {
+        $this->resources = array_merge($this->resources, $resources);
+    }
+
+    public function registerScripts(array $scripts): void
+    {
+        $this->scripts = array_merge($this->scripts, $scripts);
+    }
+
+    public function registerScriptData(array $data): void
+    {
+        $this->scriptData = array_merge($this->scriptData, $data);
+    }
+
+    public function registerStyles(array $styles): void
+    {
+        $this->styles = array_merge($this->styles, $styles);
+    }
+
+    public function registerWidgets(array $widgets): void
+    {
+        $this->widgets = array_merge($this->widgets, $widgets);
+    }
+
+    public function getAvatar(): string
+    {
+        $user = auth()->user();
+
+        $avatar = null;
+
+        if ($user instanceof HasAvatar) {
+            $avatar = $user->getFilamentAvatar();
+        }
+
+        if ($avatar) {
+            return $avatar;
+        }
+
+        $provider = config('filament.default_avatar_provider');
+
+        return (new $provider())->get($user);
+    }
+
+    public function getNavigation(): array
+    {
+        if (! $this->isNavigationMounted) {
+            $this->mountNavigation();
+        }
+
+        $groupedItems = collect($this->navigationItems)
+            ->sortBy(fn (NavigationItem $item): int => $item->getSort())
+            ->groupBy(fn (NavigationItem $item): ?string => $item->getGroup());
+
+        $sortedGroups = $groupedItems
+            ->keys()
+            ->sortBy(function (?string $group): int {
+                if (! $group) {
+                    return -1;
+                }
+
+                $sort = array_search($group, $this->navigationGroups);
+
+                if ($sort === false) {
+                    return count($this->navigationGroups);
+                }
+
+                return $sort;
+            });
+
+        return $sortedGroups
+            ->mapWithKeys(function (?string $group) use ($groupedItems): array {
+                return [$group => $groupedItems->get($group)];
+            })
+            ->toArray();
+    }
+
+    public function getNavigationGroups(): array
+    {
+        return $this->navigationGroups;
+    }
+
+    public function getNavigationItems(): array
+    {
+        return $this->navigationItems;
+    }
+
+    public function getPages(): array
     {
         return $this->pages;
     }
 
-    public function getResources()
+    public function getResources(): array
     {
         return $this->resources;
     }
 
-    public function getRoles()
-    {
-        return $this->roles;
-    }
-
-    public function getScriptData()
-    {
-        return array_merge([
-            'filamentVersion' => $this->version(),
-            'userId' => Filament::auth()->id(),
-        ], $this->scriptData);
-    }
-
-    public function getScripts()
+    public function getScripts(): array
     {
         return $this->scripts;
     }
 
-    public function getStyles()
+    public function getScriptData(): array
+    {
+        return $this->scriptData;
+    }
+
+    public function getStyles(): array
     {
         return $this->styles;
     }
 
-    public function getWidgets()
+    public function getWidgets(): array
     {
         return $this->widgets;
-    }
-
-    public function ignoreMigrations()
-    {
-        $this->shouldRunMigrations = false;
-    }
-
-    public function provideToScript($variables)
-    {
-        $this->scriptData = array_merge($this->scriptData, $variables);
-    }
-
-    public function registerAuthorizations($target, $authorizations = [])
-    {
-        $this->authorizations[$target] = array_merge(
-            $this->authorizations[$target] ?? [],
-            $authorizations,
-        );
-    }
-
-    public function registerPage($page)
-    {
-        $this->pages[] = $page;
-
-        $this->registerAuthorizations($page, $page::authorization());
-    }
-
-    public function registerResource($resource)
-    {
-        $this->resources[] = $resource;
-
-        $this->registerAuthorizations($resource::getModel(), $resource::authorization());
-    }
-
-    public function registerRole($role)
-    {
-        $this->roles[] = $role;
-    }
-
-    public function registerScript($name, $path)
-    {
-        $this->scripts[$name] = $path;
-    }
-
-    public function registerStyle($name, $path)
-    {
-        $this->styles[$name] = $path;
-    }
-
-    public function registerWidget($widget)
-    {
-        $this->widgets[] = $widget;
-    }
-
-    public function serving($callback)
-    {
-        Event::listen(ServingFilament::class, $callback);
-    }
-
-    public function shouldRunMigrations()
-    {
-        return $this->shouldRunMigrations;
-    }
-
-    public function userResource()
-    {
-        return config('filament.user_resource', UserResource::class);
-    }
-
-    public function version()
-    {
-        if (! class_exists('Composer\\InstalledVersions')) {
-            return null;
-        }
-
-        return InstalledVersions::getPrettyVersion('filament/filament');
     }
 }

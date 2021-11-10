@@ -2,139 +2,309 @@
 
 namespace Filament\Resources;
 
+use Closure;
+use Filament\Facades\Filament;
 use Filament\NavigationItem;
-use Filament\Resources\Forms\Form;
-use Filament\Resources\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
 class Resource
 {
-    public static $icon = 'heroicon-o-collection';
+    protected static ?string $breadcrumb = null;
 
-    public static $label;
+    protected static bool $isGloballySearchable = true;
 
-    public static $model;
+    protected static ?string $label = null;
 
-    public static $navigationLabel;
+    protected static ?string $model = null;
 
-    public static $navigationSort = 0;
+    protected static ?string $navigationGroup = null;
 
-    public static $routeNamePrefix = 'filament.resources';
+    protected static ?string $navigationIcon = null;
 
-    public static $slug;
+    protected static ?string $navigationLabel = null;
 
-    public static function authorization()
-    {
-        return [];
-    }
+    protected static ?int $navigationSort = null;
 
-    public static function form(Form $form)
+    protected static ?string $pluralLabel = null;
+
+    protected static ?string $recordTitleAttribute = null;
+
+    protected static ?string $slug = null;
+
+    public static function form(Form $form): Form
     {
         return $form;
     }
 
-    public static function generateUrl($name = null, $parameters = [], $absolute = true)
+    public static function registerNavigationItems(): void
     {
-        if (! $name) {
-            $name = static::router()->getIndexRoute()->name;
+        if (! static::canAccess()) {
+            return;
         }
 
-        return route(static::getRouteNamePrefix() . '.' . static::getSlug() . '.' . $name, $parameters, $absolute);
+        $routeBaseName = static::getRouteBaseName();
+
+        Filament::registerNavigationItems([
+            NavigationItem::make()
+                ->group(static::getNavigationGroup())
+                ->icon(static::getNavigationIcon())
+                ->isActiveWhen(fn () => request()->routeIs("{$routeBaseName}*"))
+                ->label(static::getNavigationLabel())
+                ->sort(static::getNavigationSort())
+                ->url(static::getNavigationUrl()),
+        ]);
     }
 
-    public static function getIcon()
+    public static function getPages(): array
     {
-        return static::$icon;
+        return [];
     }
 
-    public static function getLabel()
+    public static function table(Table $table): Table
     {
-        if (static::$label) {
-            return static::$label;
+        return $table;
+    }
+
+    public static function can(string $action, ?Model $record = null): bool
+    {
+        $policy = Gate::getPolicyFor(static::getModel());
+
+        if ($policy === null || ! method_exists($policy, $action)) {
+            return true;
         }
 
-        return (string) Str::of(class_basename(static::getModel()))
+        return Gate::check($action, $record);
+    }
+
+    public static function canAccess(): bool
+    {
+        return static::can('viewAny');
+    }
+
+    public static function canCreate(): bool
+    {
+        return static::hasPage('create') && static::can('create');
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return static::hasPage('edit') && static::can('update');
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return static::can('delete');
+    }
+
+    public static function canGloballySearch(): bool
+    {
+        return static::$isGloballySearchable && count(static::getGloballySearchableAttributes()) && static::canAccess();
+    }
+
+    public static function canView(Model $record): bool
+    {
+        return static::hasPage('view') && static::can('view');
+    }
+
+    public static function getBreadcrumb(): string
+    {
+        return static::$breadcrumb ?? Str::title(static::getPluralLabel());
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return static::getModel()::query();
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        $titleAttribute = static::getRecordTitleAttribute();
+
+        if ($titleAttribute === null) {
+            return [];
+        }
+
+        return [$titleAttribute];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return static::getRecordTitle($record);
+    }
+
+    public static function getGlobalSearchResultUrl(Model $record): ?string
+    {
+        if (static::canView($record)) {
+            return static::getUrl('view', ['record' => $record]);
+        }
+
+        if (static::canEdit($record)) {
+            return static::getUrl('edit', ['record' => $record]);
+        }
+
+        return null;
+    }
+
+    public static function getGlobalSearchResults(string $searchQuery): Collection
+    {
+        $query = static::getEloquentQuery();
+
+        foreach (explode(' ', $searchQuery) as $searchQueryWord) {
+            $query->where(function (Builder $query) use ($searchQueryWord) {
+                $isFirst = true;
+
+                foreach (static::getGloballySearchableAttributes() as $attributes) {
+                    static::applyGlobalSearchAttributeConstraint($query, Arr::wrap($attributes), $searchQueryWord, $isFirst);
+                }
+            });
+        }
+
+        return $query
+            ->get()
+            ->map(fn (Model $record): array => [
+                'details' => static::getGlobalSearchResultDetails($record),
+                'title' => static::getGlobalSearchResultTitle($record),
+                'url' => static::getGlobalSearchResultUrl($record),
+            ]);
+    }
+
+    public static function getLabel(): string
+    {
+        return static::$label ?? (string) Str::of(class_basename(static::getModel()))
             ->kebab()
             ->replace('-', ' ');
     }
 
-    public static function getModel()
+    public static function getModel(): string
     {
-        if (static::$model) {
-            return static::$model;
-        }
-
-        return (string) Str::of(class_basename(static::class))
+        return static::$model ?? (string) Str::of(class_basename(static::class))
             ->beforeLast('Resource')
             ->prepend('App\\Models\\');
     }
 
-    public static function getNavigationLabel()
+    public static function getPluralLabel(): string
     {
-        if (static::$navigationLabel) {
-            return static::$navigationLabel;
-        }
-
-        return (string) Str::title(static::getPluralLabel());
+        return static::$pluralLabel ?? Str::plural(static::getLabel());
     }
 
-    public static function getNavigationSort()
+    public static function getRecordTitleAttribute(): ?string
     {
-        return static::$navigationSort;
+        return static::$recordTitleAttribute;
     }
 
-    public static function getPluralLabel()
+    public static function getRecordTitle(Model $record): ?string
     {
-        return (string) Str::plural(static::getLabel());
+        return $record->getAttribute(static::getRecordTitleAttribute());
     }
 
-    public static function getRouteNamePrefix()
+    public static function getRouteBaseName(): string
     {
-        return static::$routeNamePrefix;
+        $slug = static::getSlug();
+
+        return "filament.resources.{$slug}";
     }
 
-    public static function getSlug()
+    public static function getRoutes(): Closure
     {
-        if (static::$slug) {
-            return static::$slug;
-        }
+        return function () {
+            $slug = static::getSlug();
 
-        return (string) Str::of(class_basename(static::getModel()))
+            Route::name("{$slug}.")->prefix($slug)->group(function () use ($slug) {
+                foreach (static::getPages() as $name => $page) {
+                    Route::get($page['route'], $page['class'])->name($name);
+                }
+            });
+        };
+    }
+
+    public static function getSlug(): string
+    {
+        return static::$slug ?? (string) Str::of(class_basename(static::getModel()))
             ->plural()
             ->kebab();
     }
 
-    public static function navigationItems()
+    public static function getUrl($name = 'index', $params = []): string
     {
-        return [
-            NavigationItem::make(static::getNavigationLabel(), static::generateUrl())
-                ->activeRule(
-                    (string) Str::of(parse_url(static::generateUrl(), PHP_URL_PATH))
-                        ->after('/')
-                        ->append('*'),
-                )
-                ->icon(static::getIcon())
-                ->sort(static::getNavigationSort()),
-        ];
+        $routeBaseName = static::getRouteBaseName();
+
+        return route("{$routeBaseName}.{$name}", $params);
     }
 
-    public static function relations()
+    public static function hasPage($page): bool
     {
-        return [];
+        return array_key_exists($page, static::getPages());
     }
 
-    public static function router()
+    public static function hasRecordTitle(): bool
     {
-        return new Router(static::class);
+        return static::getRecordTitleAttribute() !== null;
     }
 
-    public static function routes()
+    protected static function applyGlobalSearchAttributeConstraint(Builder $query, array $searchAttributes, string $searchQuery, bool &$isFirst): Builder
     {
-        return [];
+        $searchOperator = match ($query->getConnection()->getDriverName()) {
+            'pgsql' => 'ilike',
+            default => 'like',
+        };
+
+        foreach ($searchAttributes as $searchAttribute) {
+            if (Str::of($searchAttribute)->contains('.')) {
+                $query->{$isFirst ? 'whereHas' : 'orWhereHas'}(
+                    Str::of($searchAttribute)->beforeLast('.'),
+                    fn ($query) => $query->where(
+                        $searchAttribute,
+                        $searchOperator,
+                        "%{$searchQuery}%",
+                    ),
+                );
+            } else {
+                $query->{$isFirst ? 'where' : 'orWhere'}(
+                    $searchAttribute,
+                    $searchOperator,
+                    "%{$searchQuery}%"
+                );
+            }
+
+            $isFirst = false;
+        }
+
+        return $query;
     }
 
-    public static function table(Table $table)
+    protected static function getNavigationGroup(): ?string
     {
-        return $table;
+        return static::$navigationGroup;
+    }
+
+    protected static function getNavigationIcon(): string
+    {
+        return static::$navigationIcon ?? 'heroicon-o-collection';
+    }
+
+    protected static function getNavigationLabel(): string
+    {
+        return static::$navigationLabel ?? Str::title(static::getPluralLabel());
+    }
+
+    protected static function getNavigationSort(): ?int
+    {
+        return static::$navigationSort;
+    }
+
+    protected static function getNavigationUrl(): string
+    {
+        return static::getUrl();
     }
 }

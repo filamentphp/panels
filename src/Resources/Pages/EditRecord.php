@@ -2,142 +2,131 @@
 
 namespace Filament\Resources\Pages;
 
-use Filament\Filament;
-use Filament\Resources\Forms\Actions;
-use Filament\Resources\Forms\Form;
-use Filament\Resources\Forms\HasForm;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Str;
+use Filament\Forms;
+use Filament\View\Components\Actions\ButtonAction;
 
-class EditRecord extends Page
+class EditRecord extends Page implements Forms\Contracts\HasForms
 {
-    use HasForm;
+    use Concerns\CanResolveResourceRecord;
+    use Concerns\HasRecordBreadcrumb;
+    use Concerns\UsesResourceForm;
+    use Forms\Concerns\InteractsWithForms;
 
-    public static $cancelButtonLabel = 'filament::resources/pages/edit-record.buttons.cancel.label';
-
-    public static $deleteButtonLabel = 'filament::resources/pages/edit-record.buttons.delete.label';
-
-    public static $deleteModalCancelButtonLabel = 'filament::resources/pages/edit-record.modals.delete.buttons.cancel.label';
-
-    public static $deleteModalConfirmButtonLabel = 'filament::resources/pages/edit-record.modals.delete.buttons.confirm.label';
-
-    public static $deleteModalDescription = 'filament::resources/pages/edit-record.modals.delete.description';
-
-    public static $deleteModalHeading = 'filament::resources/pages/edit-record.modals.delete.heading';
-
-    public static $indexRoute = 'index';
+    protected static string $view = 'filament::resources.pages.edit-record';
 
     public $record;
 
-    public static $saveButtonLabel = 'filament::resources/pages/edit-record.buttons.save.label';
+    public $data;
 
-    public static $savedMessage = 'filament::resources/pages/edit-record.messages.saved';
-
-    public static $view = 'filament::resources.pages.edit-record';
-
-    public function canDelete()
+    public function getBreadcrumb(): string
     {
-        return Filament::can('delete', $this->record);
+        return static::$breadcrumb ?? 'Edit';
     }
 
-    public function delete()
+    public function mount($record): void
     {
-        $this->authorize('delete');
+        static::authorizeResourceAccess();
 
-        $this->callHook('beforeDelete');
+        $this->record = $this->resolveRecord($record);
 
-        $this->record->delete();
+        abort_unless(static::getResource()::canEdit($this->record), 403);
 
-        $this->callHook('afterDelete');
+        $this->callHook('beforeFill');
 
-        $this->redirect($this->getRedirectUrl($this->record));
+        $this->form->fill($this->record->toArray());
+
+        $this->callHook('afterFill');
     }
 
-    public static function getBreadcrumbs()
-    {
-        return [
-            static::getResource()::generateUrl() => (string) Str::title(static::getResource()::getPluralLabel()),
-        ];
-    }
-
-    public function isAuthorized()
-    {
-        return Filament::can('update', $this->record);
-    }
-
-    public function mount($record)
-    {
-        $this->fillRecord($record);
-
-        $this->abortIfForbidden();
-    }
-
-    public function save()
+    public function save(): void
     {
         $this->callHook('beforeValidate');
 
-        $this->validateTemporaryUploadedFiles();
-
-        $this->storeTemporaryUploadedFiles();
-
-        $this->validate();
+        $data = $this->form->getState();
 
         $this->callHook('afterValidate');
 
         $this->callHook('beforeSave');
 
-        $this->record->save();
+        $this->record->update($data);
 
         $this->callHook('afterSave');
 
-        $this->notify(__(static::$savedMessage));
+        if ($redirectUrl = $this->getRedirectUrl()) {
+            $this->redirect($redirectUrl);
+        }
     }
 
-    protected function actions()
+    public function openDeleteModal(): void
     {
-        return [
-            Actions\Button::make(static::$saveButtonLabel)
-                ->primary()
-                ->submit(),
-            Actions\Button::make(static::$cancelButtonLabel)
-                ->url($this->getResource()::generateUrl(static::$indexRoute)),
-        ];
-    }
-
-    protected function fillRecord($key)
-    {
-        $this->callHook('beforeFill');
-
-        $this->record = $this->resolveRecord($key);
-
-        $this->callHook('afterFill');
-    }
-
-    protected function form(Form $form)
-    {
-        return static::getResource()::form(
-            $form->model(static::getModel()),
-        );
-    }
-
-    protected function getRedirectUrl(Model $record): string
-    {
-        return $this->getResource()::generateUrl(static::$indexRoute, [
-            'record' => $record,
+        $this->dispatchBrowserEvent('open-modal', [
+            'id' => 'delete',
         ]);
     }
 
-    protected function resolveRecord($key)
+    public function delete(): void
     {
-        $model = static::getModel();
+        abort_unless(static::getResource()::canDelete($this->record), 403);
 
-        $record = (new $model())->resolveRouteBinding($key);
+        $this->record->delete();
 
-        if ($record === null) {
-            throw (new ModelNotFoundException())->setModel($model, [$key]);
+        $this->redirect(static::getResource()::getUrl('index'));
+    }
+
+    protected function getActions(): array
+    {
+        $resource = static::getResource();
+
+        return [
+            ButtonAction::make('view')
+                ->label('View')
+                ->url(fn () => $resource::getUrl('view', ['record' => $this->record]))
+                ->color('secondary')
+                ->hidden(! $resource::canView($this->record)),
+            ButtonAction::make('delete')
+                ->label('Delete')
+                ->action('openDeleteModal')
+                ->color('danger')
+                ->hidden(! $resource::canDelete($this->record)),
+        ];
+    }
+
+    protected function getDynamicTitle(): string
+    {
+        return ($recordTitle = $this->getRecordTitle()) ? "Edit {$recordTitle}" : static::getTitle();
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            ButtonAction::make('save')
+                ->label('Save')
+                ->submit(),
+            ButtonAction::make('cancel')
+                ->label('Cancel')
+                ->url(static::getResource()::getUrl())
+                ->color('secondary'),
+        ];
+    }
+
+    protected function getForms(): array
+    {
+        return [
+            'form' => $this->makeForm()
+                ->model($this->record)
+                ->schema($this->getResourceForm()->getSchema())
+                ->statePath('data'),
+        ];
+    }
+
+    protected function getRedirectUrl(): ?string
+    {
+        $resource = static::getResource();
+
+        if (! $resource::canView($this->record)) {
+            return null;
         }
 
-        return $record;
+        return $resource::getUrl('view', ['record' => $this->record]);
     }
 }

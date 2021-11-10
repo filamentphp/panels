@@ -2,61 +2,102 @@
 
 namespace Filament;
 
+use Closure;
+
 class NavigationItem
 {
-    public $activeRule;
+    protected ?string $group = null;
 
-    public $icon = 'heroicon-o-collection';
+    protected ?Closure $isActiveWhen = null;
 
-    public $label;
+    protected string $icon;
 
-    public $sort = 0;
+    protected string $label;
 
-    public $url;
+    protected ?int $sort = null;
 
-    public function __construct($label, $url)
+    protected ?string $url = null;
+
+    public static function make(): static
     {
-        $this->label($label);
-        $this->url($url);
+        return new static();
     }
 
-    public function activeRule($rule)
+    public function group(?string $group): static
     {
-        $this->activeRule = $rule;
+        $this->group = $group;
 
         return $this;
     }
 
-    public function icon($icon)
+    public function icon(string $icon): static
     {
         $this->icon = $icon;
 
         return $this;
     }
 
-    public function label($label)
+    public function isActiveWhen(Closure $callback): static
+    {
+        $this->isActiveWhen = $callback;
+
+        return $this;
+    }
+
+    public function label(string $label): static
     {
         $this->label = $label;
 
         return $this;
     }
 
-    public static function make($label, $url)
-    {
-        return new static($label, $url);
-    }
-
-    public function sort($sort)
+    public function sort(?int $sort): static
     {
         $this->sort = $sort;
 
         return $this;
     }
 
-    public function url($url)
+    public function url(?string $url): static
     {
         $this->url = $url;
 
         return $this;
+    }
+
+    public function getGroup(): ?string
+    {
+        return $this->group;
+    }
+
+    public function getIcon(): string
+    {
+        return $this->icon;
+    }
+
+    public function getLabel(): string
+    {
+        return $this->label;
+    }
+
+    public function getSort(): int
+    {
+        return $this->sort ?? -1;
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->url;
+    }
+
+    public function isActive(): bool
+    {
+        $callback = $this->isActiveWhen;
+
+        if ($callback === null) {
+            return false;
+        }
+
+        return app()->call($callback);
     }
 }

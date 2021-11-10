@@ -2,147 +2,147 @@
 
 namespace Filament\Pages;
 
-use Filament\Filament;
+use Closure;
+use Filament\Facades\Filament;
 use Filament\NavigationItem;
+use Filament\Resources\Form;
+use Filament\Tables\Table;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
 class Page extends Component
 {
-    public static $icon = 'heroicon-o-document-text';
+    protected static string $layout = 'filament::components.layouts.app';
 
-    public static $layout = 'filament::components.layouts.app';
+    protected static ?string $navigationGroup = null;
 
-    public static $navigationLabel;
+    protected static ?string $navigationIcon = null;
 
-    public static $navigationSort = 0;
+    protected static ?string $navigationLabel = null;
 
-    public static $slug;
+    protected static ?int $navigationSort = null;
 
-    public static $view;
+    protected static ?string $slug = null;
 
-    public static function authorization()
+    protected static ?string $title = null;
+
+    protected static string $view;
+
+    public static function form(Form $form): Form
     {
-        return [];
+        return $form;
     }
 
-    public static function generateUrl($parameters = [], $absolute = true)
+    public static function table(Table $table): Table
     {
-        return route('filament.pages.' . static::route()->name, $parameters, $absolute);
+        return $table;
     }
 
-    public static function getIcon()
+    public static function registerNavigationItems(): void
     {
-        return static::$icon;
+        Filament::registerNavigationItems([
+            NavigationItem::make()
+                ->group(static::getNavigationGroup())
+                ->icon(static::getNavigationIcon())
+                ->isActiveWhen(fn () => request()->routeIs([
+                    $routeName = static::getRouteName(),
+                    "{$routeName}*",
+                ]))
+                ->label(static::getNavigationLabel())
+                ->sort(static::getNavigationSort())
+                ->url(static::getNavigationUrl()),
+        ]);
     }
 
-    public static function getNavigationLabel()
+    public static function getRouteName(): string
     {
-        if (static::$navigationLabel) {
-            return static::$navigationLabel;
-        }
+        $slug = static::getSlug();
 
-        return (string) Str::of(class_basename(static::class))
-            ->kebab()
-            ->replace('-', ' ');
+        return "filament.pages.{$slug}";
     }
 
-    public static function getNavigationSort()
+    public static function getRoutes(): Closure
     {
-        return static::$navigationSort;
+        return function () {
+            $slug = static::getSlug();
+
+            Route::get($slug, static::class)->name($slug);
+        };
     }
 
-    public static function getPageTitle()
+    public static function getSlug(): string
     {
-        if (property_exists(static::class, 'pageTitle')) {
-            return static::$pageTitle;
-        }
-
-        return static::getTitle();
+        return static::$slug ?? (string) Str::kebab(static::getTitle());
     }
 
-    public static function getSlug()
+    public static function getTitle(): string
     {
-        if (static::$slug) {
-            return static::$slug;
-        }
-
-        return (string) Str::of(class_basename(static::class))->kebab();
-    }
-
-    public static function getTitle()
-    {
-        if (property_exists(static::class, 'title')) {
-            return static::$title;
-        }
-
-        return (string) Str::of(class_basename(static::class))
+        return static::$title ?? (string) Str::of(class_basename(static::class))
             ->kebab()
             ->replace('-', ' ')
             ->title();
     }
 
-    public function isAuthorized()
+    public static function getUrl(): string
     {
-        return Filament::can('view', static::class);
+        return route(static::getRouteName());
     }
 
-    public static function navigationItems()
-    {
-        return [
-            NavigationItem::make(Str::title(static::getNavigationLabel()), static::generateUrl())
-                ->activeRule(
-                    (string) Str::of(parse_url(static::generateUrl(), PHP_URL_PATH))
-                        ->after('/')
-                        ->append('*'),
-                )
-                ->icon(static::getIcon())
-                ->sort(static::getNavigationSort()),
-        ];
-    }
-
-    public function notify($message)
-    {
-        $this->dispatchBrowserEvent('notify', $message);
-    }
-
-    public function render()
+    public function render(): View
     {
         return view(static::$view, $this->getViewData())
             ->layout(static::$layout, $this->getLayoutData());
     }
 
-    public static function route()
-    {
-        return Route::make(static::getSlug(), static::getSlug());
-    }
-
-    protected function abortIfForbidden()
-    {
-        abort_unless($this->isAuthorized(), 403);
-    }
-
-    protected function getLayoutData()
-    {
-        return array_merge($this->layoutData(), [
-            'title' => static::getPageTitle(),
-        ]);
-    }
-
-    protected function getViewData()
-    {
-        return array_merge($this->viewData(), [
-            'title' => static::getTitle(),
-        ]);
-    }
-
-    protected function layoutData()
+    protected function getBreadcrumbs(): array
     {
         return [];
     }
 
-    protected function viewData()
+    protected static function getNavigationGroup(): ?string
     {
-        return [];
+        return static::$navigationGroup;
+    }
+
+    protected static function getNavigationIcon(): string
+    {
+        return static::$navigationIcon ?? 'heroicon-o-document-text';
+    }
+
+    protected static function getNavigationLabel(): string
+    {
+        return static::$navigationLabel ?? static::getTitle();
+    }
+
+    protected static function getNavigationSort(): ?int
+    {
+        return static::$navigationSort;
+    }
+
+    protected static function getNavigationUrl(): string
+    {
+        return static::getUrl();
+    }
+
+    protected function getDynamicTitle(): string
+    {
+        return static::getTitle();
+    }
+
+    protected function getLayoutData(): array
+    {
+        return [
+            'breadcrumbs' => $this->getBreadcrumbs(),
+            'title' => $this->getDynamicTitle(),
+        ];
+    }
+
+    protected function getViewData(): array
+    {
+        return [
+            'title' => $this->getDynamicTitle(),
+        ];
     }
 }

@@ -2,114 +2,68 @@
 
 namespace Filament\Resources\Pages;
 
-use Filament\Filament;
-use Filament\Resources\Tables\HasTable;
-use Filament\Resources\Tables\RecordActions;
-use Filament\Resources\Tables\Table;
+use Filament\Tables;
+use Filament\View\Components\Actions\ButtonAction;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
-class ListRecords extends Page
+class ListRecords extends Page implements Tables\Contracts\HasTable
 {
-    use HasTable;
+    use Concerns\UsesResourceTable;
+    use Tables\Concerns\InteractsWithTable;
 
-    public static $createButtonLabel = 'filament::resources/pages/list-records.buttons.create.label';
+    protected static string $view = 'filament::resources.pages.list-records';
 
-    public $createRoute = 'create';
-
-    public static $editRecordActionLabel = 'filament::resources/pages/list-records.table.recordActions.edit.label';
-
-    public $recordRoute = 'edit';
-
-    public static $view = 'filament::resources.pages.list-records';
-
-    public function canCreate()
+    public function mount(): void
     {
-        return Filament::can('create', static::getModel());
+        static::authorizeResourceAccess();
     }
 
-    public function canDelete()
+    public function getBreadcrumb(): string
     {
-        return true;
+        return static::$breadcrumb ?? 'List';
     }
 
-    public function canDeleteSelected()
+    public static function getTitle(): string
     {
-        return static::getModel()::find($this->selected)
-            ->contains(function ($record) {
-                return Filament::can('delete', $record);
-            });
+        return static::$title ?? Str::title(static::getResource()::getPluralLabel());
     }
 
-    public function deleteSelected()
+    protected function getActions(): array
     {
-        $this->authorize('delete');
+        $resource = static::getResource();
+        $label = $resource::getLabel();
 
-        $this->callHook('beforeDelete');
-
-        static::getModel()::destroy(
-            static::getModel()::find($this->selected)
-                ->filter(function ($record) {
-                    return Filament::can('delete', $record);
-                })
-                ->map(fn ($record) => $record->getKey())
-                ->toArray(),
-        );
-
-        $this->callHook('afterDelete');
-
-        $this->selected = [];
-    }
-
-    public static function getTitle()
-    {
-        if (property_exists(static::class, 'title')) {
-            return static::$title;
-        }
-
-        return (string) Str::of(class_basename(static::getModel()))
-            ->kebab()
-            ->replace('-', ' ')
-            ->plural()
-            ->title();
-    }
-
-    public function isAuthorized()
-    {
-        return Filament::can('viewAny', static::getModel());
-    }
-
-    public function mount()
-    {
-        $this->abortIfForbidden();
-    }
-
-    public function table(Table $table)
-    {
-        return static::getResource()::table(
-            $table
-                ->primaryColumnUrl(function ($record) {
-                    if (! Filament::can('update', $record)) {
-                        return;
-                    }
-
-                    return $this->getResource()::generateUrl(
-                        $this->recordRoute,
-                        ['record' => $record],
-                    );
-                })
-                ->recordActions([
-                    RecordActions\Link::make('edit')
-                        ->label(static::$editRecordActionLabel)
-                        ->url(fn ($record) => $this->getResource()::generateUrl($this->recordRoute, ['record' => $record]))
-                        ->when(fn ($record) => Filament::can('update', $record)),
-                ]),
-        );
-    }
-
-    protected function viewData()
-    {
         return [
-            'records' => $this->getRecords(),
+            ButtonAction::make('create')
+                ->label("New {$label}")
+                ->url(fn () => $resource::getUrl('create'))
+                ->hidden(! $resource::canCreate()),
         ];
+    }
+
+    protected function getTableActions(): array
+    {
+        return $this->getResourceTable()->getActions();
+    }
+
+    protected function getTableBulkActions(): array
+    {
+        return $this->getResourceTable()->getBulkActions();
+    }
+
+    protected function getTableColumns(): array
+    {
+        return $this->getResourceTable()->getColumns();
+    }
+
+    protected function getTableFilters(): array
+    {
+        return $this->getResourceTable()->getFilters();
+    }
+
+    protected function getTableQuery(): Builder
+    {
+        return static::getResource()::getEloquentQuery();
     }
 }

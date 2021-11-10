@@ -2,117 +2,97 @@
 
 namespace Filament\Resources\Pages;
 
-use Filament\Filament;
-use Filament\Resources\Forms\Actions;
-use Filament\Resources\Forms\Form;
-use Filament\Resources\Forms\HasForm;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
+use Filament\Forms;
+use Filament\Resources\Form;
+use Filament\View\Components\Actions\ButtonAction;
 
-class CreateRecord extends Page
+class CreateRecord extends Page implements Forms\Contracts\HasForms
 {
-    use HasForm;
+    use Concerns\UsesResourceForm;
+    use Forms\Concerns\InteractsWithForms;
 
-    public static $cancelButtonLabel = 'filament::resources/pages/create-record.buttons.cancel.label';
-
-    public static $createAnotherButtonLabel = 'filament::resources/pages/create-record.buttons.createAnother.label';
-
-    public static $createButtonLabel = 'filament::resources/pages/create-record.buttons.create.label';
-
-    public static $createdMessage = 'filament::resources/pages/create-record.messages.created';
-
-    public static $indexRoute = 'index';
+    protected static string $view = 'filament::resources.pages.create-record';
 
     public $record;
 
-    public static $showRoute = 'edit';
+    public $data;
 
-    public static $view = 'filament::resources.pages.create-record';
+    protected ?Form $resourceForm = null;
 
-    public function create($another = false)
+    public function getBreadcrumb(): string
+    {
+        return static::$breadcrumb ?? 'Create';
+    }
+
+    public function mount(): void
+    {
+        static::authorizeResourceAccess();
+
+        abort_unless(static::getResource()::canCreate(), 403);
+
+        $this->callHook('beforeFill');
+
+        $this->form->fill();
+
+        $this->callHook('afterFill');
+    }
+
+    public function create(): void
     {
         $this->callHook('beforeValidate');
 
-        $this->validateTemporaryUploadedFiles();
-
-        $this->storeTemporaryUploadedFiles();
-
-        $this->validate();
+        $data = $this->form->getState();
 
         $this->callHook('afterValidate');
 
         $this->callHook('beforeCreate');
 
-        $this->record = static::getModel()::create($this->record);
+        $this->record = static::getModel()::create($data);
+
+        $this->form->model($this->record)->saveRelationships();
 
         $this->callHook('afterCreate');
 
-        if ($another) {
-            $this->fillRecord();
+        if ($redirectUrl = $this->getRedirectUrl()) {
+            $this->redirect($redirectUrl);
+        }
+    }
 
-            $this->notify(__(static::$createdMessage));
+    protected function getFormActions(): array
+    {
+        return [
+            ButtonAction::make('create')
+                ->label('Create')
+                ->submit(),
+            ButtonAction::make('cancel')
+                ->label('Cancel')
+                ->url(static::getResource()::getUrl())
+                ->color('secondary'),
+        ];
+    }
 
-            return;
+    protected function getForms(): array
+    {
+        return [
+            'form' => $this->makeForm()
+                ->model(static::getModel())
+                ->schema($this->getResourceForm()->getSchema())
+                ->statePath('data'),
+        ];
+    }
+
+    protected function getRedirectUrl(): ?string
+    {
+        $resource = static::getResource();
+
+        if ($resource::canView($this->record)) {
+            return $resource::getUrl('view', ['record' => $this->record]);
         }
 
-        $this->redirect($this->getRedirectUrl($this->record));
-    }
+        if ($resource::canEdit($this->record)) {
+            return $resource::getUrl('edit', ['record' => $this->record]);
+        }
 
-    public static function getBreadcrumbs()
-    {
-        return [
-            static::getResource()::generateUrl() => (string) Str::title(static::getResource()::getPluralLabel()),
-        ];
-    }
-
-    public function isAuthorized()
-    {
-        return Filament::can('create', static::getModel());
-    }
-
-    public function mount()
-    {
-        $this->fillRecord();
-
-        $this->abortIfForbidden();
-    }
-
-    protected function actions()
-    {
-        return [
-            Actions\Button::make(static::$createButtonLabel)
-                ->primary()
-                ->submit(),
-            Actions\Button::make(static::$createAnotherButtonLabel)
-                ->action('create(true)')
-                ->primary(),
-            Actions\Button::make(static::$cancelButtonLabel)
-                ->url($this->getResource()::generateUrl(static::$indexRoute)),
-        ];
-    }
-
-    protected function fillRecord()
-    {
-        $this->record = [];
-
-        $this->callHook('beforeFill');
-
-        $this->fillWithFormDefaults();
-
-        $this->callHook('afterFill');
-    }
-
-    protected function form(Form $form)
-    {
-        return static::getResource()::form(
-            $form->model(static::getModel()),
-        );
-    }
-
-    protected function getRedirectUrl(Model $record): string
-    {
-        return $this->getResource()::generateUrl(static::$showRoute, [
-            'record' => $record,
-        ]);
+        return null;
     }
 }
