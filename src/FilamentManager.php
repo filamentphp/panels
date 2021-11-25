@@ -2,7 +2,6 @@
 
 namespace Filament;
 
-use Composer\InstalledVersions;
 use Filament\Events\ServingFilament;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
@@ -206,17 +205,10 @@ class FilamentManager
         return $firstItem->getUrl();
     }
 
-    public function getVersion(): ?string
-    {
-        if (! class_exists('Composer\\InstalledVersions')) {
-            return null;
-        }
-
-        return InstalledVersions::getPrettyVersion('filament/filament');
-    }
-
     public function getWidgets(): array
     {
-        return $this->widgets;
+        return collect($this->widgets)
+            ->sortBy(fn (string $widget): int => $widget::getSort())
+            ->toArray();
     }
 }
