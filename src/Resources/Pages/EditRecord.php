@@ -3,8 +3,8 @@
 namespace Filament\Resources\Pages;
 
 use Filament\Forms;
-use Filament\View\Components\Actions\ButtonAction;
-use Filament\View\Components\Actions\SelectAction;
+use Filament\Pages\Actions\ButtonAction;
+use Filament\Pages\Actions\SelectAction;
 
 class EditRecord extends Page implements Forms\Contracts\HasForms
 {
@@ -23,7 +23,7 @@ class EditRecord extends Page implements Forms\Contracts\HasForms
 
     public function getBreadcrumb(): string
     {
-        return static::$breadcrumb ?? 'Edit';
+        return static::$breadcrumb ?? __('filament::resources/pages/edit-record.breadcrumb');
     }
 
     public function mount($record): void
@@ -99,7 +99,7 @@ class EditRecord extends Page implements Forms\Contracts\HasForms
         if ($shouldRedirect && ($redirectUrl = $this->getRedirectUrl())) {
             $this->redirect($redirectUrl);
         } else {
-            $this->notify('success', 'Saved!');
+            $this->notify('success', __('filament::resources/pages/edit-record.messages.saved'));
         }
     }
 
@@ -133,46 +133,68 @@ class EditRecord extends Page implements Forms\Contracts\HasForms
     {
         $resource = static::getResource();
 
-        return [
-            SelectAction::make('activeFormLocale')
-                ->label('Locale')
-                ->options(
-                    collect($resource::getTranslatableLocales())
-                        ->mapWithKeys(function (string $locale): array {
-                            return [$locale => $locale];
-                        })
-                        ->toArray(),
-                )
-                ->hidden(! $resource::isTranslatable()),
-            ButtonAction::make('view')
-                ->label('View')
-                ->url(fn () => $resource::getUrl('view', ['record' => $this->record]))
-                ->color('secondary')
-                ->hidden(! $resource::canView($this->record)),
-            ButtonAction::make('delete')
-                ->label('Delete')
-                ->action('openDeleteModal')
-                ->color('danger')
-                ->hidden(! $resource::canDelete($this->record)),
-        ];
+        return array_merge(
+            ($resource::isTranslatable() ? [$this->getActiveFormLocaleSelectAction()] : []),
+            ($resource::canView($this->record) ? [$this->getViewButtonAction()] : []),
+            ($resource::canDelete($this->record) ? [$this->getDeleteButtonAction()] : []),
+        );
+    }
+
+    protected function getActiveFormLocaleSelectAction(): SelectAction
+    {
+        return SelectAction::make('activeFormLocale')
+            ->label(__('filament::resources/pages/edit-record.actions.active_form_locale.label'))
+            ->options(
+                collect(static::getResource()::getTranslatableLocales())
+                    ->mapWithKeys(function (string $locale): array {
+                        return [$locale => $locale];
+                    })
+                    ->toArray(),
+            );
+    }
+
+    protected function getViewButtonAction(): ButtonAction
+    {
+        return ButtonAction::make('view')
+            ->label(__('filament::resources/pages/edit-record.actions.view.label'))
+            ->url(fn () => static::getResource()::getUrl('view', ['record' => $this->record]))
+            ->color('secondary');
+    }
+
+    protected function getDeleteButtonAction(): ButtonAction
+    {
+        return ButtonAction::make('delete')
+            ->label(__('filament::resources/pages/edit-record.actions.delete.label'))
+            ->action('openDeleteModal')
+            ->color('danger');
     }
 
     protected function getTitle(): string
     {
-        return static::$title ?? (($recordTitle = $this->getRecordTitle()) ? "Edit {$recordTitle}" : parent::getTitle());
+        return static::$title ?? (($recordTitle = $this->getRecordTitle()) ? __('filament::resources/pages/edit-record.title', ['record' => $recordTitle]) : parent::getTitle());
     }
 
     protected function getFormActions(): array
     {
         return [
-            ButtonAction::make('save')
-                ->label('Save')
-                ->submit(),
-            ButtonAction::make('cancel')
-                ->label('Cancel')
-                ->url(static::getResource()::getUrl())
-                ->color('secondary'),
+            $this->getSaveButtonFormAction(),
+            $this->getCancelButtonFormAction(),
         ];
+    }
+
+    protected function getSaveButtonFormAction(): ButtonAction
+    {
+        return ButtonAction::make('save')
+            ->label(__('filament::resources/pages/edit-record.form.actions.save.label'))
+            ->submit();
+    }
+
+    protected function getCancelButtonFormAction(): ButtonAction
+    {
+        return ButtonAction::make('cancel')
+            ->label(__('filament::resources/pages/edit-record.form.actions.cancel.label'))
+            ->url(static::getResource()::getUrl())
+            ->color('secondary');
     }
 
     protected function getForms(): array

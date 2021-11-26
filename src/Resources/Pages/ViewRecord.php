@@ -3,8 +3,8 @@
 namespace Filament\Resources\Pages;
 
 use Filament\Forms;
-use Filament\View\Components\Actions\ButtonAction;
-use Filament\View\Components\Actions\SelectAction;
+use Filament\Pages\Actions\ButtonAction;
+use Filament\Pages\Actions\SelectAction;
 
 class ViewRecord extends Page implements Forms\Contracts\HasForms
 {
@@ -23,7 +23,7 @@ class ViewRecord extends Page implements Forms\Contracts\HasForms
 
     public function getBreadcrumb(): string
     {
-        return static::$breadcrumb ?? 'View';
+        return static::$breadcrumb ?? __('filament::resources/pages/view-record.breadcrumb');
     }
 
     public function mount($record): void
@@ -85,22 +85,30 @@ class ViewRecord extends Page implements Forms\Contracts\HasForms
     {
         $resource = static::getResource();
 
-        return [
-            SelectAction::make('activeFormLocale')
-                ->label('Locale')
-                ->options(
-                    collect($resource::getTranslatableLocales())
-                        ->mapWithKeys(function (string $locale): array {
-                            return [$locale => $locale];
-                        })
-                        ->toArray(),
-                )
-                ->hidden(! $resource::isTranslatable()),
-            ButtonAction::make('edit')
-                ->label('Edit')
-                ->url(fn () => $resource::getUrl('edit', ['record' => $this->record]))
-                ->hidden(! $resource::canEdit($this->record)),
-        ];
+        return array_merge(
+            ($resource::isTranslatable() ? [$this->getActiveFormLocaleSelectAction()] : []),
+            ($resource::canEdit($this->record) ? [$this->getEditButtonAction()] : []),
+        );
+    }
+
+    protected function getActiveFormLocaleSelectAction(): SelectAction
+    {
+        return SelectAction::make('activeFormLocale')
+            ->label(__('filament::resources/pages/view-record.actions.active_form_locale.label'))
+            ->options(
+                collect(static::getResource()::getTranslatableLocales())
+                    ->mapWithKeys(function (string $locale): array {
+                        return [$locale => $locale];
+                    })
+                    ->toArray(),
+            );
+    }
+
+    protected function getEditButtonAction(): ButtonAction
+    {
+        return ButtonAction::make('edit')
+            ->label(__('filament::resources/pages/view-record.actions.edit.label'))
+            ->url(fn () => static::getResource()::getUrl('edit', ['record' => $this->record]));
     }
 
     protected function getTitle(): string
