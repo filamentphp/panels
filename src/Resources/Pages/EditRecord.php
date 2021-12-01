@@ -75,7 +75,11 @@ class EditRecord extends Page implements Forms\Contracts\HasForms
     {
         abort_unless(static::getResource()::canDelete($this->record), 403);
 
+        $this->callHook('beforeDelete');
+
         $this->record->delete();
+
+        $this->callHook('afterDelete');
 
         $this->redirect(static::getResource()::getUrl('index'));
     }
@@ -146,12 +150,6 @@ class EditRecord extends Page implements Forms\Contracts\HasForms
 
     protected function getRedirectUrl(): ?string
     {
-        $resource = static::getResource();
-
-        if (! $resource::canView($this->record)) {
-            return null;
-        }
-
-        return $resource::getUrl('view', ['record' => $this->record]);
+        return null;
     }
 }
