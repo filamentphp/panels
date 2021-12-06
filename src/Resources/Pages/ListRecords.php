@@ -2,6 +2,7 @@
 
 namespace Filament\Resources\Pages;
 
+use Closure;
 use Filament\Pages\Actions\ButtonAction;
 use Filament\Resources\Table;
 use Filament\Tables;
@@ -17,6 +18,12 @@ class ListRecords extends Page implements Tables\Contracts\HasTable
     protected static string $view = 'filament::resources.pages.list-records';
 
     protected ?Table $resourceTable = null;
+
+    protected $queryString = [
+        'tableSortColumn',
+        'tableSortDirection',
+        'tableSearchQuery' => ['except' => ''],
+    ];
 
     public function mount(): void
     {
@@ -107,6 +114,16 @@ class ListRecords extends Page implements Tables\Contracts\HasTable
             ->url(fn () => $resource::getUrl('create'));
     }
 
+    protected function getDefaultTableSortColumn(): ?string
+    {
+        return $this->getResourceTable()->getDefaultSortColumn();
+    }
+
+    protected function getDefaultTableSortDirection(): ?string
+    {
+        return $this->getResourceTable()->getDefaultSortDirection();
+    }
+
     protected function getTableActions(): array
     {
         return $this->getResourceTable()->getActions();
@@ -130,6 +147,23 @@ class ListRecords extends Page implements Tables\Contracts\HasTable
     protected function getTableHeaderActions(): array
     {
         return $this->getResourceTable()->getHeaderActions();
+    }
+
+    protected function getTableRecordUrlUsing(): ?Closure
+    {
+        return function (Model $record): ?string {
+            $resource = static::getResource();
+
+            if ($resource::canEdit($record)) {
+                return $resource::getUrl('edit', ['record' => $record]);
+            }
+
+            if ($resource::canView($record)) {
+                return $resource::getUrl('view', ['record' => $record]);
+            }
+
+            return null;
+        };
     }
 
     protected function getTableQuery(): Builder

@@ -12,8 +12,8 @@ return [
 
             'fields' => [
 
-                'record_id' => [
-                    'label' => 'Record',
+                'record_ids' => [
+                    'label' => 'Records',
                 ],
 
             ],
@@ -24,8 +24,16 @@ return [
                     'label' => 'Attach',
                 ],
 
+                'attach_and_attach_another' => [
+                    'label' => 'Attach & attach another',
+                ],
+
             ],
 
+        ],
+
+        'messages' => [
+            'attached' => 'Attached',
         ],
 
     ],

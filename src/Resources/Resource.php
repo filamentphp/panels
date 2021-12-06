@@ -44,7 +44,7 @@ class Resource
 
     public static function registerNavigationItems(): void
     {
-        if (! static::canAccess()) {
+        if (! static::canViewAny()) {
             return;
         }
 
@@ -70,7 +70,9 @@ class Resource
     {
         $model = static::getModel();
 
-        return (new $model())->resolveRouteBinding($key);
+        return static::getEloquentQuery()
+            ->where((new $model())->getRouteKeyName(), $key)
+            ->first();
     }
 
     public static function can(string $action, ?Model $record = null): bool
@@ -84,7 +86,7 @@ class Resource
         return Gate::check($action, $record ?? $model);
     }
 
-    public static function canAccess(): bool
+    public static function canViewAny(): bool
     {
         return static::can('viewAny');
     }
@@ -111,7 +113,7 @@ class Resource
 
     public static function canGloballySearch(): bool
     {
-        return static::$isGloballySearchable && count(static::getGloballySearchableAttributes()) && static::canAccess();
+        return static::$isGloballySearchable && count(static::getGloballySearchableAttributes()) && static::canViewAny();
     }
 
     public static function canView(Model $record): bool
@@ -165,7 +167,7 @@ class Resource
 
     public static function getGlobalSearchResults(string $searchQuery): Collection
     {
-        $query = static::getEloquentQuery();
+        $query = static::getGlobalSearchEloquentQuery();
 
         foreach (explode(' ', $searchQuery) as $searchQueryWord) {
             $query->where(function (Builder $query) use ($searchQueryWord) {
@@ -279,9 +281,9 @@ class Resource
         foreach ($searchAttributes as $searchAttribute) {
             if (Str::of($searchAttribute)->contains('.')) {
                 $query->{$isFirst ? 'whereHas' : 'orWhereHas'}(
-                    Str::of($searchAttribute)->beforeLast('.'),
+                    (string) Str::of($searchAttribute)->beforeLast('.'),
                     fn ($query) => $query->where(
-                        $searchAttribute,
+                        (string) Str::of($searchAttribute)->afterLast('.'),
                         $searchOperator,
                         "%{$searchQuery}%",
                     ),
@@ -298,6 +300,11 @@ class Resource
         }
 
         return $query;
+    }
+
+    protected static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return static::getEloquentQuery();
     }
 
     protected static function getNavigationGroup(): ?string

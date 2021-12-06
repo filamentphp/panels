@@ -39,9 +39,14 @@ class RelationManager extends Component implements Tables\Contracts\HasTable
 
     public function mount(): void
     {
-        if (! $this->canAccess()) {
+        if (! $this->canViewAny()) {
             $this->skipRender();
         }
+    }
+
+    protected function getTableQueryStringIdentifier(): ?string
+    {
+        return lcfirst(class_basename(static::class));
     }
 
     protected function getResourceForm(): Form
@@ -73,7 +78,7 @@ class RelationManager extends Component implements Tables\Contracts\HasTable
         return Gate::check($action, $record ?? $model);
     }
 
-    protected function canAccess(): bool
+    protected function canViewAny(): bool
     {
         return $this->can('viewAny');
     }
@@ -136,6 +141,16 @@ class RelationManager extends Component implements Tables\Contracts\HasTable
     protected function getRelationship(): Relation
     {
         return $this->ownerRecord->{static::getRelationshipName()}();
+    }
+
+    protected function getDefaultTableSortColumn(): ?string
+    {
+        return $this->getResourceTable()->getDefaultSortColumn();
+    }
+
+    protected function getDefaultTableSortDirection(): ?string
+    {
+        return $this->getResourceTable()->getDefaultSortDirection();
     }
 
     protected function getTableActions(): array

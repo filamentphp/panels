@@ -1,6 +1,6 @@
 <?php
 
-namespace Filament\Http\Livewire;
+namespace Filament\Http\Livewire\Auth;
 
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use DanHarrin\LivewireRateLimiting\WithRateLimiting;
