@@ -13,8 +13,9 @@ title: Upgrading from v1.x
 Changes to Resource classes
 </summary>
 
-- The `Filament\Resources\Forms\Form` class has been renamed to `Filament\Resources\Form`.
-- The `Filament\Resources\Tables\Table` class has been renamed to `Filament\Resources\Table`.
+The `Filament\Resources\Forms\Form` class has been renamed to `Filament\Resources\Form`. 
+
+The `Filament\Resources\Tables\Table` class has been renamed to `Filament\Resources\Table`.
 
 The following properties and method signatures been updated:
 
@@ -96,23 +97,82 @@ protected static string $resource; // Protected the property. Added the `string`
 
 The entire `Filament\Resources\Forms` namespace has been moved to `Filament\Forms`.
 
-Layout components, such as Grid and Tabs, now have their own separate `schema()` for form components, instead of using a parameter of the `make()` method. For more information, check out the [form builder layout documentation](/docs/forms/layout).
+The `when()`, `only()` and `except()` methods have been removed. You may now pass a closure to any field configuration method, for example `hidden()`, which determines if the method should be applied. For more information, please see the [advanced forms documentation](/docs/forms/advanced#using-callback-customisation);
+
+#### Fields
+
+The `dependable()` method has been renamed to `reactive()`, to better describe its effects.
+
+The `helpMessage()` method has been renamed to `helperText()`.
+
+##### Checkbox
+
+The `stacked()` method has been removed, and replaced with `inline(false)`.
+
+##### Select
+
+The `emptyOptionsMessage()` method has been renamed to `searchPrompt()`.
+
+##### Tags input
+
+The tags input component now writes to a JSON array by default. To continue using the old behavior, use `separator(',')` method.
+
+##### Toggle
+
+The `stacked()` method has been removed, and replaced with `inline(false)`.
+
+#### Layout components
+
+##### Fieldset
+
+The form components within the fieldset now need to be in their own `schema()` method, instead of being passed into `make()`.
+
+##### Grid
+
+The form components within the grid now need to be in their own `schema()` method, instead of being passed into `make()`.
+
+##### Section
+
+The form components within the section now need to be in their own `schema()` method, instead of being passed into `make()`.
+
+##### Tabs
 
 The `Filament\Resources\Forms\Tab` component has been moved to `Filament\Forms\Tabs\Tab`.
+
+The form components within each tab now need to be in their own `schema()` method, instead of being passed into `make()`.
 
 ### Tables
 
 The entire `Filament\Resources\Tables` namespace has been moved to `Filament\Tables`.
 
+The `only()` and `except()` methods have been removed. You may now pass a closure to any column or filter configuration method, which determines if the method should be applied.
+
+#### Columns
+
 Column class names now have `Column` at the end, for example `TextColumn` not `Text`.
+
+The `currency()` method has been renamed to `money()`.
+
+The `formatUsing()` method has been renamed to `formatStateUsing()`. It now accepts a `$state` parameter, instead of `$value`.
+
+The `getValueUsing()` method has been renamed to `getStateUsing()`.
+
+The `primary()` method has been removed from columns. All columns link to the record page by default unless another URL or action is specified for that column.
+
+#### Filters
+
+The filter class has been moved from `Filament\Resources\Tables\Filter` to `Filament\Tables\Filters\Filter`.
 
 Filters now have a dedicated `query()` method for applying the query, instead of using the second parameter of the `make()` method. For more information, check out the [table builder filters documentation](/docs/tables/filters).
 
-Method changes:
+The `apply()` method of reusable filters must now have the following signature:
 
-- The `primary()` method has been removed from columns. All columns link to the record page by default unless another URL or action is specified for that column.
-- The `getValueUsing()` method has been renamed to `getStateUsing()`.
-- The `currency()` method has been renamed to `money()`.
+```php
+public function apply(Builder $query, array $data = []): Builder
+{
+    // ...
+}
+```
 
 ### Published configuration updates
 
@@ -127,6 +187,98 @@ If you had customized the `path`, `domain` or `default_filesystem_disk`, you sho
 ### Users
 
 Filament v2.x does not include a dedicated `filament_users` table as it did in v1.x. By default, all `App\Models\User`s can access the admin panel locally, and in production you must apply the `FilamentUser` interface to the model to control admin access. You can read more about this [here](users).
+
+<details>
+<summary>
+<strong>Recommended:</strong> Are you using the <code>filament_users</code> table, but would like to switch to <code>App\Models\User</code>?
+</summary>
+
+First, you'll need to copy the old migrations to your app, to ensure that Laravel does not complain about them missing:
+
+<details>
+<summary>
+<code>database/migrations/0000_00_00_000000_create_filament_users_table.php</code>
+</summary>
+
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateFilamentUsersTable extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('filament_users', function (Blueprint $table): void {
+            $table->id();
+            $table->string('avatar')->nullable();
+            $table->string('email')->unique();
+            $table->string('name');
+            $table->string('password');
+            $table->rememberToken();
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('filament_users');
+    }
+}
+```
+</details>
+
+<details>
+<summary>
+<code>database/migrations/0000_00_00_000001_create_filament_password_resets_table.php</code>
+</summary>
+
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateFilamentPasswordResetsTable extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('filament_password_resets', function (Blueprint $table): void {
+            $table->string('email')->index();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('filament_password_resets');
+    }
+}
+```
+</details>
+
+Create a migration to drop the `filament_users` and `filament_password_resets` tables:
+
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\Schema;
+
+class DropFilamentUsersAndFilamentPasswordResetsTables extends Migration
+{
+    public function up(): void
+    {
+        Schema::dropIfExists('filament_users');
+        Schema::dropIfExists('filament_password_resets');
+    }
+}
+```
+</details>
 
 <details>
 <summary>
@@ -239,30 +391,6 @@ class FilamentUser extends Authenticatable implements Contracts\FilamentUser, Co
 
 <details>
 <summary>
-Are you using the <code>filament_users</code> table, but would like to switch to <code>App\Models\User</code>?
-</summary>
-
-Create a migration to drop the `filament_users` and `filament_password_resets` tables:
-
-```php
-<?php
-
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\Schema;
-
-class DropFilamentUsersAndFilamentPasswordResetsTables extends Migration
-{
-    public function up(): void
-    {
-        Schema::dropIfExists('filament_users');
-        Schema::dropIfExists('filament_password_resets');
-    }
-}
-```
-</details>
-
-<details>
-<summary>
 Are you already using <code>App\Models\User</code>?
 </summary>
 
@@ -272,18 +400,15 @@ Are you already using <code>App\Models\User</code>?
 4) Remove the `$filamentAdminColumn` and `$filamentRolesColumn` properties, and `isFilamentAdmin()` method, if you use them. Filament now only uses policies for authorization, so you may implement whichever roles system you wish there. We recommend [`spatie/laravel-permission`](https://github.com/spatie/laravel-permission).
 </details>
 
-### `Filament\Filament` facade renamed to `Filament\Facades\Filament`
-
-You should be able to safely rename all instances of this class to the new one.
-
 ## Medium impact changes
 
 ### Relation managers
 
-- `HasMany` and `MorphMany` relation manager classes should now extend `Filament\Resources\RelationManagers\HasManyRelationManager`.
-- `BelongsToMany` relation manager classes should now extend `Filament\Resources\RelationManagers\BelongsToManyRelationManager`.
-- The `Filament\Resources\Forms\Form` class has been renamed to `Filament\Resources\Form`.
-- The `Filament\Resources\Tables\Table` class has been renamed to `Filament\Resources\Table`.
+`HasMany` and `MorphMany` relation manager classes should now extend `Filament\Resources\RelationManagers\HasManyRelationManager`. `BelongsToMany` relation manager classes should now extend `Filament\Resources\RelationManagers\BelongsToManyRelationManager`. 
+
+The `Filament\Resources\Forms\Form` class has been renamed to `Filament\Resources\Form`. 
+
+The `Filament\Resources\Tables\Table` class has been renamed to `Filament\Resources\Table`.
 
 The following properties and method signatures been updated:
 
@@ -294,6 +419,10 @@ protected static ?string $recordTitleAttribute; // Renamed from `$primaryColumn`
 
 protected static string $relationship; // Protected the property. Added the `string` type.
 ```
+
+### `Filament\Filament` facade renamed to `Filament\Facades\Filament`
+
+You should be able to safely rename all instances of this class to the new one.
 
 ### Roles
 
