@@ -189,11 +189,14 @@ protected static ?string $pollingInterval = null;
 
 ## Disabling the default widgets
 
-By default, two widgets are displayed on the dashboard. These widgets can be disabled by updating the `widgets.register` property of the [configuration](installation#publishing-the-configuration) file:
+By default, two widgets are displayed on the dashboard. These widgets can be disabled by updating the `widgets.default` property of the [configuration](installation#publishing-the-configuration) file:
 
 ```php
 'widgets' => [
     // ...
-    'register' => [],
+    'default' => [
+        'account' => false,
+        'info' => false,
+    ],
 ],
 ```
