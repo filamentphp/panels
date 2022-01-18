@@ -4,16 +4,16 @@ return [
 
     'action' => [
 
-        'label' => 'تعديل',
+        'label' => 'Editar',
 
         'modal' => [
 
-            'heading' => 'تعديل :label',
+            'heading' => 'Editar :label',
 
             'actions' => [
 
                 'save' => [
-                    'label' => 'حفظ',
+                    'label' => 'Guardar',
                 ],
 
             ],
@@ -21,7 +21,7 @@ return [
         ],
 
         'messages' => [
-            'saved' => 'تم الحفظ',
+            'saved' => 'Guardado!',
         ],
 
     ],
