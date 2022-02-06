@@ -181,6 +181,23 @@ class FilamentManager
         return array_unique($this->resources);
     }
 
+    public function getModelResource(string | Model $model): ?string
+    {
+        if ($model instanceof Model) {
+            $model = $model::class;
+        }
+
+        foreach ($this->getResources() as $resource) {
+            if ($model !== $resource::getModel()) {
+                continue;
+            }
+
+            return $resource;
+        }
+
+        return null;
+    }
+
     public function getScripts(): array
     {
         return $this->scripts;

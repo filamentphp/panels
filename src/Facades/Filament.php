@@ -5,12 +5,14 @@ namespace Filament\Facades;
 use Closure;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\StatefulGuard;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static StatefulGuard auth()
  * @method static array getBeforeCoreScripts()
  * @method static array getPages()
+ * @method static string | null getModelResource(string | Model $model)
  * @method static array getNavigation()
  * @method static array getNavigationGroups()
  * @method static array getNavigationItems()
@@ -28,6 +30,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static void registerNavigationItems(array $items)
  * @method static void registerPages(array $pages)
  * @method static void registerResources(array $resources)
+ * @method static void registerBeforeCoreScripts(array $scripts)
  * @method static void registerScripts(array $scripts)
  * @method static void registerScriptData(array $data)
  * @method static void registerStyles(array $styles)
