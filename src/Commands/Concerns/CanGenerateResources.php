@@ -6,7 +6,6 @@ use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types;
 use Filament\Forms;
 use Filament\Tables;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -188,16 +187,12 @@ trait CanGenerateResources
 
         $model = app($model);
 
-        if (! ($model instanceof Model)) {
-            return null;
-        }
-
         try {
             return $model
                 ->getConnection()
                 ->getDoctrineSchemaManager()
                 ->listTableDetails($model->getTable());
-        } catch (Throwable $e) {
+        } catch (Throwable $exception) {
             return null;
         }
     }
