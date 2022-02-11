@@ -7,16 +7,17 @@ return [
     'buttons' => [
 
         'dark_mode' => [
-            'label' => 'Activer le mode sombre',
+            'label' => 'Mode Gelap',
         ],
 
         'light_mode' => [
-            'label' => 'Désactiver le mode sombre',
+            'label' => 'Mode Terang',
         ],
 
         'logout' => [
-            'label' => 'Déconnexion',
+            'label' => 'Keluar',
         ],
+
     ],
 
 ];

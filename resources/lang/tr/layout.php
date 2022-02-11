@@ -7,16 +7,17 @@ return [
     'buttons' => [
 
         'dark_mode' => [
-            'label' => 'Activer le mode sombre',
+            'label' => 'Koyu temayı aç',
         ],
 
         'light_mode' => [
-            'label' => 'Désactiver le mode sombre',
+            'label' => 'Açık temayı aç',
         ],
 
         'logout' => [
-            'label' => 'Déconnexion',
+            'label' => 'Oturumu kapat',
         ],
+
     ],
 
 ];

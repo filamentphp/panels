@@ -4,20 +4,20 @@ return [
 
     'modal' => [
 
-        'requires_confirmation_subheading' => 'Êtes-vous sûr de vouloir faire cela ?',
+        'requires_confirmation_subheading' => 'Apakah Anda yakin ingin melakukan ini?',
 
         'buttons' => [
 
             'cancel' => [
-                'label' => 'Annuler',
+                'label' => 'Batal',
             ],
 
             'confirm' => [
-                'label' => 'Confirmer',
+                'label' => 'Konfirmasi',
             ],
 
             'submit' => [
-                'label' => 'Soumettre',
+                'label' => 'Kirim',
             ],
 
         ],

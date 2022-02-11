@@ -4,20 +4,20 @@ return [
 
     'modal' => [
 
-        'requires_confirmation_subheading' => 'Êtes-vous sûr de vouloir faire cela ?',
+        'requires_confirmation_subheading' => 'Bunu yapmak istediğinizden emin misiniz?',
 
         'buttons' => [
 
             'cancel' => [
-                'label' => 'Annuler',
+                'label' => 'İptal',
             ],
 
             'confirm' => [
-                'label' => 'Confirmer',
+                'label' => 'Onayla',
             ],
 
             'submit' => [
-                'label' => 'Soumettre',
+                'label' => 'Gönder',
             ],
 
         ],

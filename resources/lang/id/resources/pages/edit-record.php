@@ -2,26 +2,26 @@
 
 return [
 
-    'title' => 'Modifier :label',
+    'title' => 'Edit :label',
 
-    'breadcrumb' => 'Modifier',
+    'breadcrumb' => 'Edit',
 
     'actions' => [
 
         'delete' => [
 
-            'label' => 'Supprimer',
+            'label' => 'Hapus',
 
             'modal' => [
 
-                'heading' => 'Supprimer :label',
+                'heading' => 'Hapus :label',
 
-                'subheading' => 'Êtes-vous sûr(e) de vouloir supprimer cette donnée ?',
+                'subheading' => 'Apakah Anda yakin ingin melakukan ini? ',
 
                 'buttons' => [
 
                     'delete' => [
-                        'label' => 'Supprimer',
+                        'label' => 'Hapus',
                     ],
 
                 ],
@@ -29,13 +29,13 @@ return [
             ],
 
             'messages' => [
-                'deleted' => 'Supprimé(e)',
+                'deleted' => 'Telah dihapus',
             ],
 
         ],
 
         'view' => [
-            'label' => 'Voir',
+            'label' => 'Lihat',
         ],
 
     ],
@@ -45,11 +45,11 @@ return [
         'actions' => [
 
             'cancel' => [
-                'label' => 'Annuler',
+                'label' => 'Batal',
             ],
 
             'save' => [
-                'label' => 'Sauvegarder',
+                'label' => 'Simpan',
             ],
 
         ],
@@ -57,7 +57,7 @@ return [
     ],
 
     'messages' => [
-        'saved' => 'Sauvegardé',
+        'saved' => 'Telah disimpan',
     ],
 
 ];

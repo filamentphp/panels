@@ -2,26 +2,26 @@
 
 return [
 
-    'breadcrumb' => 'القائمة',
+    'breadcrumb' => 'Daftar',
 
     'actions' => [
 
         'create' => [
 
-            'label' => 'إضافة :label',
+            'label' => ':label baru',
 
             'modal' => [
 
-                'heading' => 'إضافة :label',
+                'heading' => 'Buat :label',
 
                 'actions' => [
 
                     'create' => [
-                        'label' => 'إضافة',
+                        'label' => 'Buat',
                     ],
 
                     'create_and_create_another' => [
-                        'label' => 'إضافة وبدء إضافة المزيد',
+                        'label' => 'Buat & Buat lainnya',
                     ],
 
                 ],
@@ -29,7 +29,7 @@ return [
             ],
 
             'messages' => [
-                'created' => 'تمت الإضافة',
+                'created' => 'Telah dibuat',
             ],
 
         ],
@@ -42,26 +42,26 @@ return [
 
             'delete' => [
 
-                'label' => 'حذف',
+                'label' => 'Delete',
 
                 'messages' => [
-                    'deleted' => 'تم الحذف',
+                    'deleted' => 'Deleted',
                 ],
 
             ],
 
             'edit' => [
 
-                'label' => 'تعديل',
+                'label' => 'Edit',
 
                 'modal' => [
 
-                    'heading' => 'تعديل :label',
+                    'heading' => 'Edit :label',
 
                     'actions' => [
 
                         'save' => [
-                            'label' => 'حفظ',
+                            'label' => 'Save',
                         ],
 
                     ],
@@ -69,13 +69,13 @@ return [
                 ],
 
                 'messages' => [
-                    'saved' => 'تم الحفظ',
+                    'saved' => 'Saved',
                 ],
 
             ],
 
             'view' => [
-                'label' => 'عرض',
+                'label' => 'Lihat',
             ],
 
         ],
@@ -84,10 +84,10 @@ return [
 
             'delete' => [
 
-                'label' => 'حذف المحدد',
+                'label' => 'Hapus yang dipilih ',
 
                 'messages' => [
-                    'deleted' => 'تم الحذف',
+                    'deleted' => 'Hapus',
                 ],
 
             ],
