@@ -7,15 +7,17 @@ return [
     'buttons' => [
 
         'dark_mode' => [
-            'label' => 'Chuyển chế độ tối',
+            'label' => 'Tukar mod gelap',
         ],
 
         'light_mode' => [
-            'label' => 'Chuyển chế độ sáng',
+            'label' => 'Tukar mod terang',
         ],
+
         'logout' => [
-            'label' => 'Đăng xuất',
+            'label' => 'Log keluar',
         ],
+
     ],
 
 ];

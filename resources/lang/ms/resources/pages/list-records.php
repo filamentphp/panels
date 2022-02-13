@@ -2,26 +2,26 @@
 
 return [
 
-    'breadcrumb' => 'Danh sách',
+    'breadcrumb' => 'Senarai',
 
     'actions' => [
 
         'create' => [
 
-            'label' => 'Thêm :label',
+            'label' => 'Cipta :label',
 
             'modal' => [
 
-                'heading' => 'Tạo :label',
+                'heading' => 'Cipta :label',
 
                 'actions' => [
 
                     'create' => [
-                        'label' => 'Tạo',
+                        'label' => 'Cipta',
                     ],
 
                     'create_and_create_another' => [
-                        'label' => 'Tạo & tiếp tục tạo mới',
+                        'label' => 'Cipta & cipta yang lain',
                     ],
 
                 ],
@@ -29,7 +29,7 @@ return [
             ],
 
             'messages' => [
-                'created' => 'Đã tạo',
+                'created' => 'Diciptakan',
             ],
 
         ],
@@ -42,26 +42,26 @@ return [
 
             'delete' => [
 
-                'label' => 'Xoá',
+                'label' => 'Padam',
 
                 'messages' => [
-                    'deleted' => 'Đã xoá',
+                    'deleted' => 'Dibuang',
                 ],
 
             ],
 
             'edit' => [
 
-                'label' => 'Sửa',
+                'label' => 'Sunting',
 
                 'modal' => [
 
-                    'heading' => 'Sửa :label',
+                    'heading' => 'Sunting :label',
 
                     'actions' => [
 
                         'save' => [
-                            'label' => 'Lưu',
+                            'label' => 'Disimpan',
                         ],
 
                     ],
@@ -69,13 +69,13 @@ return [
                 ],
 
                 'messages' => [
-                    'saved' => 'Đã lưu',
+                    'saved' => 'Disimpan',
                 ],
 
             ],
 
             'view' => [
-                'label' => 'Xem',
+                'label' => 'Lihat',
             ],
 
         ],
@@ -84,10 +84,10 @@ return [
 
             'delete' => [
 
-                'label' => 'Xoá mục đã chọn',
+                'label' => 'Padam selected',
 
                 'messages' => [
-                    'deleted' => 'Đã xoá',
+                    'deleted' => 'Dipadamkan',
                 ],
 
             ],

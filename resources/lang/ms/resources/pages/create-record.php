@@ -2,24 +2,24 @@
 
 return [
 
-    'title' => 'Tạo :label',
+    'title' => 'Cipta :label',
 
-    'breadcrumb' => 'Tạo',
+    'breadcrumb' => 'Cipta',
 
     'form' => [
 
         'actions' => [
 
             'cancel' => [
-                'label' => 'Hủy',
+                'label' => 'Batal',
             ],
 
             'create' => [
-                'label' => 'Tạo',
+                'label' => 'Cipta',
             ],
 
             'create_and_create_another' => [
-                'label' => 'Tạo & tiếp tục tạo mới',
+                'label' => 'Cipta & cipta yang lain',
             ],
 
         ],
@@ -27,7 +27,7 @@ return [
     ],
 
     'messages' => [
-        'created' => 'Đã tạo',
+        'created' => 'Diciptakan',
     ],
 
 ];

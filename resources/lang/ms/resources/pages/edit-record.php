@@ -2,26 +2,26 @@
 
 return [
 
-    'title' => 'Sửa :label',
+    'title' => 'Sunting :label',
 
-    'breadcrumb' => 'Sửa',
+    'breadcrumb' => 'Sunting',
 
     'actions' => [
 
         'delete' => [
 
-            'label' => 'Xóa',
+            'label' => 'Padam',
 
             'modal' => [
 
-                'heading' => 'Xóa :label',
+                'heading' => 'Padam :label',
 
-                'subheading' => 'Bạn có chắc muốn thực hiện hành động này?',
+                'subheading' => 'Adakah anda pasti mahu melakukan ini?',
 
                 'buttons' => [
 
                     'delete' => [
-                        'label' => 'Xóa',
+                        'label' => 'Padam',
                     ],
 
                 ],
@@ -29,13 +29,13 @@ return [
             ],
 
             'messages' => [
-                'deleted' => 'Đã xóa',
+                'deleted' => 'Dipadamkan',
             ],
 
         ],
 
         'view' => [
-            'label' => 'Xem',
+            'label' => 'Lihat',
         ],
 
     ],
@@ -45,11 +45,11 @@ return [
         'actions' => [
 
             'cancel' => [
-                'label' => 'Hủy',
+                'label' => 'Batal',
             ],
 
             'save' => [
-                'label' => 'Lưu',
+                'label' => 'Simpan',
             ],
 
         ],
@@ -57,7 +57,7 @@ return [
     ],
 
     'messages' => [
-        'saved' => 'Đã lưu',
+        'saved' => 'Disimpan',
     ],
 
 ];
