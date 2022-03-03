@@ -7,16 +7,19 @@
     'descriptionIcon' => null,
     'flat' => false,
     'label' => null,
+    'tag' => 'div',
     'value' => null,
 ])
 
-<div {{ $attributes->class([
-    'relative p-6 rounded-2xl filament-stats-card',
-    'bg-white shadow' => ! $flat,
-    'dark:bg-gray-800' => (! $flat) && config('filament.dark_mode'),
-    'border' => $flat,
-    'dark:border-gray-700' => $flat && config('filament.dark_mode'),
-]) }}>
+<{!! $tag !!}
+    {{ $attributes->class([
+        'relative p-6 rounded-2xl filament-stats-card',
+        'bg-white shadow' => ! $flat,
+        'dark:bg-gray-800' => (! $flat) && config('filament.dark_mode'),
+        'border' => $flat,
+        'dark:border-gray-700' => $flat && config('filament.dark_mode'),
+    ]) }}
+>
     <div @class([
         'space-y-2',
     ])>
@@ -132,4 +135,4 @@
             </canvas>
         </div>
     @endif
-</div>
+</{!! $tag !!}>
