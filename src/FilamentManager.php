@@ -9,6 +9,7 @@ use Filament\GlobalSearch\Contracts\GlobalSearchProvider;
 use Filament\GlobalSearch\DefaultGlobalSearchProvider;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasName;
+use Filament\Navigation\UserMenuItem;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Model;
@@ -42,6 +43,8 @@ class FilamentManager
 
     protected ?string $themeUrl = null;
 
+    protected array $userMenuItems = [];
+
     protected array $widgets = [];
 
     protected ?Closure $navigationBuilder = null;
@@ -61,8 +64,8 @@ class FilamentManager
         /** @var \Filament\Navigation\NavigationBuilder $builder */
         $builder = app()->call($this->navigationBuilder);
 
-        return collect($builder->getGroups())
-            ->merge([null => $builder->getItems()])
+        return collect([null => $builder->getItems()])
+            ->merge($builder->getGroups())
             ->toArray();
     }
 
@@ -130,6 +133,11 @@ class FilamentManager
     public function registerTheme(string $url): void
     {
         $this->themeUrl = $url;
+    }
+
+    public function registerUserMenuItems(array $items): void
+    {
+        $this->userMenuItems = array_merge($this->userMenuItems, $items);
     }
 
     public function registerWidgets(array $widgets): void
@@ -225,6 +233,13 @@ class FilamentManager
     public function getResources(): array
     {
         return array_unique($this->resources);
+    }
+
+    public function getUserMenuItems(): array
+    {
+        return collect($this->userMenuItems)
+            ->sort(fn (UserMenuItem $item): int => $item->getSort())
+            ->toArray();
     }
 
     public function getModelResource(string | Model $model): ?string
