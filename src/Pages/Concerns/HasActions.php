@@ -78,6 +78,8 @@ trait HasActions
             return $this->callMountedAction();
         }
 
+        $this->resetErrorBag();
+
         $this->dispatchBrowserEvent('open-modal', [
             'id' => 'page-action',
         ]);
