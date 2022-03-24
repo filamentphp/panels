@@ -21,7 +21,6 @@
         <a
             href="{{ config('filament.home_url') }}"
             @if (config('filament.layout.sidebar.is_collapsible_on_desktop'))
-                x-data="{}"
                 x-show="$store.sidebar.isOpen"
                 x-transition:enter="lg:transition delay-100"
                 x-transition:enter-start="opacity-0"
@@ -30,6 +29,19 @@
         >
             <x-filament::brand />
         </a>
+
+        @if (config('filament.layout.sidebar.is_collapsible_on_desktop'))
+            <a
+                class="block w-full text-center"
+                href="{{ config('filament.home_url') }}"
+                x-show="! $store.sidebar.isOpen"
+                x-transition:enter="lg:transition delay-100"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+            >
+                <x-filament::brand-icon />
+            </a>
+        @endif
     </header>
 
     <nav class="flex-1 overflow-y-auto py-6 filament-sidebar-nav">
@@ -54,7 +66,7 @@
                 @if (! $loop->last)
                     <li>
                         <div @class([
-                            'border-t -mr-6',
+                            'border-t -mr-6 rtl:-mr-auto rtl:-ml-6',
                             'dark:border-gray-700' => config('filament.dark_mode'),
                         ])></div>
                     </li>
