@@ -80,7 +80,7 @@ To finish installing Tailwind, you must create a new `tailwind.config.js` file i
 In `tailwind.config.js`, register the plugins you installed, and add custom colors used by the form builder:
 
 ```js
-const colors = require('tailwindcss/colors')
+const colors = require('tailwindcss/colors') // [tl! focus]
 
 module.exports = {
     content: [
@@ -255,7 +255,7 @@ The available hooks are as follows:
 - `head.start` - after `<head>`
 - `head.end` - before `</head>`
 - `content.start` - before page content
-- `content.after` - after page content
+- `content.end` - after page content
 - `sidebar.start` - before [sidebar](navigation) content
 - `sidebar.end` - after [sidebar](navigation) content
 - `global-search.start` - before [global search](resources/global-search) input
