@@ -7,15 +7,15 @@ return [
     'buttons' => [
 
         'dark_mode' => [
-            'label' => 'Donkere weergave inschakelen',
+            'label' => 'Comutați modul întunecat',
         ],
 
         'light_mode' => [
-            'label' => 'Lichte weergave inschakelen',
+            'label' => 'Comutați modul deschis',
         ],
 
         'logout' => [
-            'label' => 'Uitloggen',
+            'label' => 'Deconectare',
         ],
 
     ],

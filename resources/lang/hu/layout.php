@@ -7,15 +7,15 @@ return [
     'buttons' => [
 
         'dark_mode' => [
-            'label' => 'Donkere weergave inschakelen',
+            'label' => 'Sötét mód bekapcsolása',
         ],
 
         'light_mode' => [
-            'label' => 'Lichte weergave inschakelen',
+            'label' => 'Világos mód bekapcsolása',
         ],
 
         'logout' => [
-            'label' => 'Uitloggen',
+            'label' => 'Kijelentkezés',
         ],
 
     ],
