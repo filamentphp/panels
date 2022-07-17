@@ -12,6 +12,7 @@ use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasName;
 use Filament\Navigation\UserMenuItem;
 use Illuminate\Contracts\Auth\Guard;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
@@ -41,7 +42,7 @@ class FilamentManager
 
     protected array $meta = [];
 
-    protected ?string $themeUrl = null;
+    protected string | Htmlable | null $theme = null;
 
     protected array $userMenuItems = [];
 
@@ -142,9 +143,9 @@ class FilamentManager
         $this->styles = array_merge($this->styles, $styles);
     }
 
-    public function registerTheme(string $url): void
+    public function registerTheme(string | Htmlable | null $theme): void
     {
-        $this->themeUrl = $url;
+        $this->theme = $theme;
     }
 
     public function registerUserMenuItems(array $items): void
@@ -177,7 +178,7 @@ class FilamentManager
         return app($this->globalSearchProvider);
     }
 
-    public function renderHook(string $name): HtmlString
+    public function renderHook(string $name): Htmlable
     {
         $hooks = array_map(
             fn (callable $hook): string => (string) app()->call($hook),
@@ -293,12 +294,18 @@ class FilamentManager
         return $this->styles;
     }
 
-    public function getThemeUrl(): string
+    public function getThemeLink(): Htmlable
     {
-        return $this->themeUrl ?? route('filament.asset', [
+        if ($this->theme instanceof Htmlable) {
+            return $this->theme;
+        }
+
+        $url = $this->theme ?? route('filament.asset', [
             'id' => get_asset_id('app.css'),
             'file' => 'app.css',
         ]);
+
+        return new HtmlString("<link rel=\"stylesheet\" href=\"{$url}\" />");
     }
 
     public function getUrl(): ?string
