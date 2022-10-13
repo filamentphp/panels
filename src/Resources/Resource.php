@@ -16,9 +16,14 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Illuminate\Support\Traits\Macroable;
 
 class Resource
 {
+    use Macroable {
+        __call as dynamicMacroCall;
+    }
+
     protected static ?string $breadcrumb = null;
 
     protected static bool $isGloballySearchable = true;
@@ -111,13 +116,6 @@ class Resource
 
         if ($policy === null) {
             return true;
-        }
-
-        if (
-            method_exists($policy, 'before') &&
-            is_bool($response = $policy->before($user, $action))
-        ) {
-            return $response;
         }
 
         if (! method_exists($policy, $action)) {
