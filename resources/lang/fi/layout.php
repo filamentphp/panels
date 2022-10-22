@@ -7,19 +7,19 @@ return [
     'buttons' => [
 
         'dark_mode' => [
-            'label' => 'Zapnout tmavý režim',
+            'label' => 'Tumma tila',
         ],
 
         'database_notifications' => [
-            'label' => 'Zobrazit notifikace',
+            'label' => 'Avaa ilmoitukset',
         ],
 
         'light_mode' => [
-            'label' => 'Zapnout světlý režim',
+            'label' => 'Vaalea tila',
         ],
 
         'logout' => [
-            'label' => 'Odhlásit se',
+            'label' => 'Kirjaudu ulos',
         ],
 
     ],

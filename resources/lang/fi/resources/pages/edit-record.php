@@ -2,32 +2,32 @@
 
 return [
 
-    'title' => 'Upravit :label',
+    'title' => 'Muokkaa :label',
 
-    'breadcrumb' => 'Upravit',
+    'breadcrumb' => 'Muokkaa',
 
     'form' => [
 
         'actions' => [
 
             'cancel' => [
-                'label' => 'Zrušit',
+                'label' => 'Peruuta',
             ],
 
             'save' => [
-                'label' => 'Uložit',
+                'label' => 'Tallenna',
             ],
 
         ],
 
         'tab' => [
-            'label' => 'Upravit',
+            'label' => 'Muokkaa',
         ],
 
     ],
 
     'messages' => [
-        'saved' => 'Uloženo',
+        'saved' => 'Tallennettu',
     ],
 
 ];
