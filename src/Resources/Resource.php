@@ -2,12 +2,18 @@
 
 namespace Filament\Resources;
 
-use Closure;
+use Filament\Context;
 use Filament\Facades\Filament;
+use Filament\Forms\Form;
+use Filament\GlobalSearch\Actions\Action;
 use Filament\GlobalSearch\GlobalSearchResult;
-use function Filament\locale_has_pluralization;
+use Filament\Infolists\Infolist;
 use Filament\Navigation\NavigationItem;
+use Filament\Resources\Pages\PageRegistration;
+use Filament\Resources\RelationManagers\RelationGroup;
 use function Filament\Support\get_model_label;
+use function Filament\Support\locale_has_pluralization;
+use Filament\Tables\Table;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -16,15 +22,18 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Illuminate\Support\Stringable;
 use Illuminate\Support\Traits\Macroable;
 
-class Resource
+abstract class Resource
 {
     use Macroable {
-        __call as dynamicMacroCall;
+        Macroable::__call as dynamicMacroCall;
     }
 
     protected static ?string $breadcrumb = null;
+
+    protected static bool $isDiscovered = true;
 
     protected static bool $isGloballySearchable = true;
 
@@ -62,7 +71,10 @@ class Resource
 
     protected static ?string $slug = null;
 
-    protected static string | array $middlewares = [];
+    /**
+     * @var string | array<string>
+     */
+    protected static string | array $routeMiddleware = [];
 
     protected static int $globalSearchResultsLimit = 50;
 
@@ -71,6 +83,11 @@ class Resource
     public static function form(Form $form): Form
     {
         return $form;
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist;
     }
 
     public static function registerNavigationItems(): void
@@ -83,9 +100,13 @@ class Resource
             return;
         }
 
-        Filament::registerNavigationItems(static::getNavigationItems());
+        Filament::getCurrentContext()
+            ->navigationItems(static::getNavigationItems());
     }
 
+    /**
+     * @return array<NavigationItem>
+     */
     public static function getNavigationItems(): array
     {
         $routeBaseName = static::getRouteBaseName();
@@ -107,7 +128,7 @@ class Resource
         return $table;
     }
 
-    public static function resolveRecordRouteBinding($key): ?Model
+    public static function resolveRecordRouteBinding(int | string $key): ?Model
     {
         return app(static::getModel())
             ->resolveRouteBindingQuery(static::getEloquentQuery(), $key, static::getRecordRouteKeyName())
@@ -216,9 +237,23 @@ class Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return static::getModel()::query();
+        $query = static::getModel()::query();
+
+        if ($tenant = Filament::getTenant()) {
+            static::scopeEloquentQueryToTenant($query, $tenant);
+        }
+
+        return $query;
     }
 
+    public static function scopeEloquentQueryToTenant(Builder $query, Model $tenant): Builder
+    {
+        return $query->whereBelongsTo($tenant);
+    }
+
+    /**
+     * @return array<string>
+     */
     public static function getGloballySearchableAttributes(): array
     {
         $titleAttribute = static::getRecordTitleAttribute();
@@ -230,11 +265,17 @@ class Resource
         return [$titleAttribute];
     }
 
+    /**
+     * @return array<Action>
+     */
     public static function getGlobalSearchResultActions(Model $record): array
     {
         return [];
     }
 
+    /**
+     * @return array<string, string>
+     */
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [];
@@ -263,18 +304,23 @@ class Resource
         return static::$globalSearchResultsLimit;
     }
 
-    public static function getGlobalSearchResults(string $searchQuery): Collection
+    public static function getGlobalSearchResults(string $search): Collection
     {
-        $searchQuery = strtolower($searchQuery);
+        $search = strtolower($search);
 
         $query = static::getGlobalSearchEloquentQuery();
 
-        foreach (explode(' ', $searchQuery) as $searchQueryWord) {
-            $query->where(function (Builder $query) use ($searchQueryWord) {
+        foreach (explode(' ', $search) as $searchWord) {
+            $query->where(function (Builder $query) use ($searchWord) {
                 $isFirst = true;
 
                 foreach (static::getGloballySearchableAttributes() as $attributes) {
-                    static::applyGlobalSearchAttributeConstraint($query, Arr::wrap($attributes), $searchQueryWord, $isFirst);
+                    static::applyGlobalSearchAttributeConstraint(
+                        query: $query,
+                        search: $searchWord,
+                        searchAttributes: Arr::wrap($attributes),
+                        isFirst: $isFirst,
+                    );
                 }
             });
         }
@@ -314,11 +360,14 @@ class Resource
 
     public static function getModel(): string
     {
-        return static::$model ?? (string) Str::of(class_basename(static::class))
+        return static::$model ?? (string) str(class_basename(static::class))
             ->beforeLast('Resource')
             ->prepend('App\\Models\\');
     }
 
+    /**
+     * @return array<string, PageRegistration>
+     */
     public static function getPages(): array
     {
         return [];
@@ -355,21 +404,29 @@ class Resource
         return $record?->getAttribute(static::getRecordTitleAttribute()) ?? static::getModelLabel();
     }
 
+    /**
+     * @return array<class-string | RelationGroup>
+     */
     public static function getRelations(): array
     {
         return [];
     }
 
+    /**
+     * @return array<class-string>
+     */
     public static function getWidgets(): array
     {
         return [];
     }
 
-    public static function getRouteBaseName(): string
+    public static function getRouteBaseName(?string $context = null): string
     {
+        $context ??= Filament::getCurrentContext()->getId();
+
         $slug = static::getSlug();
 
-        return "filament.resources.{$slug}";
+        return "filament.{$context}.resources.{$slug}";
     }
 
     public static function getRecordRouteKeyName(): ?string
@@ -377,25 +434,46 @@ class Resource
         return static::$recordRouteKeyName;
     }
 
-    public static function getRoutes(): Closure
+    public static function routes(Context $context): void
     {
-        return function () {
-            $slug = static::getSlug();
+        $slug = static::getSlug();
 
-            Route::name("{$slug}.")
-                ->prefix($slug)
-                ->middleware(static::getMiddlewares())
-                ->group(function () {
-                    foreach (static::getPages() as $name => $page) {
-                        Route::get($page['route'], $page['class'])->name($name);
-                    }
-                });
-        };
+        Route::name("{$slug}.")
+            ->prefix($slug)
+            ->middleware(static::getRouteMiddleware($context))
+            ->group(function () use ($context) {
+                foreach (static::getPages() as $name => $page) {
+                    $page->registerRoute($context)?->name($name);
+                }
+            });
     }
 
-    public static function getMiddlewares(): string | array
+    /**
+     * @return string | array<string>
+     */
+    public static function getRouteMiddleware(Context $context): string | array
     {
-        return static::$middlewares;
+        return static::$routeMiddleware;
+    }
+
+    public static function getEmailVerifiedMiddleware(Context $context): string
+    {
+        return $context->getEmailVerifiedMiddleware();
+    }
+
+    public static function isEmailVerificationRequired(Context $context): bool
+    {
+        return $context->isEmailVerificationRequired();
+    }
+
+    public static function getTenantSubscribedMiddleware(Context $context): string
+    {
+        return $context->getTenantBillingProvider()->getSubscribedMiddleware();
+    }
+
+    public static function isTenantSubscriptionRequired(Context $context): bool
+    {
+        return $context->isTenantSubscriptionRequired();
     }
 
     public static function getSlug(): string
@@ -404,22 +482,32 @@ class Resource
             return static::$slug;
         }
 
-        return Str::of(static::getModel())
-            ->afterLast('\\Models\\')
+        return str(static::class)
+            ->whenContains(
+                '\\Resources\\',
+                fn (Stringable $slug): Stringable => $slug->afterLast('\\Resources\\'),
+                fn (Stringable $slug): Stringable => $slug->classBasename(),
+            )
+            ->beforeLast('Resource')
             ->plural()
             ->explode('\\')
-            ->map(fn (string $string) => Str::of($string)->kebab()->slug())
+            ->map(fn (string $string) => str($string)->kebab()->slug())
             ->implode('/');
     }
 
-    public static function getUrl($name = 'index', $params = [], $isAbsolute = true): string
+    /**
+     * @param  array<mixed>  $parameters
+     */
+    public static function getUrl(string $name = 'index', array $parameters = [], bool $isAbsolute = true, ?string $context = null, ?Model $tenant = null): string
     {
-        $routeBaseName = static::getRouteBaseName();
+        $parameters['tenant'] ??= ($tenant ?? Filament::getRoutableTenant());
 
-        return route("{$routeBaseName}.{$name}", $params, $isAbsolute);
+        $routeBaseName = static::getRouteBaseName(context: $context);
+
+        return route("{$routeBaseName}.{$name}", $parameters, $isAbsolute);
     }
 
-    public static function hasPage($page): bool
+    public static function hasPage(string $page): bool
     {
         return array_key_exists($page, static::getPages());
     }
@@ -429,7 +517,10 @@ class Resource
         return static::getRecordTitleAttribute() !== null;
     }
 
-    protected static function applyGlobalSearchAttributeConstraint(Builder $query, array $searchAttributes, string $searchQuery, bool &$isFirst): Builder
+    /**
+     * @param  array<string>  $searchAttributes
+     */
+    protected static function applyGlobalSearchAttributeConstraint(Builder $query, string $search, array $searchAttributes, bool &$isFirst): Builder
     {
         /** @var Connection $databaseConnection */
         $databaseConnection = $query->getConnection();
@@ -446,7 +537,7 @@ class Resource
 
             $query->when(
                 method_exists($model, 'isTranslatableAttribute') && $model->isTranslatableAttribute($searchAttribute),
-                function (Builder $query) use ($databaseConnection, $searchAttribute, $searchOperator, $searchQuery, $whereClause): Builder {
+                function (Builder $query) use ($databaseConnection, $searchAttribute, $searchOperator, $search, $whereClause): Builder {
                     $searchColumn = match ($databaseConnection->getDriverName()) {
                         'pgsql' => "{$searchAttribute}::text",
                         default => "json_extract({$searchAttribute}, '$')",
@@ -454,21 +545,21 @@ class Resource
 
                     return $query->{"{$whereClause}Raw"}(
                         "lower({$searchColumn}) {$searchOperator} ?",
-                        "%{$searchQuery}%",
+                        "%{$search}%",
                     );
                 },
                 fn (Builder $query): Builder => $query->when(
-                    Str::of($searchAttribute)->contains('.'),
+                    str($searchAttribute)->contains('.'),
                     fn ($query) => $query->{"{$whereClause}Relation"}(
-                        (string) Str::of($searchAttribute)->beforeLast('.'),
-                        (string) Str::of($searchAttribute)->afterLast('.'),
+                        (string) str($searchAttribute)->beforeLast('.'),
+                        (string) str($searchAttribute)->afterLast('.'),
                         $searchOperator,
-                        "%{$searchQuery}%",
+                        "%{$search}%",
                     ),
                     fn ($query) => $query->{$whereClause}(
                         $searchAttribute,
                         $searchOperator,
-                        "%{$searchQuery}%",
+                        "%{$search}%",
                     ),
                 ),
             );
@@ -479,12 +570,12 @@ class Resource
         return $query;
     }
 
-    protected static function getGlobalSearchEloquentQuery(): Builder
+    public static function getGlobalSearchEloquentQuery(): Builder
     {
         return static::getEloquentQuery();
     }
 
-    protected static function getNavigationGroup(): ?string
+    public static function getNavigationGroup(): ?string
     {
         return static::$navigationGroup;
     }
@@ -494,9 +585,10 @@ class Resource
         static::$navigationGroup = $group;
     }
 
-    protected static function getNavigationIcon(): string
+    public static function getNavigationIcon(): ?string
     {
-        return static::$navigationIcon ?? 'heroicon-o-collection';
+        return static::$navigationIcon ??
+            (filament()->hasTopNavigation() ? null : 'heroicon-o-rectangle-stack');
     }
 
     public static function navigationIcon(?string $icon): void
@@ -504,27 +596,27 @@ class Resource
         static::$navigationIcon = $icon;
     }
 
-    protected static function getActiveNavigationIcon(): string
+    public static function getActiveNavigationIcon(): string
     {
         return static::$activeNavigationIcon ?? static::getNavigationIcon();
     }
 
-    protected static function getNavigationLabel(): string
+    public static function getNavigationLabel(): string
     {
         return static::$navigationLabel ?? Str::headline(static::getPluralModelLabel());
     }
 
-    protected static function getNavigationBadge(): ?string
+    public static function getNavigationBadge(): ?string
     {
         return null;
     }
 
-    protected static function getNavigationBadgeColor(): ?string
+    public static function getNavigationBadgeColor(): ?string
     {
         return null;
     }
 
-    protected static function getNavigationSort(): ?int
+    public static function getNavigationSort(): ?int
     {
         return static::$navigationSort;
     }
@@ -534,13 +626,18 @@ class Resource
         static::$navigationSort = $sort;
     }
 
-    protected static function getNavigationUrl(): string
+    public static function getNavigationUrl(): string
     {
         return static::getUrl();
     }
 
-    protected static function shouldRegisterNavigation(): bool
+    public static function shouldRegisterNavigation(): bool
     {
         return static::$shouldRegisterNavigation;
+    }
+
+    public static function isDiscovered(): bool
+    {
+        return static::$isDiscovered;
     }
 }

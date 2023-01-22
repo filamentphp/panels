@@ -2,6 +2,8 @@
 
 namespace Filament\Commands;
 
+use Filament\Context;
+use Filament\Facades\Filament;
 use Filament\Forms\Commands\Concerns\CanGenerateForms;
 use Filament\Support\Commands\Concerns\CanIndentStrings;
 use Filament\Support\Commands\Concerns\CanManipulateFiles;
@@ -9,7 +11,7 @@ use Filament\Support\Commands\Concerns\CanReadModelSchemas;
 use Filament\Support\Commands\Concerns\CanValidateInput;
 use Filament\Tables\Commands\Concerns\CanGenerateTables;
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
 
 class MakeResourceCommand extends Command
 {
@@ -22,14 +24,11 @@ class MakeResourceCommand extends Command
 
     protected $description = 'Creates a Filament resource class and default page classes.';
 
-    protected $signature = 'make:filament-resource {name?} {--soft-deletes} {--view} {--G|generate} {--S|simple} {--F|force}';
+    protected $signature = 'make:filament-resource {name?} {--soft-deletes} {--view} {--G|generate} {--S|simple} {--context=} {--F|force}';
 
     public function handle(): int
     {
-        $path = config('filament.resources.path', app_path('Filament/Resources/'));
-        $namespace = config('filament.resources.namespace', 'App\\Filament\\Resources');
-
-        $model = (string) Str::of($this->argument('name') ?? $this->askRequired('Model (e.g. `BlogPost`)', 'name'))
+        $model = (string) str($this->argument('name') ?? $this->askRequired('Model (e.g. `BlogPost`)', 'name'))
             ->studly()
             ->beforeLast('Resource')
             ->trim('/')
@@ -42,11 +41,34 @@ class MakeResourceCommand extends Command
             $model = 'Resource';
         }
 
-        $modelClass = (string) Str::of($model)->afterLast('\\');
-        $modelNamespace = Str::of($model)->contains('\\') ?
-            (string) Str::of($model)->beforeLast('\\') :
+        $modelClass = (string) str($model)->afterLast('\\');
+        $modelNamespace = str($model)->contains('\\') ?
+            (string) str($model)->beforeLast('\\') :
             '';
-        $pluralModelClass = (string) Str::of($modelClass)->pluralStudly();
+        $pluralModelClass = (string) str($modelClass)->pluralStudly();
+
+        $context = $this->option('context');
+
+        if ($context) {
+            $context = Filament::getContext($context);
+        }
+
+        if (! $context) {
+            $contexts = Filament::getContexts();
+
+            /** @var Context $context */
+            $context = (count($contexts) > 1) ? $contexts[$this->choice(
+                'Which context would you like to create this in?',
+                array_map(
+                    fn (Context $context): string => $context->getId(),
+                    $contexts,
+                ),
+                Filament::getDefaultContext()->getId(),
+            )] : Arr::first($contexts);
+        }
+
+        $path = $context->getResourceDirectory() ?? app_path('Filament/Resources/');
+        $namespace = $context->getResourceNamespace() ?? 'App\\Filament\\Resources';
 
         $resource = "{$model}Resource";
         $resourceClass = "{$modelClass}Resource";
@@ -59,7 +81,7 @@ class MakeResourceCommand extends Command
         $viewResourcePageClass = "View{$modelClass}";
 
         $baseResourcePath =
-            (string) Str::of($resource)
+            (string) str($resource)
                 ->prepend('/')
                 ->prepend($path)
                 ->replace('\\', '/')
@@ -224,7 +246,7 @@ class MakeResourceCommand extends Command
             ]);
         }
 
-        $this->info("Successfully created {$resource}!");
+        $this->components->info("Successfully created {$resource}!");
 
         return static::SUCCESS;
     }

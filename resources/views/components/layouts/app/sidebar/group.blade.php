@@ -18,35 +18,42 @@
             @if ($collapsible)
                 x-on:click.prevent="$store.sidebar.toggleCollapsedGroup(label)"
             @endif
-            @if (config('filament.layout.sidebar.is_collapsible_on_desktop'))
+            @if (filament()->isSidebarCollapsibleOnDesktop())
                 x-show="$store.sidebar.isOpen"
             @endif
             class="flex items-center justify-between w-full"
         >
-            <div @class([
-                'flex items-center gap-4 text-gray-600',
-                'dark:text-gray-300' => config('filament.dark_mode'),
-            ])>
+            <div class="flex items-center gap-4">
                 @if ($icon)
-                    <x-dynamic-component :component="$icon" class="ml-1 w-3 h-3 flex-shrink-0" />
+                    <x-filament::icon
+                        :name="$icon"
+                        alias="app::sidebar.group"
+                        color="text-gray-600 dark:text-gray-300"
+                        size="h-3 w-3"
+                        class="ml-1 flex-shrink-0"
+                    />
                 @endif
 
-                <p class="flex-1 font-bold uppercase text-xs tracking-wider">
+                <p class="flex-1 font-bold uppercase text-xs tracking-wider text-primary-600 dark:text-primary-500">
                     {{ $label }}
                 </p>
             </div>
 
             @if ($collapsible)
-                <x-heroicon-o-chevron-down :class="\Illuminate\Support\Arr::toCssClasses([
-                    'w-3 h-3 text-gray-600 transition',
-                    'dark:text-gray-300' => config('filament.dark_mode'),
-                ])" x-bind:class="$store.sidebar.groupIsCollapsed(label) || '-rotate-180'" x-cloak />
+                <x-filament::icon
+                    name="heroicon-m-chevron-down"
+                    alias="app::sidebar.group.collapse"
+                    size="h-5 w-5"
+                    class="text-gray-600 transition dark:text-gray-300"
+                    x-bind:class="$store.sidebar.groupIsCollapsed(label) || '-rotate-180'"
+                    x-cloak=""
+                />
             @endif
         </button>
     @endif
 
     <ul
-        x-show="! ($store.sidebar.groupIsCollapsed(label) && {{ config('filament.layout.sidebar.is_collapsible_on_desktop') ? '$store.sidebar.isOpen' : 'true' }})"
+        x-show="! ($store.sidebar.groupIsCollapsed(label) && {{ filament()->isSidebarCollapsibleOnDesktop() ? '$store.sidebar.isOpen' : 'true' }})"
         x-collapse.duration.200ms
         @class([
             'text-sm space-y-1 -mx-3',

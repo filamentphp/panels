@@ -8,9 +8,9 @@ use Illuminate\Support\Str;
 
 trait InteractsWithRecord
 {
-    public $record;
+    public Model | int | string $record;
 
-    protected function resolveRecord($key): Model
+    protected function resolveRecord(int | string $key): Model
     {
         $record = static::getResource()::resolveRecordRouteBinding($key);
 
@@ -35,5 +35,37 @@ trait InteractsWithRecord
         }
 
         return $resource::getRecordTitle($this->getRecord());
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function getBreadcrumbs(): array
+    {
+        $resource = static::getResource();
+
+        $breadcrumbs = [
+            $resource::getUrl() => $resource::getBreadcrumb(),
+        ];
+
+        $record = $this->getRecord();
+
+        if ($record->exists && $resource::hasRecordTitle()) {
+            if ($resource::hasPage('view') && $resource::canView($record)) {
+                $breadcrumbs[
+                    $resource::getUrl('view', ['record' => $record])
+                ] = $this->getRecordTitle();
+            } elseif ($resource::hasPage('edit') && $resource::canEdit($record)) {
+                $breadcrumbs[
+                    $resource::getUrl('edit', ['record' => $record])
+                ] = $this->getRecordTitle();
+            } else {
+                $breadcrumbs[] = $this->getRecordTitle();
+            }
+        }
+
+        $breadcrumbs[] = $this->getBreadcrumb();
+
+        return $breadcrumbs;
     }
 }

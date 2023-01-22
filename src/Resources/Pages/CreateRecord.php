@@ -2,26 +2,35 @@
 
 namespace Filament\Resources\Pages;
 
-use Filament\Forms\ComponentContainer;
+use Exception;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Facades\Filament;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
-use Filament\Pages\Actions\Action;
-use Filament\Pages\Contracts\HasFormActions;
+use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 /**
- * @property ComponentContainer $form
+ * @property Form $form
  */
-class CreateRecord extends Page implements HasFormActions
+class CreateRecord extends Page
 {
-    use Concerns\UsesResourceForm;
+    use InteractsWithFormActions;
 
+    /**
+     * @var view-string
+     */
     protected static string $view = 'filament::resources.pages.create-record';
 
-    public $record;
+    public ?Model $record = null;
 
-    public $data;
+    /**
+     * @var array<string, mixed> | null
+     */
+    public ?array $data = [];
 
     public ?string $previousUrl = null;
 
@@ -127,16 +136,48 @@ class CreateRecord extends Page implements HasFormActions
         $this->create(another: true);
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     protected function handleRecordCreation(array $data): Model
     {
-        return $this->getModel()::create($data);
+        $record = new ($this->getModel())($data);
+
+        if ($tenant = Filament::getTenant()) {
+            $this->associateRecordWithTenant($record, $tenant);
+        }
+
+        $record->save();
+
+        return $record;
     }
 
+    protected function associateRecordWithTenant(Model $record, Model $tenant): void
+    {
+        $relationshipName = Filament::getTenantOwnershipRelationshipName();
+
+        if (! $record->isRelation($relationshipName)) {
+            $pageClass = static::class;
+            $recordClass = $record::class;
+
+            throw new Exception("The model [{$recordClass}] does not have a relationship named [{$relationshipName}]. This relationship is required to associate the record with the tenant. You can change the relationship being used by passing it to the [ownershipRelationship] argument of the [tenant()] method in configuration. Alternatively, you can override the [associateRecordWithTenant()] method on the [{$pageClass}] class to associate the record with the tenant in a different way.");
+        }
+
+        $record->{$relationshipName}()->associate($tenant);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         return $data;
     }
 
+    /**
+     * @return array<Action | ActionGroup>
+     */
     protected function getFormActions(): array
     {
         return array_merge(
@@ -165,7 +206,7 @@ class CreateRecord extends Page implements HasFormActions
             ->label(__('filament::resources/pages/create-record.form.actions.create_another.label'))
             ->action('createAnother')
             ->keyBindings(['mod+shift+s'])
-            ->color('secondary');
+            ->color('gray');
     }
 
     protected function getCancelFormAction(): Action
@@ -173,10 +214,10 @@ class CreateRecord extends Page implements HasFormActions
         return Action::make('cancel')
             ->label(__('filament::resources/pages/create-record.form.actions.cancel.label'))
             ->url($this->previousUrl ?? static::getResource()::getUrl())
-            ->color('secondary');
+            ->color('gray');
     }
 
-    protected function getTitle(): string
+    public function getTitle(): string
     {
         if (filled(static::$title)) {
             return static::$title;
@@ -187,21 +228,16 @@ class CreateRecord extends Page implements HasFormActions
         ]);
     }
 
-    protected function getForms(): array
+    public function form(Form $form): Form
     {
-        return [
-            'form' => $this->makeForm()
-                ->context('create')
+        return static::getResource()::form(
+            $form
+                ->operation('create')
                 ->model($this->getModel())
-                ->schema($this->getFormSchema())
                 ->statePath('data')
-                ->inlineLabel(config('filament.layout.forms.have_inline_labels')),
-        ];
-    }
-
-    protected function getFormSchema(): array
-    {
-        return $this->getResourceForm(columns: config('filament.layout.forms.have_inline_labels') ? 1 : 2)->getSchema();
+                ->columns($this->hasInlineLabels() ? 1 : 2)
+                ->inlineLabel($this->hasInlineLabels()),
+        );
     }
 
     protected function getRedirectUrl(): string
@@ -224,7 +260,7 @@ class CreateRecord extends Page implements HasFormActions
         return $this->getModel();
     }
 
-    protected static function canCreateAnother(): bool
+    public static function canCreateAnother(): bool
     {
         return static::$canCreateAnother;
     }

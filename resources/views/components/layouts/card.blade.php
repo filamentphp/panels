@@ -1,16 +1,14 @@
 @props([
-    'title' => null,
-    'width' => 'md',
+    'after' => null,
+    'heading' => null,
+    'subheading' => null,
 ])
 
-<x-filament::layouts.base :title="$title">
-    <div @class([
-        'filament-login-page flex items-center justify-center min-h-screen bg-gray-100 text-gray-900 py-12',
-        'dark:bg-gray-900 dark:text-white' => config('filament.dark_mode'),
-    ])>
+<x-filament::layouts.base :livewire="$livewire">
+    <div class="filament-card-layout flex items-center justify-center min-h-screen bg-gray-100 text-gray-900 py-14 dark:bg-gray-900 dark:text-white">
         <div @class([
-            'w-screen px-6 -mt-16 space-y-8 md:mt-0 md:px-2',
-            match($width) {
+            'w-screen px-6 space-y-8 md:mt-0 md:px-2',
+            match ($width = $livewire->getCardWidth()) {
                 'xs' => 'max-w-xs',
                 'sm' => 'max-w-sm',
                 'md' => 'max-w-md',
@@ -25,26 +23,45 @@
                 default => $width,
             },
         ])>
-            <div @class([
-                'p-8 space-y-4 bg-white/50 backdrop-blur-xl border border-gray-200 shadow-2xl rounded-2xl relative',
-                'dark:bg-gray-900/50 dark:border-gray-700' => config('filament.dark_mode'),
-            ])>
-                <div class="flex justify-center w-full">
-                    <x-filament::brand />
-                </div>
-
-                @if (filled($title))
-                    <h2 class="text-2xl font-bold tracking-tight text-center">
-                        {{ $title }}
-                    </h2>
+            <div class="filament-card-layout-card relative space-y-4 rounded-xl bg-white/50 p-8 shadow-2xl ring-1 ring-gray-900/10 backdrop-blur-xl dark:bg-gray-900/50 dark:ring-gray-50/10">
+                @if ($livewire->hasBrand())
+                    <div class="flex justify-center w-full">
+                        <x-filament::brand />
+                    </div>
                 @endif
+
+                <div class="space-y-2">
+                    @if (filled($heading ??= $livewire->getHeading()))
+                        <h2 class="text-2xl font-bold tracking-tight text-center">
+                            {{ $heading }}
+                        </h2>
+                    @endif
+
+                    @if (filled($subheading ??= $livewire->getSubHeading()))
+                        <h3 class="text-sm text-gray-600 font-medium tracking-tight text-center dark:text-gray-300">
+                            {{ $subheading }}
+                        </h3>
+                    @endif
+                </div>
 
                 <div {{ $attributes }}>
                     {{ $slot }}
                 </div>
             </div>
+
+            {{ $after }}
         </div>
+
+        @if (filament()->auth()->check())
+            <div class="absolute top-0 right-0 flex items-center justify-end p-2 w-full">
+                @livewire('filament.core.notifications')
+
+                <x-filament::user-menu />
+            </div>
+        @endif
     </div>
-    
-    @livewire('notifications')
+
+    @if (! filament()->auth()->check())
+        @livewire('filament.core.notifications')
+    @endif
 </x-filament::layouts.base>

@@ -2,20 +2,45 @@
 
 namespace Filament\Resources\Pages;
 
+use Filament\Context;
 use Filament\Pages\Page as BasePage;
+use Filament\Resources\Resource;
+use Illuminate\Routing\Route;
+use Illuminate\Support\Facades\Route as RouteFacade;
 
-class Page extends BasePage
+abstract class Page extends BasePage
 {
     protected static ?string $breadcrumb = null;
 
     protected static string $resource;
 
-    public static function route(string $path): array
+    public static function route(string $path): PageRegistration
     {
-        return [
-            'class' => static::class,
-            'route' => $path,
-        ];
+        return new PageRegistration(
+            page: static::class,
+            route: fn (Context $context): Route => RouteFacade::get($path, static::class)
+                ->middleware(static::getRouteMiddleware($context)),
+        );
+    }
+
+    public static function getEmailVerifiedMiddleware(Context $context): string
+    {
+        return static::getResource()::getEmailVerifiedMiddleware($context);
+    }
+
+    public static function isEmailVerificationRequired(Context $context): bool
+    {
+        return static::getResource()::isEmailVerificationRequired($context);
+    }
+
+    public static function getTenantSubscribedMiddleware(Context $context): string
+    {
+        return static::getResource()::getTenantSubscribedMiddleware($context);
+    }
+
+    public static function isTenantSubscriptionRequired(Context $context): bool
+    {
+        return static::getResource()::isTenantSubscriptionRequired($context);
     }
 
     public function getBreadcrumb(): ?string
@@ -23,7 +48,10 @@ class Page extends BasePage
         return static::$breadcrumb ?? static::getTitle();
     }
 
-    protected function getBreadcrumbs(): array
+    /**
+     * @return array<string>
+     */
+    public function getBreadcrumbs(): array
     {
         $resource = static::getResource();
 
@@ -45,17 +73,11 @@ class Page extends BasePage
         return static::getResource()::getModel();
     }
 
+    /**
+     * @return class-string<resource>
+     */
     public static function getResource(): string
     {
         return static::$resource;
-    }
-
-    protected function callHook(string $hook): void
-    {
-        if (! method_exists($this, $hook)) {
-            return;
-        }
-
-        $this->{$hook}();
     }
 }

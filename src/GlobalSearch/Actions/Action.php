@@ -2,37 +2,56 @@
 
 namespace Filament\GlobalSearch\Actions;
 
-use Filament\Support\Actions\BaseAction;
-use Filament\Support\Actions\Concerns\CanBeOutlined;
-use Filament\Support\Actions\Concerns\CanEmitEvent;
-use Filament\Support\Actions\Concerns\CanOpenUrl;
+use Filament\Actions\Concerns\CanBeOutlined;
+use Filament\Actions\Concerns\CanEmitEvent;
+use Filament\Actions\Concerns\CanOpenUrl;
+use Filament\Actions\Concerns\HasKeyBindings;
+use Filament\Actions\Concerns\HasTooltip;
+use Filament\Actions\StaticAction;
+use Illuminate\Support\Js;
 
-class Action extends BaseAction
+class Action extends StaticAction
 {
     use CanBeOutlined;
     use CanEmitEvent;
     use CanOpenUrl;
+    use HasKeyBindings;
+    use HasTooltip;
 
-    protected string $view = 'filament::global-search.actions.link-action';
+    /**
+     * @var view-string
+     */
+    protected string $view = 'filament-actions::link-action';
 
-    public function button(): static
+    protected function setUp(): void
     {
-        $this->view('filament::global-search.actions.button-action');
+        parent::setUp();
 
-        return $this;
+        $this->size('sm');
     }
 
-    public function link(): static
+    public function getLivewireMountAction(): ?string
     {
-        $this->view('filament::global-search.actions.link-action');
+        if ($this->getUrl()) {
+            return null;
+        }
 
-        return $this;
+        $event = $this->getEvent();
+
+        if (! $event) {
+            return null;
+        }
+
+        $emitArguments = collect([$event])
+            ->merge($this->getEventData())
+            ->map(fn ($value): string => Js::from($value)->toHtml())
+            ->implode(', ');
+
+        return "\$emit({$emitArguments})";
     }
 
-    public function iconButton(): static
+    public function getAlpineMountAction(): ?string
     {
-        $this->view('filament::global-search.actions.icon-button-action');
-
-        return $this;
+        return null;
     }
 }

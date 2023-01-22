@@ -22,8 +22,14 @@ class MakeUserCommand extends Command
                             {--email= : A valid and unique email address}
                             {--password= : The password for the user (min. 8 characters)}';
 
+    /**
+     * @var array{'name': string | null, 'email': string | null, 'password': string | null}
+     */
     protected array $options;
 
+    /**
+     * @return array{'name': string, 'email': string, 'password': string}
+     */
     protected function getUserData(): array
     {
         return [
@@ -40,22 +46,9 @@ class MakeUserCommand extends Command
 
     protected function sendSuccessMessage(Authenticatable $user): void
     {
-        $loginUrl = route('filament.auth.login');
-        $this->info('Success! ' . ($user->getAttribute('email') ?? $user->getAttribute('username') ?? 'You') . " may now log in at {$loginUrl}.");
+        $loginUrl = Filament::getLoginUrl();
 
-        if ($this->getUserModel()::count() === 1 && $this->confirm('Would you like to show some love by starring the repo?', true)) {
-            if (PHP_OS_FAMILY === 'Darwin') {
-                exec('open https://github.com/filamentphp/filament');
-            }
-            if (PHP_OS_FAMILY === 'Linux') {
-                exec('xdg-open https://github.com/filamentphp/filament');
-            }
-            if (PHP_OS_FAMILY === 'Windows') {
-                exec('start https://github.com/filamentphp/filament');
-            }
-
-            $this->line('Thank you!');
-        }
+        $this->components->info('Success! ' . ($user->getAttribute('email') ?? $user->getAttribute('username') ?? 'You') . " may now log in at {$loginUrl}.");
     }
 
     protected function getAuthGuard(): Guard

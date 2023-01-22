@@ -2,44 +2,56 @@
 
 namespace Filament\Resources\Pages;
 
-use Filament\Forms\ComponentContainer;
-use Filament\Pages\Actions\Action;
-use Filament\Pages\Actions\DeleteAction;
-use Filament\Pages\Actions\EditAction;
-use Filament\Pages\Actions\ForceDeleteAction;
-use Filament\Pages\Actions\ReplicateAction;
-use Filament\Pages\Actions\RestoreAction;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\ReplicateAction;
+use Filament\Actions\RestoreAction;
+use Filament\Forms\Form;
+use Filament\Infolists\Infolist;
+use Filament\Pages\Concerns\InteractsWithFormActions;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * @property ComponentContainer $form
+ * @property Form $form
  */
 class ViewRecord extends Page
 {
-    use Concerns\HasRecordBreadcrumb;
     use Concerns\HasRelationManagers;
     use Concerns\InteractsWithRecord;
-    use Concerns\UsesResourceForm;
+    use InteractsWithFormActions;
 
+    /**
+     * @var view-string
+     */
     protected static string $view = 'filament::resources.pages.view-record';
 
-    public $data;
+    /**
+     * @var array<string, mixed> | null
+     */
+    public ?array $data = [];
 
+    /**
+     * @var array<int | string, string | array<mixed>>
+     */
     protected $queryString = [
         'activeRelationManager',
     ];
+
+    protected ?Infolist $cachedInfolist = null;
 
     public function getBreadcrumb(): string
     {
         return static::$breadcrumb ?? __('filament::resources/pages/view-record.breadcrumb');
     }
 
-    public function getFormTabLabel(): ?string
+    public function getContentTabLabel(): ?string
     {
-        return __('filament::resources/pages/view-record.form.tab.label');
+        return __('filament::resources/pages/view-record.content.tab.label');
     }
 
-    public function mount($record): void
+    public function mount(int | string $record): void
     {
         static::authorizeResourceAccess();
 
@@ -47,7 +59,16 @@ class ViewRecord extends Page
 
         abort_unless(static::getResource()::canView($this->getRecord()), 403);
 
+        if ($this->hasInfolist()) {
+            return;
+        }
+
         $this->fillForm();
+    }
+
+    protected function hasInfolist(): bool
+    {
+        return (bool) count($this->getCachedInfolist()->getComponents());
     }
 
     protected function fillForm(): void
@@ -63,6 +84,14 @@ class ViewRecord extends Page
         $this->callHook('afterFill');
     }
 
+    protected function getCachedInfolist(): Infolist
+    {
+        return $this->cachedInfolist ??= $this->getInfolist();
+    }
+
+    /**
+     * @param  array<string>  $attributes
+     */
     protected function refreshFormData(array $attributes): void
     {
         $this->data = array_merge(
@@ -71,24 +100,13 @@ class ViewRecord extends Page
         );
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     protected function mutateFormDataBeforeFill(array $data): array
     {
         return $data;
-    }
-
-    protected function getActions(): array
-    {
-        $resource = static::getResource();
-
-        if (! $resource::hasPage('edit')) {
-            return [];
-        }
-
-        if (! $resource::canEdit($this->getRecord())) {
-            return [];
-        }
-
-        return [$this->getEditAction()];
     }
 
     protected function configureAction(Action $action): void
@@ -110,23 +128,12 @@ class ViewRecord extends Page
         $action
             ->authorize($resource::canEdit($this->getRecord()))
             ->record($this->getRecord())
-            ->recordTitle($this->getRecordTitle());
+            ->recordTitle($this->getRecordTitle())
+            ->form(fn (Form $form): Form => static::getResource()::form($form));
 
         if ($resource::hasPage('edit')) {
             $action->url(fn (): string => static::getResource()::getUrl('edit', ['record' => $this->getRecord()]));
-
-            return;
         }
-
-        $action->form($this->getFormSchema());
-    }
-
-    /**
-     * @deprecated Actions are no longer pre-defined.
-     */
-    protected function getEditAction(): Action
-    {
-        return EditAction::make();
     }
 
     protected function configureForceDeleteAction(ForceDeleteAction $action): void
@@ -167,7 +174,7 @@ class ViewRecord extends Page
             ->successRedirectUrl($resource::getUrl('index'));
     }
 
-    protected function getTitle(): string
+    public function getTitle(): string
     {
         if (filled(static::$title)) {
             return static::$title;
@@ -178,22 +185,27 @@ class ViewRecord extends Page
         ]);
     }
 
-    protected function getForms(): array
+    public function form(Form $form): Form
     {
-        return [
-            'form' => $this->makeForm()
-                ->context('view')
+        return static::getResource()::form(
+            $form
+                ->operation('view')
                 ->disabled()
                 ->model($this->getRecord())
-                ->schema($this->getFormSchema())
                 ->statePath('data')
-                ->inlineLabel(config('filament.layout.forms.have_inline_labels')),
-        ];
+                ->columns($this->hasInlineLabels() ? 1 : 2)
+                ->inlineLabel($this->hasInlineLabels()),
+        );
     }
 
-    protected function getFormSchema(): array
+    public function getInfolist(): Infolist
     {
-        return $this->getResourceForm(columns: config('filament.layout.forms.have_inline_labels') ? 1 : 2)->getSchema();
+        return static::getResource()::infolist(
+            Infolist::make()
+                ->record($this->getRecord())
+                ->columns($this->hasInlineLabels() ? 1 : 2)
+                ->inlineLabel($this->hasInlineLabels()),
+        );
     }
 
     protected function getMountedActionFormModel(): Model

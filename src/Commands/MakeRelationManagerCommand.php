@@ -2,11 +2,13 @@
 
 namespace Filament\Commands;
 
+use Filament\Context;
+use Filament\Facades\Filament;
 use Filament\Support\Commands\Concerns\CanIndentStrings;
 use Filament\Support\Commands\Concerns\CanManipulateFiles;
 use Filament\Support\Commands\Concerns\CanValidateInput;
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
 
 class MakeRelationManagerCommand extends Command
 {
@@ -16,34 +18,54 @@ class MakeRelationManagerCommand extends Command
 
     protected $description = 'Creates a Filament relation manager class for a resource.';
 
-    protected $signature = 'make:filament-relation-manager {resource?} {relationship?} {recordTitleAttribute?} {--attach} {--associate} {--soft-deletes} {--view} {--F|force}';
+    protected $signature = 'make:filament-relation-manager {resource?} {relationship?} {recordTitleAttribute?} {--attach} {--associate} {--soft-deletes} {--view} {--context=} {--F|force}';
 
     public function handle(): int
     {
-        $resourcePath = config('filament.resources.path', app_path('Filament/Resources/'));
-        $resourceNamespace = config('filament.resources.namespace', 'App\\Filament\\Resources');
-
-        $resource = (string) Str::of($this->argument('resource') ?? $this->askRequired('Resource (e.g. `DepartmentResource`)', 'resource'))
+        $resource = (string) str($this->argument('resource') ?? $this->askRequired('Resource (e.g. `DepartmentResource`)', 'resource'))
             ->studly()
             ->trim('/')
             ->trim('\\')
             ->trim(' ')
             ->replace('/', '\\');
 
-        if (! Str::of($resource)->endsWith('Resource')) {
+        if (! str($resource)->endsWith('Resource')) {
             $resource .= 'Resource';
         }
 
-        $relationship = (string) Str::of($this->argument('relationship') ?? $this->askRequired('Relationship (e.g. `members`)', 'relationship'))
+        $relationship = (string) str($this->argument('relationship') ?? $this->askRequired('Relationship (e.g. `members`)', 'relationship'))
             ->trim(' ');
-        $managerClass = (string) Str::of($relationship)
+        $managerClass = (string) str($relationship)
             ->studly()
             ->append('RelationManager');
 
-        $recordTitleAttribute = (string) Str::of($this->argument('recordTitleAttribute') ?? $this->askRequired('Title attribute (e.g. `name`)', 'title attribute'))
+        $recordTitleAttribute = (string) str($this->argument('recordTitleAttribute') ?? $this->askRequired('Title attribute (e.g. `name`)', 'title attribute'))
             ->trim(' ');
 
-        $path = (string) Str::of($managerClass)
+        $context = $this->option('context');
+
+        if ($context) {
+            $context = Filament::getContext($context);
+        }
+
+        if (! $context) {
+            $contexts = Filament::getContexts();
+
+            /** @var Context $context */
+            $context = (count($contexts) > 1) ? $contexts[$this->choice(
+                'Which context would you like to create this in?',
+                array_map(
+                    fn (Context $context): string => $context->getId(),
+                    $contexts,
+                ),
+                Filament::getDefaultContext()->getId(),
+            )] : Arr::first($contexts);
+        }
+
+        $resourcePath = $context->getResourceDirectory() ?? app_path('Filament/Resources/');
+        $resourceNamespace = $context->getResourceNamespace() ?? 'App\\Filament\\Resources';
+
+        $path = (string) str($managerClass)
             ->prepend("{$resourcePath}/{$resource}/RelationManagers/")
             ->replace('\\', '/')
             ->append('.php');
@@ -137,9 +159,9 @@ class MakeRelationManagerCommand extends Command
             'tableHeaderActions' => $this->indentString($tableHeaderActions, 4),
         ]);
 
-        $this->info("Successfully created {$managerClass}!");
+        $this->components->info("Successfully created {$managerClass}!");
 
-        $this->info("Make sure to register the relation in `{$resource}::getRelations()`.");
+        $this->components->info("Make sure to register the relation in `{$resource}::getRelations()`.");
 
         return static::SUCCESS;
     }

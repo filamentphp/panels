@@ -2,41 +2,58 @@
 
 namespace Filament\Pages;
 
-use Closure;
+use Filament\Context;
 use Filament\Facades\Filament;
+use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Support\Facades\Route;
 
 class Dashboard extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-home';
-
     protected static ?int $navigationSort = -2;
 
+    /**
+     * @var view-string
+     */
     protected static string $view = 'filament::pages.dashboard';
 
-    protected static function getNavigationLabel(): string
+    public static function getNavigationLabel(): string
     {
-        return static::$navigationLabel ?? static::$title ?? __('filament::pages/dashboard.title');
+        return static::$navigationLabel ??
+            static::$title ??
+            __('filament::pages/dashboard.title');
     }
 
-    public static function getRoutes(): Closure
+    public static function getNavigationIcon(): string
     {
-        return function () {
-            Route::get('/', static::class)->name(static::getSlug());
-        };
+        return static::$navigationIcon ??
+            FilamentIcon::resolve('app::pages.dashboard.navigation')?->name ??
+            'heroicon-o-home';
     }
 
-    protected function getWidgets(): array
+    public static function routes(Context $context): void
+    {
+        Route::get('/', static::class)
+            ->middleware(static::getRouteMiddleware($context))
+            ->name(static::getSlug());
+    }
+
+    /**
+     * @return array<class-string>
+     */
+    public function getWidgets(): array
     {
         return Filament::getWidgets();
     }
 
-    protected function getColumns(): int | array
+    /**
+     * @return int | array<string, int | null>
+     */
+    public function getColumns(): int | array
     {
         return 2;
     }
 
-    protected function getTitle(): string
+    public function getTitle(): string
     {
         return static::$title ?? __('filament::pages/dashboard.title');
     }

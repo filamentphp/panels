@@ -12,6 +12,9 @@ class NavigationGroup
 
     protected ?string $icon = null;
 
+    /**
+     * @var array<NavigationItem | NavigationGroup> | Arrayable
+     */
     protected array | Arrayable $items = [];
 
     protected ?string $label = null;
@@ -49,6 +52,9 @@ class NavigationGroup
         return $this;
     }
 
+    /**
+     * @param  array<NavigationItem | NavigationGroup> | Arrayable  $items
+     */
     public function items(array | Arrayable $items): static
     {
         $this->items = $items;
@@ -68,6 +74,9 @@ class NavigationGroup
         return $this->icon;
     }
 
+    /**
+     * @return array<NavigationItem | NavigationGroup> | Arrayable
+     */
     public function getItems(): array | Arrayable
     {
         return $this->items;
@@ -85,6 +94,19 @@ class NavigationGroup
 
     public function isCollapsible(): bool
     {
-        return $this->isCollapsible ?? config('filament.layout.sidebar.groups.are_collapsible') ?? true;
+        return $this->isCollapsible ?? filament()->hasCollapsibleNavigationGroups();
+    }
+
+    public function isActive(): bool
+    {
+        foreach ($this->getItems() as $item) {
+            if (! $item->isActive()) {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 }

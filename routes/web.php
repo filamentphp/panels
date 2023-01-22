@@ -1,45 +1,119 @@
 <?php
 
 use Filament\Facades\Filament;
-use Filament\Http\Controllers\AssetController;
-use Filament\Http\Responses\Auth\Contracts\LogoutResponse;
-use Illuminate\Http\Request;
+use Filament\Http\Controllers\Auth\EmailVerificationController;
+use Filament\Http\Controllers\Auth\LogoutController;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 
-Route::domain(config('filament.domain'))
-    ->middleware(config('filament.middleware.base'))
-    ->name('filament.')
+Route::name('filament.')
     ->group(function () {
-        Route::prefix(config('filament.core_path'))->group(function () {
-            Route::get('/assets/{file}', AssetController::class)->where('file', '.*')->name('asset');
+        foreach (Filament::getContexts() as $context) {
+            /** @var \Filament\Context $context */
+            $contextId = $context->getId();
 
-            Route::post('/logout', function (Request $request): LogoutResponse {
-                Filament::auth()->logout();
+            Route::domain($context->getDomain())
+                ->middleware($context->getMiddleware())
+                ->name("{$contextId}.")
+                ->prefix($context->getPath())
+                ->group(function () use ($context) {
+                    Route::name('auth.')->group(function () use ($context) {
+                        if ($context->hasLogin()) {
+                            Route::get('/login', $context->getLoginRouteAction())->name('login');
+                        }
 
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
+                        if ($context->hasPasswordReset()) {
+                            Route::name('password-reset.')
+                                ->prefix('/password-reset')
+                                ->group(function () use ($context) {
+                                    Route::get('/request', $context->getRequestPasswordResetRouteAction())->name('request');
+                                    Route::get('/reset', $context->getResetPasswordRouteAction())
+                                        ->middleware(['signed'])
+                                        ->name('reset');
+                                });
+                        }
 
-                return app(LogoutResponse::class);
-            })->name('auth.logout');
-        });
+                        if ($context->hasRegistration()) {
+                            Route::get('/register', $context->getRegistrationRouteAction())->name('register');
+                        }
 
-        Route::prefix(config('filament.path'))->group(function () {
-            if ($loginPage = config('filament.auth.pages.login')) {
-                Route::get('/login', $loginPage)->name('auth.login');
-            }
+                        Route::post('/logout', LogoutController::class)->name('logout');
+                    });
 
-            Route::middleware(config('filament.middleware.auth'))->group(function (): void {
-                Route::name('pages.')->group(function (): void {
-                    foreach (Filament::getPages() as $page) {
-                        Route::group([], $page::getRoutes());
+                    Route::middleware($context->getAuthMiddleware())
+                        ->group(function () use ($context): void {
+                            $hasRoutableTenancy = $context->hasRoutableTenancy();
+                            $hasTenantRegistration = $context->hasTenantRegistration();
+                            $tenantSlugAttribute = $context->getTenantSlugAttribute();
+
+                            if ($hasRoutableTenancy) {
+                                Route::get('/', function () use ($context, $hasTenantRegistration): RedirectResponse {
+                                    $tenant = Filament::getUserDefaultTenant(Filament::auth()->user());
+
+                                    if ($tenant) {
+                                        return redirect($context->getUrl($tenant));
+                                    }
+
+                                    if (! $hasTenantRegistration) {
+                                        abort(404);
+                                    }
+
+                                    return redirect($context->getTenantRegistrationUrl());
+                                })->name('home');
+                            }
+
+                            if ($context->hasEmailVerification()) {
+                                Route::name('auth.email-verification.')
+                                    ->prefix('/email-verification')
+                                    ->group(function () use ($context) {
+                                        Route::get('/prompt', $context->getEmailVerificationPromptRouteAction())->name('prompt');
+                                        Route::get('/verify', EmailVerificationController::class)->name('verify');
+                                    });
+                            }
+
+                            Route::name('tenant.')
+                                ->group(function () use ($context, $hasTenantRegistration): void {
+                                    if ($hasTenantRegistration) {
+                                        $context->getTenantRegistrationPage()::routes($context);
+                                    }
+                                });
+
+                            Route::prefix($hasRoutableTenancy ? ('{tenant' . (($tenantSlugAttribute) ? ":{$tenantSlugAttribute}" : '') . '}') : '')
+                                ->group(function () use ($context): void {
+                                    Route::get('/', function () use ($context): RedirectResponse {
+                                        return redirect($context->getUrl(Filament::getTenant()));
+                                    })->name('tenant');
+
+                                    if ($context->hasTenantBilling()) {
+                                        Route::get('/billing', $context->getTenantBillingProvider()->getRouteAction())
+                                            ->name('tenant.billing');
+                                    }
+
+                                    Route::name('pages.')->group(function () use ($context): void {
+                                        foreach ($context->getPages() as $page) {
+                                            $page::routes($context);
+                                        }
+                                    });
+
+                                    Route::name('resources.')->group(function () use ($context): void {
+                                        foreach ($context->getResources() as $resource) {
+                                            $resource::routes($context);
+                                        }
+                                    });
+
+                                    if ($routes = $context->getAuthenticatedTenantRoutes()) {
+                                        $routes($context);
+                                    }
+                                });
+
+                            if ($routes = $context->getAuthenticatedRoutes()) {
+                                $routes($context);
+                            }
+                        });
+
+                    if ($routes = $context->getRoutes()) {
+                        $routes($context);
                     }
                 });
-
-                Route::name('resources.')->group(function (): void {
-                    foreach (Filament::getResources() as $resource) {
-                        Route::group([], $resource::getRoutes());
-                    }
-                });
-            });
-        });
+        }
     });

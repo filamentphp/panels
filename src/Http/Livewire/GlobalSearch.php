@@ -9,7 +9,7 @@ use Livewire\Component;
 
 class GlobalSearch extends Component
 {
-    public $search = '';
+    public ?string $search = '';
 
     public function getResults(): ?GlobalSearchResults
     {
@@ -30,7 +30,7 @@ class GlobalSearch extends Component
         return $results;
     }
 
-    protected function isEnabled(): bool
+    public function isEnabled(): bool
     {
         foreach (Filament::getResources() as $resource) {
             if ($resource::canGloballySearch()) {
@@ -39,6 +39,11 @@ class GlobalSearch extends Component
         }
 
         return false;
+    }
+
+    public static function getName(): string
+    {
+        return 'filament.core.global-search';
     }
 
     public function render(): View

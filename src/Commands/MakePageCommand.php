@@ -2,9 +2,12 @@
 
 namespace Filament\Commands;
 
+use Filament\Context;
+use Filament\Facades\Filament;
 use Filament\Support\Commands\Concerns\CanManipulateFiles;
 use Filament\Support\Commands\Concerns\CanValidateInput;
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 class MakePageCommand extends Command
@@ -14,23 +17,18 @@ class MakePageCommand extends Command
 
     protected $description = 'Creates a Filament page class and view.';
 
-    protected $signature = 'make:filament-page {name?} {--R|resource=} {--T|type=} {--F|force}';
+    protected $signature = 'make:filament-page {name?} {--R|resource=} {--T|type=} {--context=} {--F|force}';
 
     public function handle(): int
     {
-        $path = config('filament.pages.path', app_path('Filament/Pages/'));
-        $resourcePath = config('filament.resources.path', app_path('Filament/Resources/'));
-        $namespace = config('filament.pages.namespace', 'App\\Filament\\Pages');
-        $resourceNamespace = config('filament.resources.namespace', 'App\\Filament\\Resources');
-
-        $page = (string) Str::of($this->argument('name') ?? $this->askRequired('Name (e.g. `Settings`)', 'name'))
+        $page = (string) str($this->argument('name') ?? $this->askRequired('Name (e.g. `Settings`)', 'name'))
             ->trim('/')
             ->trim('\\')
             ->trim(' ')
             ->replace('/', '\\');
-        $pageClass = (string) Str::of($page)->afterLast('\\');
-        $pageNamespace = Str::of($page)->contains('\\') ?
-            (string) Str::of($page)->beforeLast('\\') :
+        $pageClass = (string) str($page)->afterLast('\\');
+        $pageNamespace = str($page)->contains('\\') ?
+            (string) str($page)->beforeLast('\\') :
             '';
 
         $resource = null;
@@ -40,18 +38,18 @@ class MakePageCommand extends Command
         $resourceInput = $this->option('resource') ?? $this->ask('(Optional) Resource (e.g. `UserResource`)');
 
         if ($resourceInput !== null) {
-            $resource = (string) Str::of($resourceInput)
+            $resource = (string) str($resourceInput)
                 ->studly()
                 ->trim('/')
                 ->trim('\\')
                 ->trim(' ')
                 ->replace('/', '\\');
 
-            if (! Str::of($resource)->endsWith('Resource')) {
+            if (! str($resource)->endsWith('Resource')) {
                 $resource .= 'Resource';
             }
 
-            $resourceClass = (string) Str::of($resource)
+            $resourceClass = (string) str($resource)
                 ->afterLast('\\');
 
             $resourcePage = $this->option('type') ?? $this->choice(
@@ -68,17 +66,42 @@ class MakePageCommand extends Command
             );
         }
 
-        $view = Str::of($page)
+        $context = $this->option('context');
+
+        if ($context) {
+            $context = Filament::getContext($context);
+        }
+
+        if (! $context) {
+            $contexts = Filament::getContexts();
+
+            /** @var Context $context */
+            $context = (count($contexts) > 1) ? $contexts[$this->choice(
+                'Which context would you like to create this in?',
+                array_map(
+                    fn (Context $context): string => $context->getId(),
+                    $contexts,
+                ),
+                Filament::getDefaultContext()->getId(),
+            )] : Arr::first($contexts);
+        }
+
+        $path = $context->getPageDirectory() ?? app_path('Filament/Pages/');
+        $namespace = $context->getPageNamespace() ?? 'App\\Filament\\Pages';
+        $resourcePath = $context->getResourceDirectory() ?? app_path('Filament/Resources/');
+        $resourceNamespace = $context->getResourceNamespace() ?? 'App\\Filament\\Resources';
+
+        $view = str($page)
             ->prepend(
-                (string) Str::of($resource === null ? "{$namespace}\\" : "{$resourceNamespace}\\{$resource}\\pages\\")
-                    ->replace('App\\', '')
+                (string) str($resource === null ? "{$namespace}\\" : "{$resourceNamespace}\\{$resource}\\pages\\")
+                    ->replaceFirst('App\\', '')
             )
             ->replace('\\', '/')
             ->explode('/')
             ->map(fn ($segment) => Str::lower(Str::kebab($segment)))
             ->implode('.');
 
-        $path = (string) Str::of($page)
+        $path = (string) str($page)
             ->prepend('/')
             ->prepend($resource === null ? $path : "{$resourcePath}\\{$resource}\\Pages\\")
             ->replace('\\', '/')
@@ -86,7 +109,7 @@ class MakePageCommand extends Command
             ->append('.php');
 
         $viewPath = resource_path(
-            (string) Str::of($view)
+            (string) str($view)
                 ->replace('.', '/')
                 ->prepend('views/')
                 ->append('.blade.php'),
@@ -123,10 +146,10 @@ class MakePageCommand extends Command
             $this->copyStubToApp('PageView', $viewPath);
         }
 
-        $this->info("Successfully created {$page}!");
+        $this->components->info("Successfully created {$page}!");
 
         if ($resource !== null) {
-            $this->info("Make sure to register the page in `{$resourceClass}::getPages()`.");
+            $this->components->info("Make sure to register the page in `{$resourceClass}::getPages()`.");
         }
 
         return static::SUCCESS;

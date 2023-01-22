@@ -3,14 +3,14 @@
 namespace Filament\AvatarProviders;
 
 use Filament\Facades\Filament;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 
 class UiAvatarsProvider implements Contracts\AvatarProvider
 {
-    public function get(Model $user): string
+    public function get(Model | Authenticatable $record): string
     {
-        $name = Str::of(Filament::getUserName($user))
+        $name = str(Filament::getNameForDefaultAvatar($record))
             ->trim()
             ->explode(' ')
             ->map(fn (string $segment): string => filled($segment) ? mb_substr($segment, 0, 1) : '')

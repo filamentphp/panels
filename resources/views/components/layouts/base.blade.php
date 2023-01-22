@@ -1,145 +1,105 @@
 @props([
-    'title' => null,
+    'livewire',
 ])
 
 <!DOCTYPE html>
 <html
     lang="{{ str_replace('_', '-', app()->getLocale()) }}"
     dir="{{ __('filament::layout.direction') ?? 'ltr' }}"
-    class="antialiased bg-gray-100 filament js-focus-visible"
+    class="antialiased filament js-focus-visible"
 >
-    <head>
-        {{ \Filament\Facades\Filament::renderHook('head.start') }}
+<head>
+    {{ filament()->renderHook('head.start') }}
 
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        @foreach (\Filament\Facades\Filament::getMeta() as $tag)
-            {{ $tag }}
-        @endforeach
+    @if ($favicon = filament()->getFavicon())
+        <link rel="icon" href="{{ $favicon }}">
+    @endif
 
-        @if ($favicon = config('filament.favicon'))
-            <link rel="icon" href="{{ $favicon }}">
-        @endif
+    <title>
+        {{ filled($title = $livewire->getTitle()) ? "{$title} - " : null }} {{ filament()->getBrandName() }}
+    </title>
 
-        <title>{{ $title ? "{$title} - " : null }} {{ config('filament.brand') }}</title>
+    {{ filament()->renderHook('styles.start') }}
 
-        {{ \Filament\Facades\Filament::renderHook('styles.start') }}
+    <style>
+        [x-cloak=""], [x-cloak="x-cloak"], [x-cloak="1"] {
+            display: none !important;
+        }
 
-        <style>
-            [x-cloak=""], [x-cloak="x-cloak"], [x-cloak="1"] { display: none !important; }
-            @media (max-width: 1023px) { [x-cloak="-lg"] { display: none !important; } }
-            @media (min-width: 1024px) { [x-cloak="lg"] { display: none !important; } }
-            :root {
-                --sidebar-width: {{ config('filament.layout.sidebar.width') ?? '20rem' }};
-                --collapsed-sidebar-width: {{ config('filament.layout.sidebar.collapsed_width') ?? '5.4rem' }};
+        @media (max-width: 1023px) {
+            [x-cloak="-lg"] {
+                display: none !important;
             }
-        </style>
+        }
 
-        @livewireStyles
+        @media (min-width: 1024px) {
+            [x-cloak="lg"] {
+                display: none !important;
+            }
+        }
+    </style>
 
-        @if (filled($fontsUrl = config('filament.google_fonts')))
-            <link rel="preconnect" href="https://fonts.googleapis.com">
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link href="{{ $fontsUrl }}" rel="stylesheet" />
-        @endif
+    @livewireStyles
+    @filamentStyles
+    {{ filament()->getTheme()->getHtml() }}
+    {{ filament()->getFontHtml() }}
 
-        @foreach (\Filament\Facades\Filament::getStyles() as $name => $path)
-            @if (\Illuminate\Support\Str::of($path)->startsWith(['http://', 'https://']))
-                <link rel="stylesheet" href="{{ $path }}" />
-            @elseif (\Illuminate\Support\Str::of($path)->startsWith('<'))
-                {!! $path !!}
-            @else
-                <link rel="stylesheet" href="{{ route('filament.asset', [
-                    'file' => "{$name}.css",
-                ]) }}" />
-            @endif
-        @endforeach
+    <style>
+        :root {
+            --font-family: {!! filament()->getFontFamily() !!};
+            --filament-widgets-chart-font-family: var(--font-family);
+            --sidebar-width: {{ filament()->getSidebarWidth() }};
+            --collapsed-sidebar-width: {{ filament()->getCollapsedSidebarWidth() }};
 
-        {{ \Filament\Facades\Filament::getThemeLink() }}
+            @foreach (filament()->getColors() as $key => $palette)
+                @foreach ($palette as $shade => $color)
+                    --{{ $key }}-color-{{ $shade }}: {{ $color }};
+                @endforeach
+            @endforeach
+        }
+    </style>
 
-        {{ \Filament\Facades\Filament::renderHook('styles.end') }}
+    {{ filament()->renderHook('styles.end') }}
 
-        @if (config('filament.dark_mode'))
-            <script>
-                const theme = localStorage.getItem('theme')
-
-                if ((theme === 'dark') || (! theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                    document.documentElement.classList.add('dark')
-                }
-            </script>
-        @endif
-
-        {{ \Filament\Facades\Filament::renderHook('head.end') }}
-    </head>
-
-    <body @class([
-        'filament-body bg-gray-100 text-gray-900',
-        'dark:text-gray-100 dark:bg-gray-900' => config('filament.dark_mode'),
-    ])>
-        {{ \Filament\Facades\Filament::renderHook('body.start') }}
-
-        {{ $slot }}
-
-        {{ \Filament\Facades\Filament::renderHook('scripts.start') }}
-
-        @livewireScripts
-
+    @if (filament()->hasDarkMode())
         <script>
-            window.filamentData = @json(\Filament\Facades\Filament::getScriptData());
+            const theme = localStorage.getItem('theme')
+
+            if ((theme === 'dark') || (! theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark')
+            }
         </script>
+    @endif
 
-        @foreach (\Filament\Facades\Filament::getBeforeCoreScripts() as $name => $path)
-            @if (\Illuminate\Support\Str::of($path)->startsWith(['http://', 'https://']))
-                <script defer src="{{ $path }}"></script>
-            @elseif (\Illuminate\Support\Str::of($path)->startsWith('<'))
-                {!! $path !!}
-            @else
-                <script defer src="{{ route('filament.asset', [
-                    'file' => "{$name}.js",
-                ]) }}"></script>
-            @endif
-        @endforeach
+    {{ filament()->renderHook('head.end') }}
+</head>
 
-        @stack('beforeCoreScripts')
+<body class="filament-body bg-gray-100 text-gray-900 dark:text-gray-100 dark:bg-gray-900">
+    {{ filament()->renderHook('body.start') }}
 
-        <script defer src="{{ route('filament.asset', [
-            'id' => Filament\get_asset_id('app.js'),
-            'file' => 'app.js',
-        ]) }}"></script>
+    {{ $slot }}
 
-        @if (config('filament.broadcasting.echo'))
-            <script defer src="{{ route('filament.asset', [
-                'id' => Filament\get_asset_id('echo.js'),
-                'file' => 'echo.js',
-            ]) }}"></script>
+    {{ filament()->renderHook('scripts.start') }}
 
-            <script>
-                window.addEventListener('DOMContentLoaded', () => {
-                    window.Echo = new window.EchoFactory(@js(config('filament.broadcasting.echo')))
+    @livewireScripts
+    @filamentScripts(withCore: true)
 
-                    window.dispatchEvent(new CustomEvent('EchoLoaded'))
-                })
-            </script>
-        @endif
+    @if (config('filament.broadcasting.echo'))
+        <script>
+            window.addEventListener('DOMContentLoaded', () => {
+                window.Echo = new window.EchoFactory(@js(config('filament.broadcasting.echo')))
 
-        @foreach (\Filament\Facades\Filament::getScripts() as $name => $path)
-            @if (\Illuminate\Support\Str::of($path)->startsWith(['http://', 'https://']))
-                <script defer src="{{ $path }}"></script>
-            @elseif (\Illuminate\Support\Str::of($path)->startsWith('<'))
-                {!! $path !!}
-            @else
-                <script defer src="{{ route('filament.asset', [
-                    'file' => "{$name}.js",
-                ]) }}"></script>
-            @endif
-        @endforeach
+                window.dispatchEvent(new CustomEvent('EchoLoaded'))
+            })
+        </script>
+    @endif
 
-        @stack('scripts')
+    {{ filament()->renderHook('scripts.end') }}
 
-        {{ \Filament\Facades\Filament::renderHook('scripts.end') }}
-
-        {{ \Filament\Facades\Filament::renderHook('body.end') }}
-    </body>
+    {{ filament()->renderHook('body.end') }}
+</body>
 </html>
