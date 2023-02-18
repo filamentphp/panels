@@ -31,6 +31,8 @@ class Table
 
     protected ?string $pollingInterval = null;
 
+    protected ?bool $isLoadingDeferred = false;
+
     protected ?string $reorderColumn = null;
 
     final public function __construct()
@@ -164,6 +166,13 @@ class Table
         return $this;
     }
 
+    public function deferLoading(bool $condition = true): static
+    {
+        $this->isLoadingDeferred = $condition;
+
+        return $this;
+    }
+
     /**
      * @deprecated Use `appendActions()` instead.
      */
@@ -264,5 +273,10 @@ class Table
     public function getPollingInterval(): ?string
     {
         return $this->pollingInterval;
+    }
+
+    public function isLoadingDeferred(): bool
+    {
+        return $this->isLoadingDeferred;
     }
 }
