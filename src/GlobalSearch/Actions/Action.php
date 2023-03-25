@@ -2,24 +2,14 @@
 
 namespace Filament\GlobalSearch\Actions;
 
-use Filament\Actions\Concerns\CanBeInline;
-use Filament\Actions\Concerns\CanBeOutlined;
 use Filament\Actions\Concerns\CanEmitEvent;
-use Filament\Actions\Concerns\CanOpenUrl;
-use Filament\Actions\Concerns\HasKeyBindings;
-use Filament\Actions\Concerns\HasTooltip;
 use Filament\Actions\StaticAction;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Js;
 
 class Action extends StaticAction
 {
-    use CanBeInline;
-    use CanBeOutlined;
     use CanEmitEvent;
-    use CanOpenUrl;
-    use HasKeyBindings;
-    use HasTooltip;
 
     protected function setUp(): void
     {
