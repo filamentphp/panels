@@ -16,7 +16,7 @@
         x-bind:class="$store.sidebar.isOpen ? 'filament-sidebar-open translate-x-0' : '-translate-x-full rtl:translate-x-full'"
     @endif
     @class([
-        'filament-sidebar fixed inset-y-0 start-0 z-20 flex h-screen w-[--sidebar-width] flex-col overflow-hidden bg-white transition-all dark:bg-gray-800 lg:bg-transparent lg:dark:bg-transparent lg:z-0',
+        'filament-sidebar fixed inset-y-0 start-0 z-20 flex h-screen w-[--sidebar-width] flex-col bg-white transition-all dark:bg-gray-800 lg:bg-transparent lg:dark:bg-transparent lg:z-0',
         'lg:translate-x-0 rtl:lg:-translate-x-0' => ! (filament()->isSidebarCollapsibleOnDesktop() || filament()->isSidebarFullyCollapsibleOnDesktop() || filament()->hasTopNavigation()),
     ])
 >
@@ -53,16 +53,20 @@
                 </button>
             @endif
 
-            <a
-                href="{{ filament()->getHomeUrl() }}"
+            <div
                 data-turbo="false"
                 @class([
-                    'block w-full',
+                    'block w-full relative',
                     'lg:ms-3' => filament()->isSidebarCollapsibleOnDesktop() && (! filament()->isSidebarFullyCollapsibleOnDesktop()),
                 ])
             >
-                <x-filament::logo />
-            </a>
+                <a
+                    href="{{ filament()->getHomeUrl() }}"
+                    class="inline-block"
+                >
+                    <x-filament::logo />
+                </a>
+            </div>
         </div>
 
         @if (filament()->isSidebarCollapsibleOnDesktop())
