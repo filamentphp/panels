@@ -15,15 +15,15 @@ To set up your `App\Models\User` to access Filament in non-local environments, y
 
 namespace App\Models;
 
-use Filament\Context;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable implements FilamentUser
 {
     // ...
 
-    public function canAccessFilament(Context $context): bool
+    public function canAccessFilament(Panel $panel): bool
     {
         return str_ends_with($this->email, '@yourdomain.com') && $this->hasVerifiedEmail();
     }
@@ -92,11 +92,11 @@ Now, register this new avatar provider in the [configuration](configuration):
 
 ```php
 use App\Filament\AvatarProviders\BoringAvatarsProvider;
-use Filament\Context;
+use Filament\Panel;
 
-public function context(Context $context): Context
+public function panel(Panel $panel): Panel
 {
-    return $context
+    return $panel
         // ...
         ->defaultAvatarProvider(BoringAvatarsProvider::class);
 }
@@ -130,14 +130,14 @@ The `getFilamentName()` method is used to retrieve the name of the current user.
 
 ## Authentication features
 
-You can easily enable authentication features for a context in the configuration file:
+You can easily enable authentication features for a panel in the configuration file:
 
 ```php
-use Filament\Context;
+use Filament\Panel;
 
-public function context(Context $context): Context
+public function panel(Panel $panel): Panel
 {
-    return $context
+    return $panel
         // ...
         ->login()
         ->registration()
@@ -156,11 +156,11 @@ Most people will be able to make their desired customizations by extending the d
 
 ```php
 use App\Http\Livewire\Auth\Login;
-use Filament\Context;
+use Filament\Panel;
 
-public function context(Context $context): Context
+public function panel(Panel $panel): Panel
 {
-    return $context
+    return $panel
         // ...
         ->login(Login::class);
 }

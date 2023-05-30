@@ -12,9 +12,9 @@ class IdentifyTenant
 {
     public function handle(Request $request, Closure $next): mixed
     {
-        $context = Filament::getCurrentContext();
+        $panel = Filament::getCurrentPanel();
 
-        if (! $context->hasTenancy()) {
+        if (! $panel->hasTenancy()) {
             return $next($request);
         }
 
@@ -23,13 +23,13 @@ class IdentifyTenant
         }
 
         /** @var Model $user */
-        $user = $context->auth()->user();
+        $user = $panel->auth()->user();
 
         if (! $user instanceof HasTenants) {
             abort(404);
         }
 
-        $tenant = $context->getTenant($request->route()->parameter('tenant'));
+        $tenant = $panel->getTenant($request->route()->parameter('tenant'));
 
         if (! $user->canAccessTenant($tenant)) {
             abort(404);

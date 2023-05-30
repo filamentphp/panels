@@ -4,7 +4,6 @@ namespace Filament\Facades;
 
 use Closure;
 use Filament\Billing\Providers\Contracts\Provider as BillingProvider;
-use Filament\Context;
 use Filament\Contracts\Plugin;
 use Filament\FilamentManager;
 use Filament\GlobalSearch\Contracts\GlobalSearchProvider;
@@ -12,6 +11,7 @@ use Filament\Models\Contracts\HasTenants;
 use Filament\Navigation\MenuItem;
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
+use Filament\Panel;
 use Filament\Support\Assets\Theme;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\CanResetPassword;
@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static StatefulGuard auth()
- * @method static void bootCurrentContext()
+ * @method static void bootCurrentPanel()
  * @method static array<NavigationGroup> buildNavigation()
  * @method static string getAuthGuard()
  * @method static string getBrandName()
@@ -36,13 +36,13 @@ use Illuminate\Support\Facades\Facade;
  *     'success': array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | null,
  * } getColors()
  * @method static string getCollapsedSidebarWidth()
- * @method static Context getContext(?string $id = null)
- * @method static Context | null getCurrentContext()
- * @method static array<string, Context> getContexts()
+ * @method static Panel | null getCurrentPanel()
+ * @method static Panel getPanel(?string $id = null)
+ * @method static array<string, Panel> getPanels()
  * @method static array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} getDangerColor()
  * @method static string | null getDatabaseNotificationsPollingInterval()
  * @method static string getDefaultAvatarProvider()
- * @method static Context getDefaultContext()
+ * @method static Panel getDefaultPanel()
  * @method static string | null getEmailVerificationPromptUrl(array<mixed> $parameters = [])
  * @method static string getEmailVerifiedMiddleware()
  * @method static string | null getFavicon()
@@ -111,10 +111,10 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool isSidebarCollapsibleOnDesktop()
  * @method static bool isSidebarFullyCollapsibleOnDesktop()
  * @method static void mountNavigation()
- * @method static void registerContext(Context $context)
+ * @method static void registerPanel(Panel $panel)
  * @method static Htmlable renderHook(string $name)
  * @method static void serving(Closure $callback)
- * @method static void setCurrentContext(Context | null $context = null)
+ * @method static void setCurrentPanel(Panel | null $panel = null)
  * @method static void setServingStatus(bool $condition = true)
  * @method static void setTenant(Model | null $tenant = null)
  *

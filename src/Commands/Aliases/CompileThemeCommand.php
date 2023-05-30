@@ -8,5 +8,5 @@ class CompileThemeCommand extends Commands\CompileThemeCommand
 {
     protected $hidden = true;
 
-    protected $signature = 'filament:theme {context?} {--W|watch}';
+    protected $signature = 'filament:theme {panel?} {--W|watch}';
 }

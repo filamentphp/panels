@@ -3,11 +3,11 @@
 namespace Filament\Pages\Tenancy;
 
 use Filament\Actions\Action;
-use Filament\Context;
 use Filament\Facades\Filament;
 use Filament\Forms\Form;
 use Filament\Pages\CardPage;
 use Filament\Pages\Concerns;
+use Filament\Panel;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Route;
@@ -33,19 +33,19 @@ abstract class RegisterTenant extends CardPage
 
     abstract public static function getLabel(): string;
 
-    public static function routes(Context $context): void
+    public static function routes(Panel $panel): void
     {
         $slug = static::getSlug();
 
         Route::get("/{$slug}", static::class)
-            ->middleware(static::getRouteMiddleware($context))
+            ->middleware(static::getRouteMiddleware($panel))
             ->name('registration');
     }
 
     /**
      * @return string | array<string>
      */
-    public static function getRouteMiddleware(Context $context): string | array
+    public static function getRouteMiddleware(Panel $panel): string | array
     {
         return static::$routeMiddleware;
     }

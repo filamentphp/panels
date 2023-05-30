@@ -10,15 +10,15 @@ Filament has a few requirements to run:
 - Laravel v9.0+
 - Livewire v2.0+
 
-This package is compatible with other Filament v3.x products. The [form builder](/docs/forms), [table builder](/docs/tables) and [notifications](/docs/notifications) come pre-installed with the package, and no other installation steps are required to use them within the app framework.
+This package is compatible with other Filament v3.x products. The [form builder](/docs/forms), [table builder](/docs/tables) and [notifications](/docs/notifications) come pre-installed with the package, and no other installation steps are required to use them within a panel.
 
 ## Installation
 
-To get started with the app framework, you can install it using the commands:
+To get started with a panel, you can install it using the commands:
 
 ```bash
 composer require filament/filament:"^3.0"
-php artisan filament:install --app
+php artisan filament:install --panels
 ```
 
 If you don't have one, you may create a new user account using:
@@ -29,7 +29,7 @@ php artisan make:filament-user
 
 Visit your app at `/admin` to sign in, and you're now ready to start [building your app](getting-started)!
 
-[![Filament app framework demo dashboard](https://user-images.githubusercontent.com/41773797/147615302-daec5d1c-e3ac-428a-98c2-c3fb40d945b5.png)](https://demo.filamentphp.com)
+[![Filament panel demo dashboard](https://user-images.githubusercontent.com/41773797/147615302-daec5d1c-e3ac-428a-98c2-c3fb40d945b5.png)](https://demo.filamentphp.com)
 
 ## Deploying to production
 

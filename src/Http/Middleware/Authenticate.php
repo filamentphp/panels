@@ -2,10 +2,10 @@
 
 namespace Filament\Http\Middleware;
 
-use Filament\Context;
 use Filament\Facades\Filament;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasTenants;
+use Filament\Panel;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -30,26 +30,26 @@ class Authenticate extends Middleware
         /** @var Model $user */
         $user = $guard->user();
 
-        $context = Filament::getCurrentContext();
+        $panel = Filament::getCurrentPanel();
 
         abort_if(
             $user instanceof FilamentUser ?
-                (! $user->canAccessFilament($context)) :
+                (! $user->canAccessFilament($panel)) :
                 (config('app.env') !== 'local'),
             403,
         );
     }
 
-    protected function setTenant(Request $request, Context $context): void
+    protected function setTenant(Request $request, Panel $panel): void
     {
         if (! $request->route()->hasParameter('tenant')) {
             return;
         }
 
-        $tenant = $context->getTenant($request->route()->parameter('tenant'));
+        $tenant = $panel->getTenant($request->route()->parameter('tenant'));
 
         /** @var Model $user */
-        $user = $context->auth()->user();
+        $user = $panel->auth()->user();
 
         if ($user instanceof HasTenants && $user->canAccessTenant($tenant)) {
             Filament::setTenant($tenant);

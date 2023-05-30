@@ -2,10 +2,10 @@
 
 namespace Filament\Models\Contracts;
 
-use Filament\Context;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Model;
 
 interface HasDefaultTenant
 {
-    public function getDefaultTenant(Context $context): ?Model;
+    public function getDefaultTenant(Panel $panel): ?Model;
 }

@@ -37,11 +37,11 @@ abstract class Page extends BasePage
     /**
      * @param  array<mixed>  $parameters
      */
-    public static function getUrl(array $parameters = [], bool $isAbsolute = true, ?string $context = null, ?Model $tenant = null): string
+    public static function getUrl(array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?Model $tenant = null): string
     {
         $parameters['tenant'] ??= ($tenant ?? Filament::getTenant());
 
-        return route(static::getRouteName($context), $parameters, $isAbsolute);
+        return route(static::getRouteName($panel), $parameters, $isAbsolute);
     }
 
     public static function registerNavigationItems(): void
@@ -50,7 +50,7 @@ abstract class Page extends BasePage
             return;
         }
 
-        Filament::getCurrentContext()
+        Filament::getCurrentPanel()
             ->navigationItems(static::getNavigationItems());
     }
 
@@ -70,13 +70,13 @@ abstract class Page extends BasePage
         ];
     }
 
-    public static function getRouteName(?string $context = null): string
+    public static function getRouteName(?string $panel = null): string
     {
-        $context ??= Filament::getCurrentContext()->getId();
+        $panel ??= Filament::getCurrentPanel()->getId();
 
         return (string) str(static::getSlug())
             ->replace('/', '.')
-            ->prepend("filament.{$context}.pages.");
+            ->prepend("filament.{$panel}.pages.");
     }
 
     /**

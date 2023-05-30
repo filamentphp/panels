@@ -2,8 +2,8 @@
 
 namespace Filament\Pages;
 
-use Filament\Context;
 use Filament\Facades\Filament;
+use Filament\Panel;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Support\Facades\Route;
 
@@ -30,10 +30,10 @@ class Dashboard extends Page
             'heroicon-o-home';
     }
 
-    public static function routes(Context $context): void
+    public static function routes(Panel $panel): void
     {
         Route::get('/', static::class)
-            ->middleware(static::getRouteMiddleware($context))
+            ->middleware(static::getRouteMiddleware($panel))
             ->name(static::getSlug());
     }
 

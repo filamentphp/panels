@@ -2,8 +2,8 @@
 
 namespace Filament\Resources\Pages;
 
-use Filament\Context;
 use Filament\Pages\Page as BasePage;
+use Filament\Panel;
 use Filament\Resources\Resource;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Route as RouteFacade;
@@ -18,29 +18,29 @@ abstract class Page extends BasePage
     {
         return new PageRegistration(
             page: static::class,
-            route: fn (Context $context): Route => RouteFacade::get($path, static::class)
-                ->middleware(static::getRouteMiddleware($context)),
+            route: fn (Panel $panel): Route => RouteFacade::get($path, static::class)
+                ->middleware(static::getRouteMiddleware($panel)),
         );
     }
 
-    public static function getEmailVerifiedMiddleware(Context $context): string
+    public static function getEmailVerifiedMiddleware(Panel $panel): string
     {
-        return static::getResource()::getEmailVerifiedMiddleware($context);
+        return static::getResource()::getEmailVerifiedMiddleware($panel);
     }
 
-    public static function isEmailVerificationRequired(Context $context): bool
+    public static function isEmailVerificationRequired(Panel $panel): bool
     {
-        return static::getResource()::isEmailVerificationRequired($context);
+        return static::getResource()::isEmailVerificationRequired($panel);
     }
 
-    public static function getTenantSubscribedMiddleware(Context $context): string
+    public static function getTenantSubscribedMiddleware(Panel $panel): string
     {
-        return static::getResource()::getTenantSubscribedMiddleware($context);
+        return static::getResource()::getTenantSubscribedMiddleware($panel);
     }
 
-    public static function isTenantSubscriptionRequired(Context $context): bool
+    public static function isTenantSubscriptionRequired(Panel $panel): bool
     {
-        return static::getResource()::isTenantSubscriptionRequired($context);
+        return static::getResource()::isTenantSubscriptionRequired($panel);
     }
 
     public function getBreadcrumb(): ?string

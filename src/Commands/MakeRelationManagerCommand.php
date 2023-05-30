@@ -2,8 +2,8 @@
 
 namespace Filament\Commands;
 
-use Filament\Context;
 use Filament\Facades\Filament;
+use Filament\Panel;
 use Filament\Support\Commands\Concerns\CanIndentStrings;
 use Filament\Support\Commands\Concerns\CanManipulateFiles;
 use Filament\Support\Commands\Concerns\CanValidateInput;
@@ -16,9 +16,9 @@ class MakeRelationManagerCommand extends Command
     use CanManipulateFiles;
     use CanValidateInput;
 
-    protected $description = 'Creates a Filament relation manager class for a resource.';
+    protected $description = 'Create a new Filament relation manager class for a resource';
 
-    protected $signature = 'make:filament-relation-manager {resource?} {relationship?} {recordTitleAttribute?} {--attach} {--associate} {--soft-deletes} {--view} {--context=} {--F|force}';
+    protected $signature = 'make:filament-relation-manager {resource?} {relationship?} {recordTitleAttribute?} {--attach} {--associate} {--soft-deletes} {--view} {--panel=} {--F|force}';
 
     public function handle(): int
     {
@@ -42,28 +42,28 @@ class MakeRelationManagerCommand extends Command
         $recordTitleAttribute = (string) str($this->argument('recordTitleAttribute') ?? $this->askRequired('Title attribute (e.g. `name`)', 'title attribute'))
             ->trim(' ');
 
-        $context = $this->option('context');
+        $panel = $this->option('panel');
 
-        if ($context) {
-            $context = Filament::getContext($context);
+        if ($panel) {
+            $panel = Filament::getPanel($panel);
         }
 
-        if (! $context) {
-            $contexts = Filament::getContexts();
+        if (! $panel) {
+            $panels = Filament::getPanels();
 
-            /** @var Context $context */
-            $context = (count($contexts) > 1) ? $contexts[$this->choice(
-                'Which context would you like to create this in?',
+            /** @var Panel $panel */
+            $panel = (count($panels) > 1) ? $panels[$this->choice(
+                'Which panel would you like to create this in?',
                 array_map(
-                    fn (Context $context): string => $context->getId(),
-                    $contexts,
+                    fn (Panel $panel): string => $panel->getId(),
+                    $panels,
                 ),
-                Filament::getDefaultContext()->getId(),
-            )] : Arr::first($contexts);
+                Filament::getDefaultPanel()->getId(),
+            )] : Arr::first($panels);
         }
 
-        $resourcePath = $context->getResourceDirectory() ?? app_path('Filament/Resources/');
-        $resourceNamespace = $context->getResourceNamespace() ?? 'App\\Filament\\Resources';
+        $resourcePath = $panel->getResourceDirectory() ?? app_path('Filament/Resources/');
+        $resourceNamespace = $panel->getResourceNamespace() ?? 'App\\Filament\\Resources';
 
         $path = (string) str($managerClass)
             ->prepend("{$resourcePath}/{$resource}/RelationManagers/")
