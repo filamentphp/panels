@@ -2,7 +2,7 @@
 
 namespace Filament\Models\Contracts;
 
-use Filament\Panel;
+use Filament\Context;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
@@ -13,5 +13,5 @@ interface HasTenants
     /**
      * @return array<Model> | Collection
      */
-    public function getTenants(Panel $panel): array | Collection;
+    public function getTenants(Context $context): array | Collection;
 }

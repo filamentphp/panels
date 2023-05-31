@@ -9,8 +9,6 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Actions\RestoreAction;
 use Filament\Forms\Form;
-use Filament\Infolists\Concerns\InteractsWithInfolists;
-use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Infolists\Infolist;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Illuminate\Database\Eloquent\Model;
@@ -18,12 +16,11 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property Form $form
  */
-class ViewRecord extends Page implements HasInfolists
+class ViewRecord extends Page
 {
     use Concerns\HasRelationManagers;
     use Concerns\InteractsWithRecord;
     use InteractsWithFormActions;
-    use InteractsWithInfolists;
 
     /**
      * @var view-string
@@ -42,6 +39,8 @@ class ViewRecord extends Page implements HasInfolists
         'activeRelationManager',
     ];
 
+    protected ?Infolist $cachedInfolist = null;
+
     public function getBreadcrumb(): string
     {
         return static::$breadcrumb ?? __('filament::resources/pages/view-record.breadcrumb');
@@ -54,9 +53,11 @@ class ViewRecord extends Page implements HasInfolists
 
     public function mount(int | string $record): void
     {
+        static::authorizeResourceAccess();
+
         $this->record = $this->resolveRecord($record);
 
-        $this->authorizeAccess();
+        abort_unless(static::getResource()::canView($this->getRecord()), 403);
 
         if ($this->hasInfolist()) {
             return;
@@ -65,16 +66,9 @@ class ViewRecord extends Page implements HasInfolists
         $this->fillForm();
     }
 
-    protected function authorizeAccess(): void
-    {
-        static::authorizeResourceAccess();
-
-        abort_unless(static::getResource()::canView($this->getRecord()), 403);
-    }
-
     protected function hasInfolist(): bool
     {
-        return (bool) count($this->getInfolist('infolist')->getComponents());
+        return (bool) count($this->getCachedInfolist()->getComponents());
     }
 
     protected function fillForm(): void
@@ -90,15 +84,20 @@ class ViewRecord extends Page implements HasInfolists
         $this->callHook('afterFill');
     }
 
+    protected function getCachedInfolist(): Infolist
+    {
+        return $this->cachedInfolist ??= $this->getInfolist();
+    }
+
     /**
      * @param  array<string>  $attributes
      */
     protected function refreshFormData(array $attributes): void
     {
-        $this->data = [
-            ...$this->data,
-            ...$this->getRecord()->only($attributes),
-        ];
+        $this->data = array_merge(
+            $this->data,
+            $this->getRecord()->only($attributes),
+        );
     }
 
     /**
@@ -193,10 +192,10 @@ class ViewRecord extends Page implements HasInfolists
         );
     }
 
-    public function infolist(Infolist $infolist): Infolist
+    public function getInfolist(): Infolist
     {
         return static::getResource()::infolist(
-            $infolist
+            Infolist::make()
                 ->record($this->getRecord())
                 ->columns($this->hasInlineLabels() ? 1 : 2)
                 ->inlineLabel($this->hasInlineLabels()),
@@ -206,15 +205,5 @@ class ViewRecord extends Page implements HasInfolists
     protected function getMountedActionFormModel(): Model
     {
         return $this->getRecord();
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function getWidgetData(): array
-    {
-        return [
-            'record' => $this->getRecord(),
-        ];
     }
 }

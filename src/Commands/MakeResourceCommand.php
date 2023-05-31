@@ -2,9 +2,9 @@
 
 namespace Filament\Commands;
 
+use Filament\Context;
 use Filament\Facades\Filament;
 use Filament\Forms\Commands\Concerns\CanGenerateForms;
-use Filament\Panel;
 use Filament\Support\Commands\Concerns\CanIndentStrings;
 use Filament\Support\Commands\Concerns\CanManipulateFiles;
 use Filament\Support\Commands\Concerns\CanReadModelSchemas;
@@ -22,9 +22,9 @@ class MakeResourceCommand extends Command
     use CanReadModelSchemas;
     use CanValidateInput;
 
-    protected $description = 'Create a new Filament resource class and default page classes';
+    protected $description = 'Creates a Filament resource class and default page classes.';
 
-    protected $signature = 'make:filament-resource {name?} {--soft-deletes} {--view} {--G|generate} {--S|simple} {--panel=} {--F|force}';
+    protected $signature = 'make:filament-resource {name?} {--soft-deletes} {--view} {--G|generate} {--S|simple} {--context=} {--F|force}';
 
     public function handle(): int
     {
@@ -47,28 +47,28 @@ class MakeResourceCommand extends Command
             '';
         $pluralModelClass = (string) str($modelClass)->pluralStudly();
 
-        $panel = $this->option('panel');
+        $context = $this->option('context');
 
-        if ($panel) {
-            $panel = Filament::getPanel($panel);
+        if ($context) {
+            $context = Filament::getContext($context);
         }
 
-        if (! $panel) {
-            $panels = Filament::getPanels();
+        if (! $context) {
+            $contexts = Filament::getContexts();
 
-            /** @var Panel $panel */
-            $panel = (count($panels) > 1) ? $panels[$this->choice(
-                'Which panel would you like to create this in?',
+            /** @var Context $context */
+            $context = (count($contexts) > 1) ? $contexts[$this->choice(
+                'Which context would you like to create this in?',
                 array_map(
-                    fn (Panel $panel): string => $panel->getId(),
-                    $panels,
+                    fn (Context $context): string => $context->getId(),
+                    $contexts,
                 ),
-                Filament::getDefaultPanel()->getId(),
-            )] : Arr::first($panels);
+                Filament::getDefaultContext()->getId(),
+            )] : Arr::first($contexts);
         }
 
-        $path = $panel->getResourceDirectory() ?? app_path('Filament/Resources/');
-        $namespace = $panel->getResourceNamespace() ?? 'App\\Filament\\Resources';
+        $path = $context->getResourceDirectory() ?? app_path('Filament/Resources/');
+        $namespace = $context->getResourceNamespace() ?? 'App\\Filament\\Resources';
 
         $resource = "{$model}Resource";
         $resourceClass = "{$modelClass}Resource";
@@ -181,7 +181,7 @@ class MakeResourceCommand extends Command
             'resource' => "{$namespace}\\{$resourceClass}",
             'resourceClass' => $resourceClass,
             'tableActions' => $this->indentString($tableActions, 4),
-            'tableBulkActions' => $this->indentString($tableBulkActions, 5),
+            'tableBulkActions' => $this->indentString($tableBulkActions, 4),
             'tableColumns' => $this->indentString($this->option('generate') ? $this->getResourceTableColumns(
                 'App\Models' . ($modelNamespace !== '' ? "\\{$modelNamespace}" : '') . '\\' . $modelClass,
             ) : '//', 4),

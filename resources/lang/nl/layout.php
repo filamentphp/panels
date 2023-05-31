@@ -10,7 +10,7 @@ return [
             'label' => 'Abonnement beheren',
         ],
 
-        'dark_theme' => [
+        'dark_mode' => [
             'label' => 'Donkere weergave inschakelen',
         ],
 
@@ -18,7 +18,7 @@ return [
             'label' => 'Meldingen openen',
         ],
 
-        'light_theme' => [
+        'light_mode' => [
             'label' => 'Lichte weergave inschakelen',
         ],
 

@@ -5,8 +5,6 @@ namespace Filament\Pages;
 use Closure;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
 use Filament\Support\Exceptions\Halt;
 use Filament\Tables\Contracts\RendersActionModal;
 use Illuminate\Contracts\Support\Htmlable;
@@ -14,10 +12,9 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
-abstract class BasePage extends Component implements HasActions, HasForms, RendersActionModal
+abstract class BasePage extends Component implements HasActions, RendersActionModal
 {
     use InteractsWithActions;
-    use InteractsWithForms;
 
     protected static string $layout;
 
@@ -36,11 +33,10 @@ abstract class BasePage extends Component implements HasActions, HasForms, Rende
     public function render(): View
     {
         return view(static::$view, $this->getViewData())
-            ->layout(static::$layout, [
+            ->layout(static::$layout, array_merge([
                 'livewire' => $this,
                 'maxContentWidth' => $this->getMaxContentWidth(),
-                ...$this->getLayoutData(),
-            ]);
+            ], $this->getLayoutData()));
     }
 
     public function getHeading(): string | Htmlable

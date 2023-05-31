@@ -49,7 +49,7 @@ document.addEventListener('alpine:init', () => {
             : 'light',
     )
 
-    window.addEventListener('theme-changed', (event) => {
+    window.addEventListener('dark-mode-toggled', (event) => {
         window.Alpine.store('theme', event.detail)
     })
 

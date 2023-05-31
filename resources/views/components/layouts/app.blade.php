@@ -37,7 +37,7 @@
             ])
         >
             <x-filament::layouts.app.topbar
-                :breadcrumbs="filament()->hasBreadcrumbs() ? $livewire->getBreadcrumbs() : []"
+                :breadcrumbs="$livewire->getBreadcrumbs()"
                 :navigation="$navigation"
             />
 

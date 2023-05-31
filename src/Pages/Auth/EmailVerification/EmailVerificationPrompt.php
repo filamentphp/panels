@@ -38,12 +38,12 @@ class EmailVerificationPrompt extends CardPage
 
     public function resendNotificationAction(): Action
     {
-        return Action::make('resendNotification')
+        return Action::make('resendNotificationAction')
             ->link()
             ->label(__('filament::pages/auth/email-verification/email-verification-prompt.buttons.resend_notification.label') . '.')
             ->action(function (): void {
                 try {
-                    $this->rateLimit(2);
+                    $this->rateLimit(1);
                 } catch (TooManyRequestsException $exception) {
                     Notification::make()
                         ->title(__('filament::pages/auth/email-verification/email-verification-prompt.messages.notification_resend_throttled', [

@@ -6,7 +6,7 @@ return [
 
     'buttons' => [
 
-        'dark_theme' => [
+        'dark_mode' => [
             'label' => 'Tumma tila',
         ],
 
@@ -14,7 +14,7 @@ return [
             'label' => 'Avaa ilmoitukset',
         ],
 
-        'light_theme' => [
+        'light_mode' => [
             'label' => 'Vaalea tila',
         ],
 

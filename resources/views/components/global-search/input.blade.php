@@ -22,11 +22,7 @@
         </span>
 
         <input
-            x-data="{}"
             wire:model.debounce.500ms="search"
-            @if ($keyBindings = filament()->getGlobalSearchKeyBindings())
-                x-mousetrap.global.{{ collect($keyBindings)->map(fn (string $keyBinding): string => str_replace('+', '-', $keyBinding))->implode('.') }}="$el.focus()"
-            @endif
             id="globalSearchInput"
             placeholder="{{ __('filament::global-search.field.placeholder') }}"
             type="search"

@@ -5,10 +5,10 @@ return [
     'direction' => 'ltr',
 
     'buttons' => [
-        'dark_theme' => [
+        'dark_mode' => [
             'label' => 'Alternar para o modo escuro',
         ],
-        'light_theme' => [
+        'light_mode' => [
             'label' => 'Alternar para o modo claro',
         ],
         'logout' => [

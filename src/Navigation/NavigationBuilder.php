@@ -42,10 +42,7 @@ class NavigationBuilder
     /** @param  array<NavigationGroup>  $groups */
     public function groups(array $groups): static
     {
-        $this->groups = [
-            ...$this->groups,
-            ...$groups,
-        ];
+        $this->groups = array_merge($this->groups, $groups);
 
         return $this;
     }
@@ -53,10 +50,7 @@ class NavigationBuilder
     /** @param  array<NavigationItem>  $items */
     public function items(array $items): static
     {
-        $this->items = [
-            ...$this->items,
-            ...$items,
-        ];
+        $this->items = array_merge($this->items, $items);
 
         return $this;
     }

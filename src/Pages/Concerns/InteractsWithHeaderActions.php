@@ -10,7 +10,7 @@ use InvalidArgumentException;
 trait InteractsWithHeaderActions
 {
     /**
-     * @var array<Action | ActionGroup>
+     * @var array<string, Action | ActionGroup>
      */
     protected array $cachedHeaderActions = [];
 
@@ -27,15 +27,20 @@ trait InteractsWithHeaderActions
             fn (): array => $this->getHeaderActions(),
         );
 
-        foreach ($actions as $action) {
+        foreach ($actions as $index => $action) {
             if ($action instanceof ActionGroup) {
-                $action->livewire($this);
+                foreach ($action->getActions() as $groupedAction) {
+                    if (! $groupedAction instanceof Action) {
+                        throw new InvalidArgumentException('Header actions within a group must be an instance of ' . Action::class . '.');
+                    }
 
-                /** @var array<string, Action> $flatActions */
-                $flatActions = $action->getFlatActions();
+                    /** @var Action $groupedAction */
+                    $groupedAction->livewire($this);
 
-                $this->mergeCachedActions($flatActions);
-                $this->cachedHeaderActions[] = $action;
+                    $this->cacheAction($groupedAction);
+                }
+
+                $this->cachedHeaderActions[$index] = $action;
 
                 continue;
             }
@@ -45,12 +50,12 @@ trait InteractsWithHeaderActions
             }
 
             $this->cacheAction($action);
-            $this->cachedHeaderActions[] = $action;
+            $this->cachedHeaderActions[$action->getName()] = $action;
         }
     }
 
     /**
-     * @return array<Action | ActionGroup>
+     * @return array<string, Action | ActionGroup>
      */
     public function getCachedHeaderActions(): array
     {

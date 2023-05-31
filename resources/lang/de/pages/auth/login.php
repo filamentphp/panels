@@ -12,14 +12,6 @@ return [
             'label' => 'Anmelden',
         ],
 
-        'register' => [
-            'before' => 'oder',
-            'label' => 'erstellen Sie ein Konto',
-        ],
-
-        'request_password_reset' => [
-            'label' => 'Passwort vergessen?',
-        ],
     ],
 
     'fields' => [

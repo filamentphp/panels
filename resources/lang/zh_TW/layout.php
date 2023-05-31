@@ -6,11 +6,11 @@ return [
 
     'buttons' => [
 
-        'dark_theme' => [
+        'dark_mode' => [
             'label' => '切換至暗色模式',
         ],
 
-        'light_theme' => [
+        'light_mode' => [
             'label' => '切換至亮色模式',
         ],
 

@@ -6,7 +6,7 @@ return [
 
     'buttons' => [
 
-        'dark_theme' => [
+        'dark_mode' => [
             'label' => 'הפעל מצב כהה',
         ],
 
@@ -14,7 +14,7 @@ return [
             'label' => 'פתח התראות',
         ],
 
-        'light_theme' => [
+        'light_mode' => [
             'label' => 'הפעל מצב מואר',
         ],
 

@@ -4,34 +4,43 @@ title: Multi-tenancy
 
 ## Overview
 
-Multi-tenancy is a concept where a single instance of an application serves multiple customers. Each customer has their own data and access rules that prevent them from viewing or modifying each other's data. This is a common pattern in SaaS applications. Users often belong to groups of users (often called teams or organizations). Records are owned by the group, and users can be members of multiple groups. This is suitable for applications where users need to collaborate on data.
+Multi-tenancy is a concept where a single instance of an application serves multiple customers. Each customer has their own data and access rules that prevent them from viewing or modifying each other's data. This is a common pattern in SaaS applications.
+
+There are two main approaches to "ownership" in a multi-tenant application:
+
+- Users own records they create. This is by far the simplest approach.
+- Users belong to groups of users (often called teams or organizations). Records are owned by the group, and users can be members of multiple groups. This is a more complex approach, but is suitable for applications where users need to collaborate on data. More UI is required to support this approach, which is used to [register tenants](#tenant-registration). Often, you'll also want a page where users can manage the tenant and its members.
+
+Filament supports both of these approaches. If users own records then the `App\Models\User` model is the "tenant model". If users belong to teams then the `App\Models\Team` model is the "tenant model". When reading this guide, we will refer to this as the "tenant model".
 
 ## Setting up tenancy
 
-To set up tenancy, you'll need to specify the "tenant" (like team or organization) model in the [configuration](configuration):
+To set up tenancy, you'll need to specify the tenant model in the [configuration](configuration):
 
 ```php
 use App\Models\Team;
-use Filament\Panel;
+use Filament\Context;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->tenant(Team::class);
 }
 ```
 
-You'll also need to tell Filament which tenants a user belongs to. You can do this by implementing the `HasTenants` interface on the `App\Models\User` model:
+If you're using the `App\Models\User` model as the tenant model, then you can pass this instead. Now, users will only be able to see and edit records in [resources](resources) that they own. No additional setup is required.
+
+If you're using a different tenant model, you'll need to tell Filament which tenants a user belongs to. You can do this by implementing the `HasTenants` interface on the `App\Models\User` model:
 
 ```php
 <?php
 
 namespace App\Models;
 
+use Filament\Context;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasTenants;
-use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Collection;
@@ -40,7 +49,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants
 {
     // ...
 
-    public function getTenants(Panel $panel): Collection
+    public function getTenants(Context $context): Collection
     {
         return $this->teams;
     }
@@ -58,7 +67,7 @@ You'll also want users to be able to [register new teams](#registration).
 
 ## Registration
 
-A registration page will allow users to create a new tenant.
+A registration page will allow users to create a new tenant. This is useful if you're using a tenant model other than `App\Models\User`.
 
 When visiting your app after logging in, users will be redirected to this page if they don't already have a tenant.
 
@@ -105,11 +114,11 @@ Now, we need to tell Filament to use this page. We can do this in the [configura
 
 ```php
 use App\Filament\Pages\Tenancy\RegisterTeam;
-use Filament\Panel;
+use Filament\Context;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->tenantRegistration(RegisterTeam::class);
 }
@@ -146,12 +155,12 @@ composer require filament/spark-billing-provider
 In the [configuration](configuration), set Spark as the `tenantBillingProvider()`:
 
 ```php
+use Filament\Context;
 use Filament\Billing\Providers\SparkBillingProvider;
-use Filament\Panel;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->tenantBillingProvider(new SparkBillingProvider());
 }
@@ -164,11 +173,11 @@ Now, you're all good to go! Users can manage their billing by clicking a link in
 To require a subscription to use any part of the app, you can use the `requiresTenantSubscription()` configuration method:
 
 ```php
-use Filament\Panel;
+use Filament\Context;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->requiresTenantSubscription();
 }
@@ -181,7 +190,7 @@ Now, users will be redirected to the billing page if they don't have an active s
 Sometimes, you may wish to only require a subscription for certain [resources](resources) and [pages](pages) in your app. You can do this by returning `true` from the `isTenantSubscriptionRequired()` method on the resource or page class:
 
 ```php
-public static function isTenantSubscriptionRequired(Panel $panel): bool
+public static function isTenantSubscriptionRequired(Context $context): bool
 {
     return true;
 }
@@ -227,12 +236,12 @@ The tenant-switching menu is featured in the sidebar of the admin layout. It's f
 To register new items to the tenant menu, you can use the [configuration](configuration):
 
 ```php
+use Filament\Context;
 use Filament\Navigation\MenuItem;
-use Filament\Panel;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->tenantMenuItems([
             MenuItem::make()
@@ -249,12 +258,12 @@ public function panel(Panel $panel): Panel
 To customize the registration link on the tenant menu, register a new item with the `register` array key:
 
 ```php
+use Filament\Context;
 use Filament\Navigation\MenuItem;
-use Filament\Panel;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->userMenuItems([
             'register' => MenuItem::make()->label('Register new team'),
@@ -268,12 +277,12 @@ public function panel(Panel $panel): Panel
 To customize the billing link on the tenant menu, register a new item with the `billing` array key:
 
 ```php
+use Filament\Context;
 use Filament\Navigation\MenuItem;
-use Filament\Panel;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->userMenuItems([
             'billing' => MenuItem::make()->label('Manage subscription'),
@@ -284,7 +293,7 @@ public function panel(Panel $panel): Panel
 
 ## Setting up avatars
 
-Out of the box, Filament uses [ui-avatars.com](https://ui-avatars.com) to generate avatars based on a user's name. However, if you user model has an `avatar_url` attribute, that will be used instead. To customize how Filament gets a user's avatar URL, you can implement the `HasAvatar` contract:
+Out of the box, Filament uses [ui-avatars.com](https://ui-avatars.com) to generate avatars based on a user's name. To provide your own avatar URLs, you can implement the `HasAvatar` contract:
 
 ```php
 <?php
@@ -315,11 +324,11 @@ You can easily swap out [ui-avatars.com](https://ui-avatars.com) for a different
 When creating a new [resource record](resources/creating-records), it will attempt to associate it with the current tenant. It will use the tenant's model to guess which relationship exists on the resource model. For example, if the tenant model is `App\Models\Team`, it will look for a `team()` relationship on the resource model. You can customize this relationship using the `ownershipRelationship` argument on the `tenant()` configuration method:
 
 ```php
-use Filament\Panel;
+use Filament\Context;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->tenant(Team::class, ownershipRelationship: 'owner');
 }
@@ -346,11 +355,11 @@ class CreatePost extends CreateRecord
 When using a tenant like a team, you might want to add a slug field to the URL rather than the team's ID. You can do that with the `slugAttribute` argument on the `tenant()` configuration method:
 
 ```php
-use Filament\Panel;
+use Filament\Context;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->tenant(Team::class, slugAttribute: 'slug');
 }

@@ -3,7 +3,7 @@
 namespace Filament\Resources\Pages;
 
 use Closure;
-use Filament\Panel;
+use Filament\Context;
 use Illuminate\Routing\Route;
 
 class PageRegistration
@@ -14,9 +14,9 @@ class PageRegistration
     ) {
     }
 
-    public function registerRoute(Panel $panel): ?Route
+    public function registerRoute(Context $context): ?Route
     {
-        return ($this->route)($panel);
+        return ($this->route)($context);
     }
 
     public function getPage(): string

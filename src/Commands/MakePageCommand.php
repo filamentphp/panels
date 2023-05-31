@@ -2,8 +2,8 @@
 
 namespace Filament\Commands;
 
+use Filament\Context;
 use Filament\Facades\Filament;
-use Filament\Panel;
 use Filament\Support\Commands\Concerns\CanManipulateFiles;
 use Filament\Support\Commands\Concerns\CanValidateInput;
 use Illuminate\Console\Command;
@@ -15,9 +15,9 @@ class MakePageCommand extends Command
     use CanManipulateFiles;
     use CanValidateInput;
 
-    protected $description = 'Create a new Filament page class and view';
+    protected $description = 'Creates a Filament page class and view.';
 
-    protected $signature = 'make:filament-page {name?} {--R|resource=} {--T|type=} {--panel=} {--F|force}';
+    protected $signature = 'make:filament-page {name?} {--R|resource=} {--T|type=} {--context=} {--F|force}';
 
     public function handle(): int
     {
@@ -66,30 +66,30 @@ class MakePageCommand extends Command
             );
         }
 
-        $panel = $this->option('panel');
+        $context = $this->option('context');
 
-        if ($panel) {
-            $panel = Filament::getPanel($panel);
+        if ($context) {
+            $context = Filament::getContext($context);
         }
 
-        if (! $panel) {
-            $panels = Filament::getPanels();
+        if (! $context) {
+            $contexts = Filament::getContexts();
 
-            /** @var Panel $panel */
-            $panel = (count($panels) > 1) ? $panels[$this->choice(
-                'Which panel would you like to create this in?',
+            /** @var Context $context */
+            $context = (count($contexts) > 1) ? $contexts[$this->choice(
+                'Which context would you like to create this in?',
                 array_map(
-                    fn (Panel $panel): string => $panel->getId(),
-                    $panels,
+                    fn (Context $context): string => $context->getId(),
+                    $contexts,
                 ),
-                Filament::getDefaultPanel()->getId(),
-            )] : Arr::first($panels);
+                Filament::getDefaultContext()->getId(),
+            )] : Arr::first($contexts);
         }
 
-        $path = $panel->getPageDirectory() ?? app_path('Filament/Pages/');
-        $namespace = $panel->getPageNamespace() ?? 'App\\Filament\\Pages';
-        $resourcePath = $panel->getResourceDirectory() ?? app_path('Filament/Resources/');
-        $resourceNamespace = $panel->getResourceNamespace() ?? 'App\\Filament\\Resources';
+        $path = $context->getPageDirectory() ?? app_path('Filament/Pages/');
+        $namespace = $context->getPageNamespace() ?? 'App\\Filament\\Pages';
+        $resourcePath = $context->getResourceDirectory() ?? app_path('Filament/Resources/');
+        $resourceNamespace = $context->getResourceNamespace() ?? 'App\\Filament\\Resources';
 
         $view = str($page)
             ->prepend(
@@ -115,10 +115,10 @@ class MakePageCommand extends Command
                 ->append('.blade.php'),
         );
 
-        $files = [
-            $path,
-            ...($resourcePage === 'custom' ? [$viewPath] : []),
-        ];
+        $files = array_merge(
+            [$path],
+            $resourcePage === 'custom' ? [$viewPath] : [],
+        );
 
         if (! $this->option('force') && $this->checkForCollision($files)) {
             return static::INVALID;

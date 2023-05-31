@@ -6,7 +6,7 @@ return [
 
     'buttons' => [
 
-        'dark_theme' => [
+        'dark_mode' => [
             'label' => 'Geuza hali ya giza',
         ],
 
@@ -14,7 +14,7 @@ return [
             'label' => 'Fungua arifa',
         ],
 
-        'light_theme' => [
+        'light_mode' => [
             'label' => 'Geuza hali ya mwanga',
         ],
 

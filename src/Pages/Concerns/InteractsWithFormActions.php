@@ -10,7 +10,7 @@ use InvalidArgumentException;
 trait InteractsWithFormActions
 {
     /**
-     * @var array<Action | ActionGroup>
+     * @var array<string, Action | ActionGroup>
      */
     protected array $cachedFormActions = [];
 
@@ -27,15 +27,20 @@ trait InteractsWithFormActions
             fn (): array => $this->getFormActions(),
         );
 
-        foreach ($actions as $action) {
+        foreach ($actions as $index => $action) {
             if ($action instanceof ActionGroup) {
-                $action->livewire($this);
+                foreach ($action->getActions() as $groupedAction) {
+                    if (! $groupedAction instanceof Action) {
+                        throw new InvalidArgumentException('Form actions within a group must be an instance of ' . Action::class . '.');
+                    }
 
-                /** @var array<string, Action> $flatActions */
-                $flatActions = $action->getFlatActions();
+                    /** @var Action $groupedAction */
+                    $groupedAction->livewire($this);
 
-                $this->mergeCachedActions($flatActions);
-                $this->cachedFormActions[] = $action;
+                    $this->cacheAction($groupedAction);
+                }
+
+                $this->cachedActions[$index] = $action;
 
                 continue;
             }
@@ -45,12 +50,12 @@ trait InteractsWithFormActions
             }
 
             $this->cacheAction($action);
-            $this->cachedFormActions[] = $action;
+            $this->cachedFormActions[$action->getName()] = $action;
         }
     }
 
     /**
-     * @return array<Action | ActionGroup>
+     * @return array<string, Action | ActionGroup>
      */
     public function getCachedFormActions(): array
     {

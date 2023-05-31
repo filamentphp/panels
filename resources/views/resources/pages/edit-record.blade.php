@@ -1,4 +1,5 @@
 <x-filament::page
+    :widget-data="['record' => $record]"
     @class([
         'filament-resources-edit-record-page',
         'filament-resources-' . str_replace('/', '-', $this->getResource()::getSlug()),

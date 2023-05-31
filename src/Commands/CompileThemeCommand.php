@@ -2,8 +2,8 @@
 
 namespace Filament\Commands;
 
+use Filament\Context;
 use Filament\Facades\Filament;
-use Filament\Panel;
 use Filament\Support\Commands\Concerns\CanManipulateFiles;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
@@ -14,7 +14,7 @@ class CompileThemeCommand extends Command
 
     protected $description = 'Compiles a Filament theme.';
 
-    protected $signature = 'filament:compile-theme {panel?} {--W|watch}';
+    protected $signature = 'filament:compile-theme {context?} {--W|watch}';
 
     public function handle(): int
     {
@@ -28,38 +28,38 @@ class CompileThemeCommand extends Command
 
         $this->info("Using Node.js v{$npmVersion[0]}");
 
-        $panelId = $this->argument('panel');
+        $contextId = $this->argument('context');
 
-        if (! $panelId) {
-            $panelIds = collect(Filament::getPanels())
-                ->map(fn (Panel $panel): string => $panel->getId())
-                ->filter(fn (string $panelId): bool => (
-                    file_exists(resource_path("css/filament/{$panelId}/theme.css")) &&
-                    file_exists(resource_path("css/filament/{$panelId}/tailwind.config.js"))
+        if (! $contextId) {
+            $contextIds = collect(Filament::getContexts())
+                ->map(fn (Context $context): string => $context->getId())
+                ->filter(fn (string $contextId): bool => (
+                    file_exists(resource_path("css/filament/{$contextId}/theme.css")) &&
+                    file_exists(resource_path("css/filament/{$contextId}/tailwind.config.js"))
                 ))
                 ->all();
 
-            if (empty($panelIds)) {
+            if (empty($contextIds)) {
                 $this->error('No themes found. Please create a theme using `php artisan make:filament-theme` before continuing.');
 
                 return static::FAILURE;
             }
 
-            $defaultPanelId = in_array(Filament::getDefaultPanel()->getId(), $panelIds) ?
-                Filament::getDefaultPanel()->getId() :
-                Arr::first($panelIds);
+            $defaultContextId = in_array(Filament::getDefaultContext()->getId(), $contextIds) ?
+                Filament::getDefaultContext()->getId() :
+                Arr::first($contextIds);
 
-            $panelId = (count($panelIds) > 1) ? $this->choice(
-                'Which panel\'s theme would you like to compile?',
-                $panelIds,
-                $defaultPanelId,
-            ) : Arr::first($panelIds);
+            $contextId = (count($contextIds) > 1) ? $this->choice(
+                'Which context\'s theme would you like to compile?',
+                $contextIds,
+                $defaultContextId,
+            ) : Arr::first($contextIds);
         }
 
         exec('npm install tailwindcss @tailwindcss/forms @tailwindcss/typography postcss autoprefixer tippy.js --save-dev');
-        exec("npx tailwindcss --input ./resources/css/filament/{$panelId}/theme.css --output ./public/css/filament/{$panelId}/theme.css --config ./resources/css/filament/{$panelId}/tailwind.config.js --minify" . ($this->option('watch') ? ' --watch' : ''));
+        exec("npx tailwindcss --input ./resources/css/filament/{$contextId}/theme.css --output ./public/css/filament/{$contextId}/theme.css --config ./resources/css/filament/{$contextId}/tailwind.config.js --minify" . ($this->option('watch') ? ' --watch' : ''));
 
-        $this->components->info("Compiled resources/css/filament/{$panelId}/theme.css!");
+        $this->components->info("Compiled resources/css/filament/{$contextId}/theme.css!");
 
         return static::SUCCESS;
     }

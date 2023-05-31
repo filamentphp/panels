@@ -6,7 +6,7 @@ title: Dashboard
 
 Filament allows you to build dynamic dashboards, comprised of "widget" cards, very easily.
 
-The following document will explain how to use these widgets to assemble a dashboard using the panel.
+The following document will explain how to use these widgets to assemble a dashboard using the app framework.
 
 ## Available widgets
 
@@ -114,11 +114,11 @@ This command will create two files - a widget class in the `/Widgets` directory 
 By default, two widgets are displayed on the dashboard. These widgets can be disabled by updating the `widgets()` array of the [configuration](configuration):
 
 ```php
-use Filament\Panel;
+use Filament\Context;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->widgets([]);
 }
@@ -144,11 +144,11 @@ class Dashboard extends BasePage
 Finally, remove the original `Dashboard` class from [configuration file](configuration):
 
 ```php
-use Filament\Panel;
+use Filament\Context;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->pages([]);
 }

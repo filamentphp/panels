@@ -16,3 +16,4 @@
         {{ $this->registerAction }}
     </form>
 </div>
+

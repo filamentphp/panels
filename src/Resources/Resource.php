@@ -2,13 +2,13 @@
 
 namespace Filament\Resources;
 
+use Filament\Context;
 use Filament\Facades\Filament;
 use Filament\Forms\Form;
 use Filament\GlobalSearch\Actions\Action;
 use Filament\GlobalSearch\GlobalSearchResult;
 use Filament\Infolists\Infolist;
 use Filament\Navigation\NavigationItem;
-use Filament\Panel;
 use Filament\Resources\Pages\PageRegistration;
 use Filament\Resources\RelationManagers\RelationGroup;
 use function Filament\Support\get_model_label;
@@ -102,7 +102,7 @@ abstract class Resource
             return;
         }
 
-        Filament::getCurrentPanel()
+        Filament::getCurrentContext()
             ->navigationItems(static::getNavigationItems());
     }
 
@@ -437,13 +437,13 @@ abstract class Resource
         return [];
     }
 
-    public static function getRouteBaseName(?string $panel = null): string
+    public static function getRouteBaseName(?string $context = null): string
     {
-        $panel ??= Filament::getCurrentPanel()->getId();
+        $context ??= Filament::getCurrentContext()->getId();
 
         return (string) str(static::getSlug())
             ->replace('/', '.')
-            ->prepend("filament.{$panel}.resources.");
+            ->prepend("filament.{$context}.resources.");
     }
 
     public static function getRecordRouteKeyName(): ?string
@@ -451,7 +451,7 @@ abstract class Resource
         return static::$recordRouteKeyName;
     }
 
-    public static function routes(Panel $panel): void
+    public static function routes(Context $context): void
     {
         $slug = static::getSlug();
 
@@ -461,10 +461,10 @@ abstract class Resource
                 ->append('.'),
         )
             ->prefix($slug)
-            ->middleware(static::getRouteMiddleware($panel))
-            ->group(function () use ($panel) {
+            ->middleware(static::getRouteMiddleware($context))
+            ->group(function () use ($context) {
                 foreach (static::getPages() as $name => $page) {
-                    $page->registerRoute($panel)?->name($name);
+                    $page->registerRoute($context)?->name($name);
                 }
             });
     }
@@ -472,29 +472,29 @@ abstract class Resource
     /**
      * @return string | array<string>
      */
-    public static function getRouteMiddleware(Panel $panel): string | array
+    public static function getRouteMiddleware(Context $context): string | array
     {
         return static::$routeMiddleware;
     }
 
-    public static function getEmailVerifiedMiddleware(Panel $panel): string
+    public static function getEmailVerifiedMiddleware(Context $context): string
     {
-        return $panel->getEmailVerifiedMiddleware();
+        return $context->getEmailVerifiedMiddleware();
     }
 
-    public static function isEmailVerificationRequired(Panel $panel): bool
+    public static function isEmailVerificationRequired(Context $context): bool
     {
-        return $panel->isEmailVerificationRequired();
+        return $context->isEmailVerificationRequired();
     }
 
-    public static function getTenantSubscribedMiddleware(Panel $panel): string
+    public static function getTenantSubscribedMiddleware(Context $context): string
     {
-        return $panel->getTenantBillingProvider()->getSubscribedMiddleware();
+        return $context->getTenantBillingProvider()->getSubscribedMiddleware();
     }
 
-    public static function isTenantSubscriptionRequired(Panel $panel): bool
+    public static function isTenantSubscriptionRequired(Context $context): bool
     {
-        return $panel->isTenantSubscriptionRequired();
+        return $context->isTenantSubscriptionRequired();
     }
 
     public static function getSlug(): string
@@ -519,11 +519,11 @@ abstract class Resource
     /**
      * @param  array<mixed>  $parameters
      */
-    public static function getUrl(string $name = 'index', array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?Model $tenant = null): string
+    public static function getUrl(string $name = 'index', array $parameters = [], bool $isAbsolute = true, ?string $context = null, ?Model $tenant = null): string
     {
-        $parameters['tenant'] ??= ($tenant ?? Filament::getTenant());
+        $parameters['tenant'] ??= ($tenant ?? Filament::getRoutableTenant());
 
-        $routeBaseName = static::getRouteBaseName(panel: $panel);
+        $routeBaseName = static::getRouteBaseName(context: $context);
 
         return route("{$routeBaseName}.{$name}", $parameters, $isAbsolute);
     }

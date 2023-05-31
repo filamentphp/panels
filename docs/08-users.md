@@ -15,26 +15,26 @@ To set up your `App\Models\User` to access Filament in non-local environments, y
 
 namespace App\Models;
 
+use Filament\Context;
 use Filament\Models\Contracts\FilamentUser;
-use Filament\Panel;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable implements FilamentUser
 {
     // ...
 
-    public function canAccessPanel(Panel $panel): bool
+    public function canAccessFilament(Context $context): bool
     {
         return str_ends_with($this->email, '@yourdomain.com') && $this->hasVerifiedEmail();
     }
 }
 ```
 
-The `canAccessPanel()` method returns `true` or `false` depending on whether the user is allowed to access Filament. In this example, we check if the user's email ends with `@yourdomain.com` and if they have verified their email address.
+The `canAccessFilament()` method returns `true` or `false` depending on whether the user is allowed to access Filament. In this example, we check if the user's email ends with `@yourdomain.com` and if they have verified their email address.
 
 ## Setting up user avatars
 
-Out of the box, Filament uses [ui-avatars.com](https://ui-avatars.com) to generate avatars based on a user's name. However, if you user model has an `avatar_url` attribute, that will be used instead. To customize how Filament gets a user's avatar URL, you can implement the `HasAvatar` contract:
+Out of the box, Filament uses [ui-avatars.com](https://ui-avatars.com) to generate avatars based on a user's name. To provide your own avatar URLs, you can implement the `HasAvatar` contract:
 
 ```php
 <?php
@@ -92,11 +92,11 @@ Now, register this new avatar provider in the [configuration](configuration):
 
 ```php
 use App\Filament\AvatarProviders\BoringAvatarsProvider;
-use Filament\Panel;
+use Filament\Context;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->defaultAvatarProvider(BoringAvatarsProvider::class);
 }
@@ -130,14 +130,14 @@ The `getFilamentName()` method is used to retrieve the name of the current user.
 
 ## Authentication features
 
-You can easily enable authentication features for a panel in the configuration file:
+You can easily enable authentication features for a context in the configuration file:
 
 ```php
-use Filament\Panel;
+use Filament\Context;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->login()
         ->registration()
@@ -156,11 +156,11 @@ Most people will be able to make their desired customizations by extending the d
 
 ```php
 use App\Http\Livewire\Auth\Login;
-use Filament\Panel;
+use Filament\Context;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->login(Login::class);
 }

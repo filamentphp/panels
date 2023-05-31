@@ -37,11 +37,11 @@ abstract class Page extends BasePage
     /**
      * @param  array<mixed>  $parameters
      */
-    public static function getUrl(array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?Model $tenant = null): string
+    public static function getUrl(array $parameters = [], bool $isAbsolute = true, ?string $context = null, ?Model $tenant = null): string
     {
-        $parameters['tenant'] ??= ($tenant ?? Filament::getTenant());
+        $parameters['tenant'] ??= ($tenant ?? Filament::getRoutableTenant());
 
-        return route(static::getRouteName($panel), $parameters, $isAbsolute);
+        return route(static::getRouteName($context), $parameters, $isAbsolute);
     }
 
     public static function registerNavigationItems(): void
@@ -50,7 +50,7 @@ abstract class Page extends BasePage
             return;
         }
 
-        Filament::getCurrentPanel()
+        Filament::getCurrentContext()
             ->navigationItems(static::getNavigationItems());
     }
 
@@ -70,13 +70,13 @@ abstract class Page extends BasePage
         ];
     }
 
-    public static function getRouteName(?string $panel = null): string
+    public static function getRouteName(?string $context = null): string
     {
-        $panel ??= Filament::getCurrentPanel()->getId();
+        $context ??= Filament::getCurrentContext()->getId();
 
         return (string) str(static::getSlug())
             ->replace('/', '.')
-            ->prepend("filament.{$panel}.pages.");
+            ->prepend("filament.{$context}.pages.");
     }
 
     /**
@@ -196,14 +196,6 @@ abstract class Page extends BasePage
     public function getFooterWidgetsColumns(): int | string | array
     {
         return 2;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function getWidgetData(): array
-    {
-        return [];
     }
 
     public static function shouldRegisterNavigation(): bool

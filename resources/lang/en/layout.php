@@ -10,16 +10,16 @@ return [
             'label' => 'Manage subscription',
         ],
 
-        'dark_theme' => [
-            'label' => 'Toggle dark theme',
+        'dark_mode' => [
+            'label' => 'Toggle dark mode',
         ],
 
         'database_notifications' => [
             'label' => 'Open notifications',
         ],
 
-        'light_theme' => [
-            'label' => 'Toggle light theme',
+        'light_mode' => [
+            'label' => 'Toggle light mode',
         ],
 
         'logout' => [
@@ -36,10 +36,6 @@ return [
                 'label' => 'Expand sidebar',
             ],
 
-        ],
-
-        'system_theme' => [
-            'label' => 'Toggle system theme',
         ],
 
         'user_menu' => [

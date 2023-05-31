@@ -2,8 +2,8 @@
 
 namespace Filament\Resources\Pages;
 
+use Filament\Context;
 use Filament\Pages\Page as BasePage;
-use Filament\Panel;
 use Filament\Resources\Resource;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Route as RouteFacade;
@@ -18,29 +18,29 @@ abstract class Page extends BasePage
     {
         return new PageRegistration(
             page: static::class,
-            route: fn (Panel $panel): Route => RouteFacade::get($path, static::class)
-                ->middleware(static::getRouteMiddleware($panel)),
+            route: fn (Context $context): Route => RouteFacade::get($path, static::class)
+                ->middleware(static::getRouteMiddleware($context)),
         );
     }
 
-    public static function getEmailVerifiedMiddleware(Panel $panel): string
+    public static function getEmailVerifiedMiddleware(Context $context): string
     {
-        return static::getResource()::getEmailVerifiedMiddleware($panel);
+        return static::getResource()::getEmailVerifiedMiddleware($context);
     }
 
-    public static function isEmailVerificationRequired(Panel $panel): bool
+    public static function isEmailVerificationRequired(Context $context): bool
     {
-        return static::getResource()::isEmailVerificationRequired($panel);
+        return static::getResource()::isEmailVerificationRequired($context);
     }
 
-    public static function getTenantSubscribedMiddleware(Panel $panel): string
+    public static function getTenantSubscribedMiddleware(Context $context): string
     {
-        return static::getResource()::getTenantSubscribedMiddleware($panel);
+        return static::getResource()::getTenantSubscribedMiddleware($context);
     }
 
-    public static function isTenantSubscriptionRequired(Panel $panel): bool
+    public static function isTenantSubscriptionRequired(Context $context): bool
     {
-        return static::getResource()::isTenantSubscriptionRequired($panel);
+        return static::getResource()::isTenantSubscriptionRequired($context);
     }
 
     public function getBreadcrumb(): ?string
@@ -57,10 +57,10 @@ abstract class Page extends BasePage
 
         $breadcrumb = $this->getBreadcrumb();
 
-        return [
-            $resource::getUrl() => $resource::getBreadcrumb(),
-            ...(filled($breadcrumb) ? [$breadcrumb] : []),
-        ];
+        return array_merge(
+            [$resource::getUrl() => $resource::getBreadcrumb()],
+            (filled($breadcrumb) ? [$breadcrumb] : []),
+        );
     }
 
     public static function authorizeResourceAccess(): void

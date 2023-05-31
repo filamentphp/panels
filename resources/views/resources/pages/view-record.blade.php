@@ -1,4 +1,5 @@
 <x-filament::page
+    :widget-data="['record' => $record]"
     @class([
         'filament-resources-view-record-page',
         'filament-resources-' . str_replace('/', '-', $this->getResource()::getSlug()),
@@ -11,7 +12,7 @@
 
     @if ((! $this->hasCombinedRelationManagerTabsWithContent()) || (! count($relationManagers)))
         @if ($this->hasInfolist())
-            {{ $this->infolist }}
+            {{ $this->getCachedInfolist() }}
         @else
             {{ $this->form }}
         @endif
@@ -32,7 +33,7 @@
             @if ($this->hasCombinedRelationManagerTabsWithContent())
                 <x-slot name="content">
                     @if ($this->hasInfolist())
-                        {{ $this->infolist }}
+                        {{ $this->getCachedInfolist() }}
                     @else
                         {{ $this->form }}
                     @endif

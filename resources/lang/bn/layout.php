@@ -6,7 +6,7 @@ return [
 
     'buttons' => [
 
-        'dark_theme' => [
+        'dark_mode' => [
             'label' => 'ডার্ক মোড',
         ],
 
@@ -14,7 +14,7 @@ return [
             'label' => 'বিজ্ঞপ্তি খুলুন',
         ],
 
-        'light_theme' => [
+        'light_mode' => [
             'label' => 'লাইট মোড',
         ],
 

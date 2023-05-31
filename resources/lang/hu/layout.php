@@ -6,7 +6,7 @@ return [
 
     'buttons' => [
 
-        'dark_theme' => [
+        'dark_mode' => [
             'label' => 'Sötét mód bekapcsolása',
         ],
 
@@ -14,7 +14,7 @@ return [
             'label' => 'Értesítések',
         ],
 
-        'light_theme' => [
+        'light_mode' => [
             'label' => 'Világos mód bekapcsolása',
         ],
 

@@ -6,7 +6,7 @@ return [
 
     'buttons' => [
 
-        'dark_theme' => [
+        'dark_mode' => [
             'label' => 'Skift til mørk tilstand',
         ],
 
@@ -14,7 +14,7 @@ return [
             'label' => 'Åbn notifikationer',
         ],
 
-        'light_theme' => [
+        'light_mode' => [
             'label' => 'Skift til lys tilstand',
         ],
 

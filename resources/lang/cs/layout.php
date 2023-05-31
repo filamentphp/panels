@@ -6,7 +6,7 @@ return [
 
     'buttons' => [
 
-        'dark_theme' => [
+        'dark_mode' => [
             'label' => 'Zapnout tmavý režim',
         ],
 
@@ -14,7 +14,7 @@ return [
             'label' => 'Zobrazit notifikace',
         ],
 
-        'light_theme' => [
+        'light_mode' => [
             'label' => 'Zapnout světlý režim',
         ],
 

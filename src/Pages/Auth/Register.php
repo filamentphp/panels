@@ -49,7 +49,7 @@ class Register extends CardPage
     public function register(): ?RegistrationResponse
     {
         try {
-            $this->rateLimit(2);
+            $this->rateLimit(1);
         } catch (TooManyRequestsException $exception) {
             Notification::make()
                 ->title(__('filament::pages/auth/register.messages.throttled', [
@@ -100,10 +100,9 @@ class Register extends CardPage
                     ->required()
                     ->rule(Password::default())
                     ->dehydrateStateUsing(fn ($state) => Hash::make($state))
-                    ->same('passwordConfirmation')
-                    ->validationAttribute(__('filament::pages/auth/register.fields.password.validation_attribute')),
+                    ->same('passwordConfirmation'),
                 TextInput::make('passwordConfirmation')
-                    ->label(__('filament::pages/auth/register.fields.password_confirmation.label'))
+                    ->label(__('filament::pages/auth/register.fields.passwordConfirmation.label'))
                     ->password()
                     ->required()
                     ->dehydrated(false),
@@ -113,14 +112,14 @@ class Register extends CardPage
 
     public function registerAction(): Action
     {
-        return Action::make('register')
+        return Action::make('registerAction')
             ->label(__('filament::pages/auth/register.buttons.register.label'))
             ->submit('register');
     }
 
     public function loginAction(): Action
     {
-        return Action::make('login')
+        return Action::make('loginAction')
             ->link()
             ->label(__('filament::pages/auth/register.buttons.login.label'))
             ->url(filament()->getLoginUrl());
@@ -139,6 +138,16 @@ class Register extends CardPage
         $provider = $authGuard->getProvider();
 
         return $this->userModel = $provider->getModel();
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function getMessages(): array
+    {
+        return [
+            'password.same' => __('validation.confirmed', ['attribute' => __('filament::pages/auth/register.fields.password.validation_attribute')]),
+        ];
     }
 
     public static function getName(): string

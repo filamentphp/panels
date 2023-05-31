@@ -6,7 +6,7 @@ return [
 
     'buttons' => [
 
-        'dark_theme' => [
+        'dark_mode' => [
             'label' => 'تفعيل الوضع الليلي',
         ],
 
@@ -14,7 +14,7 @@ return [
             'label' => 'عرض التنبيهات',
         ],
 
-        'light_theme' => [
+        'light_mode' => [
             'label' => 'تفعيل وضع النهار',
         ],
 

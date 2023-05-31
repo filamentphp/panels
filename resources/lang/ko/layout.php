@@ -6,11 +6,11 @@ return [
 
     'buttons' => [
 
-        'dark_theme' => [
+        'dark_mode' => [
             'label' => '다크모드',
         ],
 
-        'light_theme' => [
+        'light_mode' => [
             'label' => '라이트모드',
         ],
 

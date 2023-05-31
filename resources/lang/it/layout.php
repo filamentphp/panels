@@ -6,7 +6,7 @@ return [
 
     'buttons' => [
 
-        'dark_theme' => [
+        'dark_mode' => [
             'label' => 'Attiva modalità scura',
         ],
 
@@ -14,7 +14,7 @@ return [
             'label' => 'Apri notifiche',
         ],
 
-        'light_theme' => [
+        'light_mode' => [
             'label' => 'Attiva modalità chiara',
         ],
 

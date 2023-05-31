@@ -6,7 +6,7 @@ return [
 
     'buttons' => [
 
-        'dark_theme' => [
+        'dark_mode' => [
             'label' => 'Mudar para modo escuro',
         ],
 
@@ -14,7 +14,7 @@ return [
             'label' => 'Abrir notificações',
         ],
 
-        'light_theme' => [
+        'light_mode' => [
             'label' => 'Mudar para modo claro',
         ],
 

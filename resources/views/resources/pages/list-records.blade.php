@@ -16,8 +16,6 @@
                         :active="$activeTab === $tabKey"
                         :badge="$tab->getBadge()"
                         :icon="$tab->getIcon()"
-                        :icon-color="$tab->getIconColor()"
-                        :icon-position="$tab->getIconPosition()"
                     >
                         {{ $tab->getLabel() ?? $this->generateTabLabel($tabKey) }}
                     </x-filament::tabs.item>
@@ -26,9 +24,5 @@
         </div>
     @endif
 
-    {{ filament()->renderHook('resource.pages.list-records.table.start') }}
-
     {{ $this->table }}
-
-    {{ filament()->renderHook('resource.pages.list-records.table.end') }}
 </x-filament::page>

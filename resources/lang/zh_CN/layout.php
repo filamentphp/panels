@@ -6,7 +6,7 @@ return [
 
     'buttons' => [
 
-        'dark_theme' => [
+        'dark_mode' => [
             'label' => '切换暗黑模式',
         ],
 
@@ -14,7 +14,7 @@ return [
             'label' => '打开通知',
         ],
 
-        'light_theme' => [
+        'light_mode' => [
             'label' => '切换明亮模式',
         ],
 

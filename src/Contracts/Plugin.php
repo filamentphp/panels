@@ -2,13 +2,13 @@
 
 namespace Filament\Contracts;
 
-use Filament\Panel;
+use Filament\Context;
 
 interface Plugin
 {
     public function getId(): string;
 
-    public function register(Panel $panel): void;
+    public function register(Context $context): void;
 
-    public function boot(Panel $panel): void;
+    public function boot(Context $context): void;
 }

@@ -57,7 +57,7 @@ class ResetPassword extends CardPage
     public function resetPassword(): ?PasswordResetResponse
     {
         try {
-            $this->rateLimit(2);
+            $this->rateLimit(1);
         } catch (TooManyRequestsException $exception) {
             Notification::make()
                 ->title(__('filament::pages/auth/password-reset/reset-password.messages.throttled', [
@@ -117,10 +117,9 @@ class ResetPassword extends CardPage
                     ->password()
                     ->required()
                     ->rule(PasswordRule::default())
-                    ->same('passwordConfirmation')
-                    ->validationAttribute(__('filament::pages/auth/password-reset/reset-password.fields.password.validation_attribute')),
+                    ->same('passwordConfirmation'),
                 TextInput::make('passwordConfirmation')
-                    ->label(__('filament::pages/auth/password-reset/reset-password.fields.password_confirmation.label'))
+                    ->label(__('filament::pages/auth/password-reset/reset-password.fields.passwordConfirmation.label'))
                     ->password()
                     ->required()
                     ->dehydrated(false),
@@ -129,7 +128,7 @@ class ResetPassword extends CardPage
 
     public function resetPasswordAction(): Action
     {
-        return Action::make('resetPassword')
+        return Action::make('resetPasswordAction')
             ->label(__('filament::pages/auth/password-reset/reset-password.buttons.reset.label'))
             ->submit('resetPassword');
     }
@@ -147,6 +146,16 @@ class ResetPassword extends CardPage
         }
 
         return parent::propertyIsPublicAndNotDefinedOnBaseClass($propertyName);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function getMessages(): array
+    {
+        return [
+            'password.same' => __('validation.confirmed', ['attribute' => __('filament::pages/auth/password-reset/reset-password.fields.password.validation_attribute')]),
+        ];
     }
 
     public static function getName(): string

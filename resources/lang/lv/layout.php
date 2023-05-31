@@ -6,7 +6,7 @@ return [
 
     'buttons' => [
 
-        'dark_theme' => [
+        'dark_mode' => [
             'label' => 'Pārslēgt uz tumšo režīmu',
         ],
 
@@ -14,7 +14,7 @@ return [
             'label' => 'Atvērt paziņojumus',
         ],
 
-        'light_theme' => [
+        'light_mode' => [
             'label' => 'Pārslēgt uz gaišo režīmu',
         ],
 

@@ -4,52 +4,19 @@ title: Navigation
 
 ## Overview
 
-By default, Filament will register navigation items for each of your [resources](resources) and [custom pages](pages). These classes contain static properties and methods that you can override, to configure that navigation item.
-
-## Customizing a navigation item's label
-
-By default, the navigation label is generated from the resource or page's name. You may customize this using the `$navigationLabel` property:
-
-```php
-protected static ?string $navigationLabel = 'Custom Navigation Label';
-```
-
-Alternatively, you may override the `getNavigationLabel()` method:
-
-```php
-public static function getNavigationLabel(): ?string
-{
-    return 'Custom Navigation Label';
-}
-```
-
-## Customizing a navigation item's icon
-
-To customize a navigation item's [icon](https://blade-ui-kit.com/blade-icons?set=1#search), you may override the `$navigationIcon` property on the [resource](resources) or [page](pages) class:
+By default, Filament will register navigation items for each of your [resources](resources) and [custom pages](pages). These classes contain static properties and methods that you can override, to configure that navigation item and its order:
 
 ```php
 protected static ?string $navigationIcon = 'heroicon-o-document-text';
-```
 
-### Switching navigation item icon when it is active
+protected static ?string $navigationLabel = 'Custom Navigation Label';
 
-You may assign a navigation [icon](https://blade-ui-kit.com/blade-icons?set=1#search) which will only be used for active items using the `$activeNavigationIcon` property:
-
-```php
-protected static ?string $activeNavigationIcon = 'heroicon-s-document-text';
-```
-
-## Sorting navigation items
-
-By default, navigation items are sorted alphabetically. You may customize this using the `$navigationSort` property:
-
-```php
 protected static ?int $navigationSort = 3;
 ```
 
-Now, navigation items with a lower sort value will appear before those with a higher sort value - the order is ascending.
+The `$navigationIcon` supports the name of any Blade component, and passes a set of formatting classes to it. By default, the [Blade Heroicons v1](https://github.com/blade-ui-kit/blade-heroicons/tree/1.3.1) package is installed, so you may use the name of any [Heroicons v1](https://v1.heroicons.com) out of the box. However, you may create your own custom icon components or install an alternative library if you wish.
 
-## Adding a badge to a navigation item
+## Navigation item badges
 
 To add a badge next to the navigation item, you can use the `getNavigationBadge()` method and return the content of the badge:
 
@@ -60,7 +27,7 @@ public static function getNavigationBadge(): ?string
 }
 ```
 
-If a badge value is returned by `getNavigationBadge()`, it will display using the primary color by default. To style the badge contextually, return either `danger`, `gray`, `info`, `primary`, `secondary`, `success` or `warning` from the `getNavigationBadgeColor()` method:
+If a badge value is returned by `getNavigationBadge()`, it will display using the primary Tailwind color by default. To style the badge contextually, return either `danger`, `warning`, `success` or `secondary` from the `getNavigationBadgeColor()` method:
 
 ```php
 public static function getNavigationBadgeColor(): ?string
@@ -84,12 +51,12 @@ All items in the same navigation group will be displayed together under the same
 You may customize navigation groups by calling `navigationGroups()` in the [configuration](configuration), and passing `NavigationGroup` objects in order:
 
 ```php
+use Filament\Context;
 use Filament\Navigation\NavigationGroup;
-use Filament\Panel;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->navigationGroups([
             NavigationGroup::make()
@@ -113,7 +80,7 @@ In this example, we pass in a custom `icon()` for the groups, and make one `coll
 By using `navigationGroups()`, you are defining a new order for the navigation groups in the sidebar. If you just want to reorder the groups and not define an entire `NavigationGroup` object, you may just pass the labels of the groups in the new order:
 
 ```php
-$panel
+$context
     ->navigationGroups([
         'Shop',
         'Blog',
@@ -137,11 +104,11 @@ NavigationGroup::make()
 Or, you can do it globally for all groups in the [configuration](configuration):
 
 ```php
-use Filament\Panel;
+use Filament\Context;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->collapsibleNavigationGroups(false);
 }
@@ -152,11 +119,11 @@ public function panel(Panel $panel): Panel
 To make the sidebar collapsible on desktop as well as mobile, you can use the [configuration](configuration):
 
 ```php
-use Filament\Panel;
+use Filament\Context;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->sidebarCollapsibleOnDesktop();
 }
@@ -165,13 +132,30 @@ public function panel(Panel $panel): Panel
 By default, when you collapse the sidebar on desktop, the navigation icons still show. You can fully collapse the sidebar using the `sidebarFullyCollapsibleOnDesktop()` method:
 
 ```php
-use Filament\Panel;
+use Filament\Context;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->sidebarFullyCollapsibleOnDesktop();
+}
+```
+
+## Active icons
+
+You may assign a navigation icon which will be displayed for active items using the `$activeNavigationIcon` property:
+
+```php
+protected static ?string $activeNavigationIcon = 'heroicon-s-document-text';
+```
+
+Alternatively, override the `getActiveNavigationIcon()` method:
+
+```php
+public static function getActiveNavigationIcon(): string
+{
+    return 'heroicon-s-document-text';
 }
 ```
 
@@ -180,12 +164,12 @@ public function panel(Panel $panel): Panel
 To register new navigation items, you can use the [configuration](configuration):
 
 ```php
+use Filament\Context;
 use Filament\Navigation\NavigationItem;
-use Filament\Panel;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->navigationItems([
             NavigationItem::make('Analytics')
@@ -209,22 +193,20 @@ protected static bool $shouldRegisterNavigation = false;
 
 ## Advanced navigation customization
 
-The `navigation()` method can be called from the [configuration](configuration). It allows you to build a custom navigation that overrides Filament's automatically generated items. This API is designed to give you complete control over the navigation.
-
-### Registering custom navigation items
+The `navigation()` method can be called from the [configuration](configuration). Once you add this function, Filament's default automatic navigation will be disabled and your sidebar will be empty. This is done on purpose, since this API is designed to give you complete control over the navigation.
 
 To register navigation items, call the `items()` method:
 
 ```php
 use App\Filament\Pages\Settings;
 use App\Filament\Resources\UserResource;
+use Filament\Context;
 use Filament\Navigation\NavigationBuilder;
 use Filament\Navigation\NavigationItem;
-use Filament\Panel;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->navigation(function (NavigationBuilder $builder): NavigationBuilder {
             return $builder->items([
@@ -240,48 +222,23 @@ public function panel(Panel $panel): Panel
 }
 ```
 
-### Registering custom navigation groups
-
 If you want to register groups, you can call the `groups()` method:
 
 ```php
 use App\Filament\Pages\HomePageSettings;
 use App\Filament\Resources\CategoryResource;
 use App\Filament\Resources\PageResource;
-use Filament\Navigation\NavigationBuilder;
 use Filament\Navigation\NavigationGroup;
-use Filament\Panel;
 
-public function panel(Panel $panel): Panel
-{
-    return $panel
-        // ...
-        ->navigation(function (NavigationBuilder $builder): NavigationBuilder {
-            return $builder->groups([
-                NavigationGroup::make('Website')
-                    ->items([
-                        ...PageResource::getNavigationItems(),
-                        ...CategoryResource::getNavigationItems(),
-                        ...HomePageSettings::getNavigationItems(),
-                    ]),
-            ]);
-        });
-}
-```
-
-### Disabling navigation
-
-You may disable navigation entirely by passing `false` to the `navigation()` method:
-
-```php
-use Filament\Panel;
-
-public function panel(Panel $panel): Panel
-{
-    return $panel
-        // ...
-        ->navigation(false);
-}
+$builder
+    ->groups([
+        NavigationGroup::make('Website')
+            ->items([
+                ...PageResource::getNavigationItems(),
+                ...CategoryResource::getNavigationItems(),
+                ...HomePageSettings::getNavigationItems(),
+            ]),
+    ])
 ```
 
 ## Customizing the user menu
@@ -291,12 +248,12 @@ The user menu is featured in the top right corner of the admin layout. It's full
 To register new items to the user menu, you can use the [configuration](configuration):
 
 ```php
+use Filament\Context;
 use Filament\Navigation\MenuItem;
-use Filament\Panel;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->userMenuItems([
             MenuItem::make()
@@ -313,12 +270,12 @@ public function panel(Panel $panel): Panel
 To customize the user account link at the start of the user menu, register a new item with the `account` array key:
 
 ```php
+use Filament\Context;
 use Filament\Navigation\MenuItem;
-use Filament\Panel;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->userMenuItems([
             'account' => MenuItem::make()->url(route('filament.pages.account')),
@@ -332,33 +289,16 @@ public function panel(Panel $panel): Panel
 To customize the user account link at the end of the user menu, register a new item with the `logout` array key:
 
 ```php
+use Filament\Context;
 use Filament\Navigation\MenuItem;
-use Filament\Panel;
 
-public function panel(Panel $panel): Panel
+public function context(Context $context): Context
 {
-    return $panel
+    return $context
         // ...
         ->userMenuItems([
             'logout' => MenuItem::make()->label('Log out'),
             // ...
         ]);
-}
-```
-
-## Disabling breadcrumbs
-
-The default layout will show breadcrumbs to indicate the location of the current page within the hierarchy of the app.
-
-You may disable breadcrumbs in your [configuration](configuration):
-
-```php
-use Filament\Panel;
-
-public function panel(Panel $panel): Panel
-{
-    return $panel
-        // ...
-        ->breadcrumbs(false);
 }
 ```

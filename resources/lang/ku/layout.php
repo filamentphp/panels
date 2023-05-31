@@ -5,7 +5,7 @@ return [
     'direction' => 'rtl',
 
     'buttons' => [
-        'dark_theme' => [
+        'dark_mode' => [
             'label' => 'گۆڕینی ڕوانگە بۆ تاریک',
         ],
 
@@ -13,7 +13,7 @@ return [
             'label' => 'کردنەوەی ئاگانامەکان',
         ],
 
-        'light_theme' => [
+        'light_mode' => [
             'label' => 'گۆڕینی ڕوانگە بۆ سپی',
         ],
 
