@@ -4,11 +4,8 @@ namespace Filament\Http\Middleware;
 
 use Filament\Facades\Filament;
 use Filament\Models\Contracts\FilamentUser;
-use Filament\Models\Contracts\HasTenants;
-use Filament\Panel;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
 
 class Authenticate extends Middleware
 {
@@ -34,7 +31,7 @@ class Authenticate extends Middleware
 
         abort_if(
             $user instanceof FilamentUser ?
-                (! $user->canAccessFilament($panel)) :
+                (! $user->canAccessPanel($panel)) :
                 (config('app.env') !== 'local'),
             403,
         );
