@@ -6,7 +6,8 @@ use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Http\Middleware\SetUpContext;
+use Filament\Http\Middleware\IdentifyTenant;
+use Filament\Http\Middleware\SetUpPanel;
 use Filament\Http\Responses\Auth\Contracts\EmailVerificationResponse as EmailVerificationResponseContract;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse as LoginResponseContract;
 use Filament\Http\Responses\Auth\Contracts\LogoutResponse as LogoutResponseContract;
@@ -17,7 +18,6 @@ use Filament\Http\Responses\Auth\LoginResponse;
 use Filament\Http\Responses\Auth\LogoutResponse;
 use Filament\Http\Responses\Auth\PasswordResetResponse;
 use Filament\Http\Responses\Auth\RegistrationResponse;
-use Filament\Support\Assets\AssetManager;
 use Filament\Support\Assets\Js;
 use Filament\Support\Assets\Theme;
 use Filament\Support\Facades\FilamentAsset;
@@ -51,24 +51,23 @@ class FilamentServiceProvider extends PackageServiceProvider
         $this->app->bind(PasswordResetResponseContract::class, PasswordResetResponse::class);
         $this->app->bind(RegistrationResponseContract::class, RegistrationResponse::class);
 
-        $this->app->resolving(AssetManager::class, function () {
-            FilamentAsset::register([
-                Js::make('app', __DIR__ . '/../dist/index.js')->core(),
-                Js::make('echo', __DIR__ . '/../dist/echo.js')->core(),
-                Theme::make('app', __DIR__ . '/../dist/theme.css'),
-            ], 'filament/filament');
-        });
-
-        app(Router::class)->aliasMiddleware('context', SetUpContext::class);
+        app(Router::class)->aliasMiddleware('panel', SetUpPanel::class);
     }
 
     public function packageBooted(): void
     {
+        FilamentAsset::register([
+            Js::make('app', __DIR__ . '/../dist/index.js')->core(),
+            Js::make('echo', __DIR__ . '/../dist/echo.js')->core(),
+            Theme::make('app', __DIR__ . '/../dist/theme.css'),
+        ], 'filament/filament');
+
         Livewire::addPersistentMiddleware([
             Authenticate::class,
             DisableBladeIconComponents::class,
             DispatchServingFilamentEvent::class,
-            SetUpContext::class,
+            IdentifyTenant::class,
+            SetUpPanel::class,
         ]);
 
         Filament::serving(function () {
@@ -91,8 +90,8 @@ class FilamentServiceProvider extends PackageServiceProvider
     {
         $commands = [
             Commands\CompileThemeCommand::class,
-            Commands\MakeContextCommand::class,
             Commands\MakePageCommand::class,
+            Commands\MakePanelCommand::class,
             Commands\MakeRelationManagerCommand::class,
             Commands\MakeResourceCommand::class,
             Commands\MakeThemeCommand::class,
@@ -111,6 +110,9 @@ class FilamentServiceProvider extends PackageServiceProvider
             $aliases[] = $class;
         }
 
-        return array_merge($commands, $aliases);
+        return [
+            ...$commands,
+            ...$aliases,
+        ];
     }
 }

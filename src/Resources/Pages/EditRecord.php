@@ -14,6 +14,7 @@ use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Support\Exceptions\Halt;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -90,10 +91,10 @@ class EditRecord extends Page
      */
     protected function refreshFormData(array $attributes): void
     {
-        $this->data = array_merge(
-            $this->data,
-            $this->getRecord()->only($attributes),
-        );
+        $this->data = [
+            ...$this->data,
+            ...$this->getRecord()->only($attributes),
+        ];
     }
 
     /**
@@ -246,7 +247,7 @@ class EditRecord extends Page
             ->successRedirectUrl($resource::getUrl('index'));
     }
 
-    public function getTitle(): string
+    public function getTitle(): string | Htmlable
     {
         if (filled(static::$title)) {
             return static::$title;
@@ -309,5 +310,15 @@ class EditRecord extends Page
     protected function getMountedActionFormModel(): Model
     {
         return $this->getRecord();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getWidgetData(): array
+    {
+        return [
+            'record' => $this->getRecord(),
+        ];
     }
 }

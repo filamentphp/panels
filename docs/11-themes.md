@@ -4,22 +4,23 @@ title: Themes
 
 ## Changing the colors
 
-In the [configuration](configuration), you can easily change the colors that are used. Filament ships with 6 predefined colors that are used everywhere within the framework. They are customizable as follows:
+In the [configuration](configuration), you can easily change the colors that are used. Filament ships with 7 predefined colors that are used everywhere within the framework. They are customizable as follows:
 
 ```php
-use Filament\Context;
+use Filament\Panel;
 use Filament\Support\Color;
 
-public function context(Context $context): Context
+public function panel(Panel $panel): Panel
 {
-    return $context
+    return $panel
         // ...
+        ->dangerColor(Color::Rose)
+        ->grayColor(Color::Gray)
+        ->infoColor(Color::Blue)
         ->primaryColor(Color::Indigo)
         ->secondaryColor(Color::Sky)
-        ->grayColor(Color::Gray)
-        ->dangerColor(Color::Rose)
-        ->warningColor(Color::Orange)
-        ->successColor(Color::Emerald);
+        ->successColor(Color::Emerald)
+        ->warningColor(Color::Orange);
 }
 ```
 
@@ -28,7 +29,7 @@ The `Filament\Support\Color` class contains color options for all [Tailwind CSS 
 Alternatively, you may pass your own palette in as an array of RGB values:
 
 ```php
-$context->primaryColor([
+$panel->primaryColor([
     50 => '238, 242, 255',
     100 => '224, 231, 255',
     200 => '199, 210, 254',
@@ -50,9 +51,9 @@ If you want us to attempt to generate a palette for you based on a singular hex 
 ```php
 use Filament\Support\Color;
 
-$context->primaryColor('#6366f1')
+$panel->primaryColor('#6366f1')
 
-$context->primaryColor('rgb(99, 102, 241)')
+$panel->primaryColor('rgb(99, 102, 241)')
 ```
 
 ## Changing the font
@@ -60,11 +61,11 @@ $context->primaryColor('rgb(99, 102, 241)')
 By default, we use the [Be Vietnam Pro](https://fonts.google.com/specimen/Be+Vietnam+Pro) font. You can change this using the `font()` method in the [configuration](configuration) file:
 
 ```php
-use Filament\Context;
+use Filament\Panel;
 
-public function context(Context $context): Context
+public function panel(Panel $panel): Panel
 {
-    return $context
+    return $panel
         // ...
         ->font('Inter');
 }
@@ -79,7 +80,7 @@ All [Google Fonts](https://fonts.google.com) are available to use.
 ```php
 use Filament\FontProviders\GoogleFontProvider;
 
-$context->font('Inter', provider: GoogleFontProvider::class)
+$panel->font('Inter', provider: GoogleFontProvider::class)
 ```
 
 Or if you'd like to serve the fonts from a local stylesheet, you can use the `LocalFontProvider`:
@@ -87,7 +88,7 @@ Or if you'd like to serve the fonts from a local stylesheet, you can use the `Lo
 ```php
 use Filament\FontProviders\LocalFontProvider;
 
-$context->font(
+$panel->font(
     'Inter',
     url: asset('css/fonts.css'),
     provider: LocalFontProvider::class,
@@ -135,7 +136,7 @@ export default defineConfig({
 })
 ```
 
-And add Tailwind to the `postcss.config.js` file:
+And add Tailwind to the `postcss.config.cjs` file:
 
 ```js
 module.exports = {
@@ -165,11 +166,11 @@ In `/resources/css/filament.css`, import Filament's base theme CSS:
 Now, you may register the theme file in Filament's [configuration](configuration):
 
 ```php
-use Filament\Context;
+use Filament\Panel;
 
-public function context(Context $context): Context
+public function panel(Panel $panel): Panel
 {
-    return $context
+    return $panel
         // ...
         ->viteTheme('resources/css/filament.css') // Using Vite
         ->theme(mix('css/filament.css')); // Using Laravel Mix
@@ -201,11 +202,11 @@ You may create a `resources/views/vendor/filament/components/logo.blade.php` fil
 To disable dark mode switching, you can use the [configuration](configuration) file:
 
 ```php
-use Filament\Context;
+use Filament\Panel;
 
-public function context(Context $context): Context
+public function panel(Panel $panel): Panel
 {
-    return $context
+    return $panel
         // ...
         ->darkMode(false);
 }
@@ -216,11 +217,11 @@ public function context(Context $context): Context
 To add a favicon, you can use the [configuration](configuration) file, passing the public URL of the favicon:
 
 ```php
-use Filament\Context;
+use Filament\Panel;
 
-public function context(Context $context): Context
+public function panel(Panel $panel): Panel
 {
-    return $context
+    return $panel
         // ...
         ->favicon(asset('images/favicon.png'));
 }

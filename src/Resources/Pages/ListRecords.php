@@ -4,18 +4,21 @@ namespace Filament\Resources\Pages;
 
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ListRecords\Tab;
 use Filament\Tables;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class ListRecords extends Page implements Tables\Contracts\HasTable
+class ListRecords extends Page implements Forms\Contracts\HasForms, Tables\Contracts\HasTable
 {
+    use Forms\Concerns\InteractsWithForms;
     use Tables\Concerns\InteractsWithTable {
         makeTable as makeBaseTable;
     }
@@ -63,7 +66,7 @@ class ListRecords extends Page implements Tables\Contracts\HasTable
         return static::getResource()::table($table);
     }
 
-    public function getTitle(): string
+    public function getTitle(): string | Htmlable
     {
         return static::$title ?? Str::headline(static::getResource()::getPluralModelLabel());
     }

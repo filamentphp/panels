@@ -2,9 +2,10 @@
 
 namespace Filament\Pages;
 
-use Filament\Context;
 use Filament\Facades\Filament;
+use Filament\Panel;
 use Filament\Support\Facades\FilamentIcon;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Route;
 
 class Dashboard extends Page
@@ -30,10 +31,10 @@ class Dashboard extends Page
             'heroicon-o-home';
     }
 
-    public static function routes(Context $context): void
+    public static function routes(Panel $panel): void
     {
         Route::get('/', static::class)
-            ->middleware(static::getRouteMiddleware($context))
+            ->middleware(static::getRouteMiddleware($panel))
             ->name(static::getSlug());
     }
 
@@ -53,7 +54,7 @@ class Dashboard extends Page
         return 2;
     }
 
-    public function getTitle(): string
+    public function getTitle(): string | Htmlable
     {
         return static::$title ?? __('filament::pages/dashboard.title');
     }

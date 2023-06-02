@@ -2,7 +2,7 @@
 
 namespace Filament\Pages\Concerns;
 
-use Filament\Context;
+use Filament\Panel;
 use Illuminate\Support\Facades\Route;
 
 trait HasRoutes
@@ -14,12 +14,12 @@ trait HasRoutes
      */
     protected static string | array $routeMiddleware = [];
 
-    public static function routes(Context $context): void
+    public static function routes(Panel $panel): void
     {
         $slug = static::getSlug();
 
         Route::get("/{$slug}", static::class)
-            ->middleware(static::getRouteMiddleware($context))
+            ->middleware(static::getRouteMiddleware($panel))
             ->name((string) str($slug)->replace('/', '.'));
     }
 
@@ -33,32 +33,32 @@ trait HasRoutes
     /**
      * @return string | array<string>
      */
-    public static function getRouteMiddleware(Context $context): string | array
+    public static function getRouteMiddleware(Panel $panel): string | array
     {
-        return array_merge(
-            (static::isEmailVerificationRequired($context) ? [static::getEmailVerifiedMiddleware($context)] : []),
-            (static::isTenantSubscriptionRequired($context) ? [static::getTenantSubscribedMiddleware($context)] : []),
-            static::$routeMiddleware,
-        );
+        return [
+            ...(static::isEmailVerificationRequired($panel) ? [static::getEmailVerifiedMiddleware($panel)] : []),
+            ...(static::isTenantSubscriptionRequired($panel) ? [static::getTenantSubscribedMiddleware($panel)] : []),
+            ...static::$routeMiddleware,
+        ];
     }
 
-    public static function getEmailVerifiedMiddleware(Context $context): string
+    public static function getEmailVerifiedMiddleware(Panel $panel): string
     {
-        return $context->getEmailVerifiedMiddleware();
+        return $panel->getEmailVerifiedMiddleware();
     }
 
-    public static function isEmailVerificationRequired(Context $context): bool
+    public static function isEmailVerificationRequired(Panel $panel): bool
     {
-        return $context->isEmailVerificationRequired();
+        return $panel->isEmailVerificationRequired();
     }
 
-    public static function getTenantSubscribedMiddleware(Context $context): string
+    public static function getTenantSubscribedMiddleware(Panel $panel): string
     {
-        return $context->getTenantBillingProvider()->getSubscribedMiddleware();
+        return $panel->getTenantBillingProvider()->getSubscribedMiddleware();
     }
 
-    public static function isTenantSubscriptionRequired(Context $context): bool
+    public static function isTenantSubscriptionRequired(Panel $panel): bool
     {
-        return $context->isTenantSubscriptionRequired();
+        return $panel->isTenantSubscriptionRequired();
     }
 }

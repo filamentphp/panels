@@ -9,18 +9,22 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Actions\RestoreAction;
 use Filament\Forms\Form;
+use Filament\Infolists\Concerns\InteractsWithInfolists;
+use Filament\Infolists\Contracts\HasInfolists;
 use Filament\Infolists\Infolist;
 use Filament\Pages\Concerns\InteractsWithFormActions;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property Form $form
  */
-class ViewRecord extends Page
+class ViewRecord extends Page implements HasInfolists
 {
     use Concerns\HasRelationManagers;
     use Concerns\InteractsWithRecord;
     use InteractsWithFormActions;
+    use InteractsWithInfolists;
 
     /**
      * @var view-string
@@ -39,8 +43,6 @@ class ViewRecord extends Page
         'activeRelationManager',
     ];
 
-    protected ?Infolist $cachedInfolist = null;
-
     public function getBreadcrumb(): string
     {
         return static::$breadcrumb ?? __('filament::resources/pages/view-record.breadcrumb');
@@ -53,11 +55,9 @@ class ViewRecord extends Page
 
     public function mount(int | string $record): void
     {
-        static::authorizeResourceAccess();
-
         $this->record = $this->resolveRecord($record);
 
-        abort_unless(static::getResource()::canView($this->getRecord()), 403);
+        $this->authorizeAccess();
 
         if ($this->hasInfolist()) {
             return;
@@ -66,9 +66,16 @@ class ViewRecord extends Page
         $this->fillForm();
     }
 
+    protected function authorizeAccess(): void
+    {
+        static::authorizeResourceAccess();
+
+        abort_unless(static::getResource()::canView($this->getRecord()), 403);
+    }
+
     protected function hasInfolist(): bool
     {
-        return (bool) count($this->getCachedInfolist()->getComponents());
+        return (bool) count($this->getInfolist('infolist')->getComponents());
     }
 
     protected function fillForm(): void
@@ -84,20 +91,15 @@ class ViewRecord extends Page
         $this->callHook('afterFill');
     }
 
-    protected function getCachedInfolist(): Infolist
-    {
-        return $this->cachedInfolist ??= $this->getInfolist();
-    }
-
     /**
      * @param  array<string>  $attributes
      */
     protected function refreshFormData(array $attributes): void
     {
-        $this->data = array_merge(
-            $this->data,
-            $this->getRecord()->only($attributes),
-        );
+        $this->data = [
+            ...$this->data,
+            ...$this->getRecord()->only($attributes),
+        ];
     }
 
     /**
@@ -168,7 +170,7 @@ class ViewRecord extends Page
             ->successRedirectUrl($resource::getUrl('index'));
     }
 
-    public function getTitle(): string
+    public function getTitle(): string | Htmlable
     {
         if (filled(static::$title)) {
             return static::$title;
@@ -192,10 +194,10 @@ class ViewRecord extends Page
         );
     }
 
-    public function getInfolist(): Infolist
+    public function infolist(Infolist $infolist): Infolist
     {
         return static::getResource()::infolist(
-            Infolist::make()
+            $infolist
                 ->record($this->getRecord())
                 ->columns($this->hasInlineLabels() ? 1 : 2)
                 ->inlineLabel($this->hasInlineLabels()),
@@ -205,5 +207,15 @@ class ViewRecord extends Page
     protected function getMountedActionFormModel(): Model
     {
         return $this->getRecord();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getWidgetData(): array
+    {
+        return [
+            'record' => $this->getRecord(),
+        ];
     }
 }

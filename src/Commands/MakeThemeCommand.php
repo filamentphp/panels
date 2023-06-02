@@ -2,8 +2,8 @@
 
 namespace Filament\Commands;
 
-use Filament\Context;
 use Filament\Facades\Filament;
+use Filament\Panel;
 use Filament\Support\Commands\Concerns\CanManipulateFiles;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
@@ -13,36 +13,36 @@ class MakeThemeCommand extends Command
 {
     use CanManipulateFiles;
 
-    protected $description = 'Creates a Filament theme.';
+    protected $description = 'Create a new Filament panel theme';
 
-    protected $signature = 'make:filament-theme {context?} {--F|force}';
+    protected $signature = 'make:filament-theme {panel?} {--F|force}';
 
     public function handle(): int
     {
-        $context = $this->argument('context');
+        $panel = $this->argument('panel');
 
-        if ($context) {
-            $context = Filament::getContext($context);
+        if ($panel) {
+            $panel = Filament::getPanel($panel);
         }
 
-        if (! $context) {
-            $contexts = Filament::getContexts();
+        if (! $panel) {
+            $panels = Filament::getPanels();
 
-            /** @var Context $context */
-            $context = (count($contexts) > 1) ? $contexts[$this->choice(
-                'Which context would you like to create this for?',
+            /** @var Panel $panel */
+            $panel = (count($panels) > 1) ? $panels[$this->choice(
+                'Which panel would you like to create this for?',
                 array_map(
-                    fn (Context $context): string => $context->getId(),
-                    $contexts,
+                    fn (Panel $panel): string => $panel->getId(),
+                    $panels,
                 ),
-                Filament::getDefaultContext()->getId(),
-            )] : Arr::first($contexts);
+                Filament::getDefaultPanel()->getId(),
+            )] : Arr::first($panels);
         }
 
-        $contextId = $context->getId();
+        $panelId = $panel->getId();
 
-        $cssFilePath = resource_path("css/filament/{$contextId}/theme.css");
-        $tailwindConfigFilePath = resource_path("css/filament/{$contextId}/tailwind.config.js");
+        $cssFilePath = resource_path("css/filament/{$panelId}/theme.css");
+        $tailwindConfigFilePath = resource_path("css/filament/{$panelId}/tailwind.config.js");
 
         if (! $this->option('force') && $this->checkForCollision([
             $cssFilePath,
@@ -51,7 +51,7 @@ class MakeThemeCommand extends Command
             return static::INVALID;
         }
 
-        $classPathPrefix = (string) Str::of($context->getPageDirectory())
+        $classPathPrefix = (string) Str::of($panel->getPageDirectory())
             ->afterLast('Filament/')
             ->beforeLast('Pages');
 
@@ -61,18 +61,18 @@ class MakeThemeCommand extends Command
             ->implode('/');
 
         $this->copyStubToApp('ThemeCss', $cssFilePath, [
-            'context' => $contextId,
+            'panel' => $panelId,
         ]);
         $this->copyStubToApp('ThemeTailwindConfig', $tailwindConfigFilePath, [
             'classPathPrefix' => $classPathPrefix,
             'viewPathPrefix' => $viewPathPrefix,
         ]);
 
-        $this->call('filament:compile-theme', ['context' => $contextId]);
+        $this->call('filament:compile-theme', ['panel' => $panelId]);
 
-        $this->components->info("Successfully created resources/css/filament/{$contextId}/theme.css and resources/css/filament/{$contextId}/tailwind.config.js!");
+        $this->components->info("Successfully created resources/css/filament/{$panelId}/theme.css and resources/css/filament/{$panelId}/tailwind.config.js!");
 
-        $this->components->info("Make sure to register the theme in the {$contextId} context provider using `theme(asset('css/filament/{$contextId}/theme.css'))`");
+        $this->components->info("Make sure to register the theme in the {$panelId} panel provider using `theme(asset('css/filament/{$panelId}/theme.css'))`");
 
         return static::SUCCESS;
     }
