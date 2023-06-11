@@ -3,11 +3,13 @@
         {{ __('filament::global-search.field.label') }}
     </label>
 
-    <div class="relative group max-w-md">
-        <span class="absolute inset-y-0 start-0 flex items-center justify-center w-10 h-10 pointer-events-none">
+    <div class="group relative max-w-md">
+        <span
+            class="pointer-events-none absolute inset-y-0 start-0 flex h-10 w-10 items-center justify-center"
+        >
             <x-filament::icon
                 name="heroicon-m-magnifying-glass"
-                alias="app::global-search.input.prefix"
+                alias="panels::global-search.input.prefix"
                 color="text-gray-500 dark:text-gray-400"
                 size="h-5 w-5"
                 wire:loading.remove.delay=""
@@ -31,7 +33,7 @@
             placeholder="{{ __('filament::global-search.field.placeholder') }}"
             type="search"
             autocomplete="off"
-            class="block w-full h-10 ps-10 bg-gray-400/10 placeholder-gray-500 border-transparent transition duration-75 rounded-lg outline-none focus:bg-white focus:placeholder-gray-400 focus:border-primary-500 focus:ring-1 focus:ring-inset focus:ring-primary-500 dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-400"
-        >
+            class="block h-10 w-full rounded-lg border-transparent bg-gray-400/10 ps-10 placeholder-gray-500 outline-none transition duration-75 focus:border-primary-500 focus:bg-white focus:placeholder-gray-400 focus:ring-1 focus:ring-inset focus:ring-primary-500 dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-400"
+        />
     </div>
 </div>

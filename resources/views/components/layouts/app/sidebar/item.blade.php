@@ -4,11 +4,17 @@
     'badge' => null,
     'badgeColor' => null,
     'icon',
+    'iconColor' => null,
     'shouldOpenUrlInNewTab' => false,
     'url',
 ])
 
-<li @class(['filament-sidebar-item overflow-hidden', 'filament-sidebar-item-active' => $active])>
+<li
+    @class([
+        'filament-sidebar-item overflow-hidden',
+        'filament-sidebar-item-active' => $active,
+    ])
+>
     <a
         href="{{ $url }}"
         @if ($shouldOpenUrlInNewTab) target="_blank" @endif
@@ -31,15 +37,23 @@
             x-tooltip.html="tooltip"
         @endif
         @class([
-            'flex items-center justify-center gap-3 px-3 py-2 rounded-lg font-medium transition',
+            'flex items-center justify-center gap-3 rounded-lg px-3 py-2 font-medium transition',
             'hover:bg-gray-500/5 focus:bg-gray-500/5 dark:text-gray-300 dark:hover:bg-gray-700' => ! $active,
             'bg-primary-500 text-white' => $active,
         ])
     >
         <x-filament::icon
             :name="($active && $activeIcon) ? $activeIcon : $icon"
-            alias="app::sidebar.item"
-            :color="(! $active) ? 'text-gray-600 dark:text-gray-500' : null"
+            alias="panels::sidebar.item"
+            :color="(! $active) ? match ($iconColor) {
+                'primary' => 'text-primary-600 dark:text-primary-500',
+                'danger' => 'text-danger-600 dark:text-danger-500',
+                'info' => 'text-info-600 dark:text-info-500',
+                'secondary' => 'text-secondary-600 dark:text-secondary-500',
+                'success' => 'text-success-600 dark:text-success-500',
+                'warning' => 'text-warning-600 dark:text-warning-500',
+                default => 'text-gray-600 dark:text-gray-500',
+            } : null"
             size="h-6 w-6"
         />
 
