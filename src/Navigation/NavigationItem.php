@@ -14,13 +14,14 @@ class NavigationItem
 
     protected ?string $activeIcon = null;
 
-    protected ?string $iconColor = null;
-
     protected string $label;
 
     protected ?string $badge = null;
 
-    protected ?string $badgeColor = null;
+    /**
+     * @var string | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | null
+     */
+    protected string | array | null $badgeColor = null;
 
     protected bool $shouldOpenUrlInNewTab = false;
 
@@ -44,7 +45,10 @@ class NavigationItem
         return app(static::class, ['label' => $label]);
     }
 
-    public function badge(?string $badge, ?string $color = null): static
+    /**
+     * @param  string | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | null  $color
+     */
+    public function badge(?string $badge, string | array | null $color = null): static
     {
         $this->badge = $badge;
         $this->badgeColor = $color;
@@ -80,16 +84,9 @@ class NavigationItem
         return $this;
     }
 
-    public function activeIcon(string $activeIcon): static
+    public function activeIcon(?string $activeIcon): static
     {
         $this->activeIcon = $activeIcon;
-
-        return $this;
-    }
-
-    public function iconColor(?string $iconColor): static
-    {
-        $this->iconColor = $iconColor;
 
         return $this;
     }
@@ -135,7 +132,10 @@ class NavigationItem
         return $this->badge;
     }
 
-    public function getBadgeColor(): ?string
+    /**
+     * @return string | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | null
+     */
+    public function getBadgeColor(): string | array | null
     {
         return $this->badgeColor;
     }
@@ -167,11 +167,6 @@ class NavigationItem
     public function getActiveIcon(): ?string
     {
         return $this->activeIcon;
-    }
-
-    public function getIconColor(): ?string
-    {
-        return $this->iconColor;
     }
 
     public function getLabel(): string
