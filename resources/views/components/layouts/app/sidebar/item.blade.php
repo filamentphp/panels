@@ -39,8 +39,8 @@
             x-tooltip.html="tooltip"
         @endif
         @class([
-            'relative flex items-center justify-center gap-x-3 rounded-lg px-3 py-2 font-medium text-gray-700 outline-none transition hover:bg-gray-950/5 focus:bg-gray-950/5 dark:text-gray-300 dark:hover:bg-white/5 dark:focus:bg-white/5',
-            'rounded-full bg-gray-950/5 text-primary-600 dark:bg-white/5 dark:text-primary-400' => $active,
+            'relative flex items-center justify-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 outline-none transition hover:bg-gray-950/5 focus:bg-gray-950/5 dark:text-gray-300 dark:hover:bg-white/5 dark:focus:bg-white/5',
+            'bg-gray-950/5 text-primary-600 dark:bg-white/5 dark:text-primary-400' => $active,
         ])
     >
         @if ($icon)
@@ -80,11 +80,11 @@
         <span
             @if (filament()->isSidebarCollapsibleOnDesktop())
                 x-show="$store.sidebar.isOpen"
-                x-transition:enter="lg:transition delay-100"
+                x-transition:enter="delay-100 lg:transition"
                 x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100"
             @endif
-            class="flex-1 text-sm"
+            class="flex-1"
         >
             {{ $slot }}
         </span>
