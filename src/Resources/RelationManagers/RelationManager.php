@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class RelationManager extends Component implements Forms\Contracts\HasForms, Tables\Contracts\HasTable
@@ -25,8 +26,10 @@ class RelationManager extends Component implements Forms\Contracts\HasForms, Tab
         makeTable as makeBaseTable;
     }
 
+    #[Locked]
     public Model $ownerRecord;
 
+    #[Locked]
     public ?string $pageClass = null;
 
     protected static string $relationship;
@@ -544,5 +547,13 @@ class RelationManager extends Component implements Forms\Contracts\HasForms, Tab
     protected function getForms(): array
     {
         return [];
+    }
+
+    /**
+     * @param  array<string, mixed>  $props
+     */
+    public static function make(array $props = []): RelationManagerConfiguration
+    {
+        return app(RelationManagerConfiguration::class, ['relationManager' => static::class, 'props' => $props]);
     }
 }

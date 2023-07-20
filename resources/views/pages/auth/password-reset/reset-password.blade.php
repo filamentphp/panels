@@ -1,5 +1,10 @@
-<form wire:submit.prevent="resetPassword" class="grid gap-y-8">
-    {{ $this->form }}
+<x-filament::page.simple>
+    <x-filament::form wire:submit="resetPassword">
+        {{ $this->form }}
 
-    {{ $this->resetPasswordAction }}
-</form>
+        <x-filament::form.actions
+            :actions="$this->getCachedFormActions()"
+            :full-width="$this->hasFullWidthFormActions()"
+        />
+    </x-filament::form>
+</x-filament::page.simple>

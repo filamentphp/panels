@@ -7,11 +7,13 @@ use DanHarrin\LivewireRateLimiting\WithRateLimiting;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 use Filament\Notifications\Notification;
-use Filament\Pages\CardPage;
+use Filament\Pages\Concerns\InteractsWithFormActions;
+use Filament\Pages\SimplePage;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
@@ -20,8 +22,9 @@ use Illuminate\Validation\ValidationException;
 /**
  * @property Form $form
  */
-class Login extends CardPage
+class Login extends SimplePage
 {
+    use InteractsWithFormActions;
     use WithRateLimiting;
 
     /**
@@ -79,41 +82,44 @@ class Login extends CardPage
     {
         return $form
             ->schema([
-                TextInput::make('email')
-                    ->label(__('filament::pages/auth/login.fields.email.label'))
-                    ->email()
-                    ->required()
-                    ->autocomplete()
-                    ->autofocus(),
-                TextInput::make('password')
-                    ->label(__('filament::pages/auth/login.fields.password.label'))
-                    ->hint(filament()->hasPasswordReset() ? new HtmlString(Blade::render('<x-filament::link :href="filament()->getRequestPasswordResetUrl()"> {{ __(\'filament::pages/auth/login.buttons.request_password_reset.label\') }}</x-filament::link>')) : null)
-                    ->password()
-                    ->required(),
-                Checkbox::make('remember')
-                    ->label(__('filament::pages/auth/login.fields.remember.label')),
+                $this->getEmailFormComponent(),
+                $this->getPasswordFormComponent(),
+                $this->getRememberFormComponent(),
             ])
             ->statePath('data');
     }
 
-    public function authenticateAction(): Action
+    protected function getEmailFormComponent(): Component
     {
-        return Action::make('authenticate')
-            ->label(__('filament::pages/auth/login.buttons.authenticate.label'))
-            ->submit('authenticate');
+        return TextInput::make('email')
+            ->label(__('filament::pages/auth/login.form.email.label'))
+            ->email()
+            ->required()
+            ->autocomplete()
+            ->autofocus();
+    }
+
+    protected function getPasswordFormComponent(): Component
+    {
+        return TextInput::make('password')
+            ->label(__('filament::pages/auth/login.form.password.label'))
+            ->hint(filament()->hasPasswordReset() ? new HtmlString(Blade::render('<x-filament::link :href="filament()->getRequestPasswordResetUrl()"> {{ __(\'filament::pages/auth/login.actions.request_password_reset.label\') }}</x-filament::link>')) : null)
+            ->password()
+            ->required();
+    }
+
+    protected function getRememberFormComponent(): Component
+    {
+        return Checkbox::make('remember')
+            ->label(__('filament::pages/auth/login.form.remember.label'));
     }
 
     public function registerAction(): Action
     {
         return Action::make('register')
             ->link()
-            ->label(__('filament::pages/auth/login.buttons.register.label'))
+            ->label(__('filament::pages/auth/login.actions.register.label'))
             ->url(filament()->getRegistrationUrl());
-    }
-
-    public static function getName(): string
-    {
-        return 'filament.core.auth.login';
     }
 
     public function getTitle(): string | Htmlable
@@ -124,5 +130,27 @@ class Login extends CardPage
     public function getHeading(): string | Htmlable
     {
         return __('filament::pages/auth/login.heading');
+    }
+
+    /**
+     * @return array<Action | ActionGroup>
+     */
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getAuthenticateFormAction(),
+        ];
+    }
+
+    protected function getAuthenticateFormAction(): Action
+    {
+        return Action::make('authenticate')
+            ->label(__('filament::pages/auth/login.form.actions.authenticate.label'))
+            ->submit('authenticate');
+    }
+
+    protected function hasFullWidthFormActions(): bool
+    {
+        return true;
     }
 }

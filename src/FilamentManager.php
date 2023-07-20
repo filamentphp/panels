@@ -18,6 +18,8 @@ use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
 use Filament\Support\Assets\Theme;
 use Filament\Support\Facades\FilamentAsset;
+use Filament\Support\Facades\FilamentView;
+use Filament\Widgets\Widget;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Contracts\Auth\Guard;
@@ -245,6 +247,14 @@ class FilamentManager
     /**
      * @param  array<mixed>  $parameters
      */
+    public function getProfileUrl(array $parameters = []): ?string
+    {
+        return $this->getCurrentPanel()->getProfileUrl($parameters);
+    }
+
+    /**
+     * @param  array<mixed>  $parameters
+     */
     public function getRegistrationUrl(array $parameters = []): ?string
     {
         return $this->getCurrentPanel()->getRegistrationUrl($parameters);
@@ -337,6 +347,26 @@ class FilamentManager
     public function getTenantOwnershipRelationshipName(): string
     {
         return $this->getCurrentPanel()->getTenantOwnershipRelationshipName();
+    }
+
+    public function getProfilePage(): ?string
+    {
+        return $this->getCurrentPanel()->getProfilePage();
+    }
+
+    public function getTenantProfilePage(): ?string
+    {
+        return $this->getCurrentPanel()->getTenantProfilePage();
+    }
+
+    /**
+     * @param  array<mixed>  $parameters
+     */
+    public function getTenantProfileUrl(array $parameters = []): ?string
+    {
+        $parameters['tenant'] ??= $this->getTenant();
+
+        return $this->getCurrentPanel()->getTenantProfileUrl($parameters);
     }
 
     public function getTenantRegistrationPage(): ?string
@@ -435,7 +465,7 @@ class FilamentManager
     }
 
     /**
-     * @return array<class-string>
+     * @return array<class-string<Widget>>
      */
     public function getWidgets(): array
     {
@@ -487,6 +517,11 @@ class FilamentManager
         return $this->getCurrentPanel()->hasPasswordReset();
     }
 
+    public function hasProfile(): bool
+    {
+        return $this->getCurrentPanel()->hasProfile();
+    }
+
     public function hasRegistration(): bool
     {
         return $this->getCurrentPanel()->hasRegistration();
@@ -502,6 +537,11 @@ class FilamentManager
         return $this->getCurrentPanel()->hasTenantBilling();
     }
 
+    public function hasTenantProfile(): bool
+    {
+        return $this->getCurrentPanel()->hasTenantProfile();
+    }
+
     public function hasTenantRegistration(): bool
     {
         return $this->getCurrentPanel()->hasTenantRegistration();
@@ -510,6 +550,21 @@ class FilamentManager
     public function hasTopNavigation(): bool
     {
         return $this->getCurrentPanel()->hasTopNavigation();
+    }
+
+    public function isGlobalSearchEnabled(): bool
+    {
+        if ($this->getGlobalSearchProvider() === null) {
+            return false;
+        }
+
+        foreach ($this->getResources() as $resource) {
+            if ($resource::canGloballySearch()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function isServing(): bool
@@ -541,9 +596,12 @@ class FilamentManager
         }
     }
 
+    /**
+     * @deprecated Use the `\Filament\Support\Facades\FilamentView::renderHook()` method instead.
+     */
     public function renderHook(string $name): Htmlable
     {
-        return $this->getCurrentPanel()->getRenderHook($name);
+        return FilamentView::renderHook($name);
     }
 
     public function serving(Closure $callback): void
@@ -612,13 +670,12 @@ class FilamentManager
         }
     }
 
+    /**
+     * @deprecated Use the `renderHook()` method on the panel configuration instead.
+     */
     public function registerRenderHook(string $name, Closure $hook): void
     {
-        try {
-            $this->getDefaultPanel()->renderHook($name, $hook);
-        } catch (NoDefaultPanelSetException $exception) {
-            throw new Exception('Please use the `renderHook()` method on the panel configuration to register render hooks. See the documentation - https://filamentphp.com/docs/panels/configuration#render-hooks');
-        }
+        FilamentView::registerRenderHook($name, $hook);
     }
 
     /**

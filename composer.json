@@ -1,6 +1,6 @@
 {
     "name": "filament/filament",
-    "description": "Effortlessly build TALL-stack apps and admin panels.",
+    "description": "A collection of full-stack components for accelerated Laravel app development.",
     "license": "MIT",
     "homepage": "https://github.com/filamentphp/filament",
     "support": {
@@ -27,7 +27,6 @@
         "illuminate/session": "^9.0|^10.0",
         "illuminate/support": "^9.0|^10.0",
         "illuminate/view": "^9.0|^10.0",
-        "livewire/livewire": "^2.10.7",
         "spatie/laravel-package-tools": "^1.9"
     },
     "autoload": {

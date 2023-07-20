@@ -1,12 +1,15 @@
 <x-filament::page
     @class([
-        'filament-resources-edit-record-page',
-        'filament-resources-' . str_replace('/', '-', $this->getResource()::getSlug()),
-        'filament-resources-record-' . $record->getKey(),
+        'fi-resource-edit-record-page',
+        'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug()),
+        'fi-resource-record-' . $record->getKey(),
     ])
 >
     @capture($form)
-        <x-filament::form wire:submit.prevent="save">
+        <x-filament::form
+            :wire:key="$this->getId() . '.forms.' . $this->getFormStatePath()"
+            wire:submit="save"
+        >
             {{ $this->form }}
 
             <x-filament::form.actions
@@ -25,11 +28,8 @@
     @endif
 
     @if (count($relationManagers))
-        @if (! $this->hasCombinedRelationManagerTabsWithContent())
-            <x-filament::hr />
-        @endif
-
         <x-filament::resources.relation-managers
+            :active-locale="isset($activeLocale) ? $activeLocale : null"
             :active-manager="$activeRelationManager"
             :content-tab-label="$this->getContentTabLabel()"
             :managers="$relationManagers"

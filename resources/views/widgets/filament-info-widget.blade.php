@@ -1,4 +1,4 @@
-<x-filament-widgets::widget class="filament-filament-info-widget">
+<x-filament-widgets::widget class="fi-filament-info-widget">
     <x-filament::card class="relative">
         <div
             class="relative flex h-12 flex-col items-center justify-center space-y-2"
@@ -8,7 +8,7 @@
                     href="https://filamentphp.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="flex items-end space-x-2 text-gray-800 transition hover:text-primary-500 rtl:space-x-reverse dark:text-primary-500 dark:hover:text-primary-400"
+                    class="flex items-end gap-x-2 text-gray-800 transition hover:text-primary-500 dark:text-primary-500 dark:hover:text-primary-400"
                 >
                     <svg
                         role="img"
@@ -34,14 +34,14 @@
                 </a>
             </div>
 
-            <div class="flex space-x-2 text-sm rtl:space-x-reverse">
+            <div class="flex gap-x-2 text-sm">
                 <a
                     href="https://filamentphp.com/docs"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="text-gray-600 outline-none hover:text-primary-500 focus:underline dark:text-gray-300 dark:hover:text-primary-500"
                 >
-                    {{ __('filament::widgets/filament-info-widget.buttons.visit_documentation.label') }}
+                    {{ __('filament::widgets/filament-info-widget.actions.visit_documentation.label') }}
                 </a>
 
                 <span>&bull;</span>
@@ -52,7 +52,7 @@
                     rel="noopener noreferrer"
                     class="text-gray-600 outline-none hover:text-primary-500 focus:underline dark:text-gray-300 dark:hover:text-primary-500"
                 >
-                    {{ __('filament::widgets/filament-info-widget.buttons.visit_github.label') }}
+                    {{ __('filament::widgets/filament-info-widget.actions.visit_github.label') }}
                 </a>
             </div>
         </div>

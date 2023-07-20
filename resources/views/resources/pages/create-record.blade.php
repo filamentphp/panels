@@ -1,10 +1,13 @@
 <x-filament::page
     @class([
-        'filament-resources-create-record-page',
-        'filament-resources-' . str_replace('/', '-', $this->getResource()::getSlug()),
+        'fi-resource-create-record-page',
+        'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug()),
     ])
 >
-    <x-filament::form wire:submit.prevent="create">
+    <x-filament::form
+        :wire:key="$this->getId() . '.forms.' . $this->getFormStatePath()"
+        wire:submit="create"
+    >
         {{ $this->form }}
 
         <x-filament::form.actions

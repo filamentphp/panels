@@ -5,30 +5,30 @@
 
     $billingItem = $items['billing'] ?? null;
     $billingItemUrl = $billingItem?->getUrl();
-    $hasTenantBilling = filament()->hasTenantBilling() || $billingItemUrl;
+    $hasTenantBilling = filament()->hasTenantBilling() || filled($billingItemUrl);
 
     $registrationItem = $items['register'] ?? null;
     $registrationItemUrl = $registrationItem?->getUrl();
-    $hasTenantRegistration = filament()->hasTenantRegistration() || $registrationItemUrl;
+    $hasTenantRegistration = filament()->hasTenantRegistration() || filled($registrationItemUrl);
+
+    $profileItem = $items['profile'] ?? null;
+    $profileItemUrl = $profileItem?->getUrl();
+    $hasTenantProfile = filament()->hasTenantProfile() || filled($profileItemUrl);
 
     $canSwitchTenants = count($tenants = array_filter(
         filament()->getUserTenants(filament()->auth()->user()),
         fn (\Illuminate\Database\Eloquent\Model $tenant): bool => ! $tenant->is($currentTenant),
     ));
 
-    $items = \Illuminate\Support\Arr::except($items, ['billing', 'register']);
+    $items = \Illuminate\Support\Arr::except($items, ['billing', 'profile', 'register']);
 @endphp
 
-{{ filament()->renderHook('tenant-menu.before') }}
+{{ \Filament\Support\Facades\FilamentView::renderHook('tenant-menu.before') }}
 
-<x-filament::dropdown
-    placement="bottom-start"
-    teleport
-    class="filament-tenant-menu"
->
+<x-filament::dropdown placement="bottom-start" teleport class="fi-tenant-menu">
     <x-slot name="trigger">
         <div
-            class="-m-3 flex items-center space-x-3 rounded-lg p-2 transition hover:bg-gray-500/5 rtl:space-x-reverse dark:hover:bg-gray-900/50"
+            class="-m-3 flex items-center gap-x-3 rounded-lg p-2 transition hover:bg-gray-500/5 dark:hover:bg-gray-900/50"
             @if (filament()->isSidebarCollapsibleOnDesktop())
                 x-data="{ tooltip: {} }"
                 x-init="
@@ -76,6 +76,19 @@
         </div>
     </x-slot>
 
+    @if ($hasTenantProfile && (filament()->hasTenantProfile() ? filament()->getTenantProfilePage()::canView($currentTenant) : true))
+        <x-filament::dropdown.list>
+            <x-filament::dropdown.list.item
+                :color="$profileItem?->getColor() ?? 'gray'"
+                :href="$profileItemUrl ?? filament()->getTenantProfileUrl()"
+                :icon="$profileItem?->getIcon() ?? 'heroicon-m-cog-8-tooth'"
+                tag="a"
+            >
+                {{ $profileItem?->getLabel() ?? filament()->getTenantProfilePage()::getLabel() }}
+            </x-filament::dropdown.list.item>
+        </x-filament::dropdown.list>
+    @endif
+
     @if (count($items))
         <x-filament::dropdown.list>
             @foreach ($items as $item)
@@ -99,7 +112,7 @@
                 :icon="$billingItem?->getIcon() ?? 'heroicon-m-credit-card'"
                 tag="a"
             >
-                {{ $billingItem?->getLabel() ?? __('filament::layout.buttons.billing.label') }}
+                {{ $billingItem?->getLabel() ?? __('filament::layout.actions.billing.label') }}
             </x-filament::dropdown.list.item>
         </x-filament::dropdown.list>
     @endif
@@ -133,4 +146,4 @@
     @endif
 </x-filament::dropdown>
 
-{{ filament()->renderHook('tenant-menu.after') }}
+{{ \Filament\Support\Facades\FilamentView::renderHook('tenant-menu.after') }}
