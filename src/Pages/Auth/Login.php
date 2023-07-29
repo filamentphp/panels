@@ -53,10 +53,14 @@ class Login extends SimplePage
             $this->rateLimit(5);
         } catch (TooManyRequestsException $exception) {
             Notification::make()
-                ->title(__('filament-panels::pages/auth/login.messages.throttled', [
+                ->title(__('filament-panels::pages/auth/login.notifications.throttled.title', [
                     'seconds' => $exception->secondsUntilAvailable,
                     'minutes' => ceil($exception->secondsUntilAvailable / 60),
                 ]))
+                ->body(array_key_exists('body', __('filament-panels::pages/auth/login.notifications.throttled') ?? []) ? __('filament-panels::pages/auth/login.notifications.throttled.body', [
+                    'seconds' => $exception->secondsUntilAvailable,
+                    'minutes' => ceil($exception->secondsUntilAvailable / 60),
+                ]) : null)
                 ->danger()
                 ->send();
 
@@ -101,7 +105,7 @@ class Login extends SimplePage
     {
         return TextInput::make('password')
             ->label(__('filament-panels::pages/auth/login.form.password.label'))
-            ->hint(filament()->hasPasswordReset() ? new HtmlString(Blade::render('<x-filament::link :href="filament()->getRequestPasswordResetUrl()"> {{ __(\'filament-panels::layouts/auth/login.actions.request_password_reset.label\') }}</x-filament::link>')) : null)
+            ->hint(filament()->hasPasswordReset() ? new HtmlString(Blade::render('<x-filament::link :href="filament()->getRequestPasswordResetUrl()"> {{ __(\'filament-panels::pages/auth/login.actions.request_password_reset.label\') }}</x-filament::link>')) : null)
             ->password()
             ->required();
     }
