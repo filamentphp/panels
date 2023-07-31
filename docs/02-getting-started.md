@@ -145,7 +145,7 @@ If you open the `PatientResource.php` file, there's a `form()` method with an em
 
 #### "Name" text input
 
-Filament bundles a large selection of [form fields](../forms/fields). Let's start with a simple [text input field](../forms/fields/text-input):
+Filament bundles a large selection of [form fields](../forms/fields/getting-started). Let's start with a simple [text input field](../forms/fields/text-input):
 
 ```php
 use Filament\Forms;
@@ -646,7 +646,7 @@ Let's add a stats widget to our default dashboard page that includes a card for 
 
 ### Creating a stats widget
 
-Create a [stats widget](../widgets/stats-overview) to render patient types using the following artisan command (select "admin" for the location when prompted):
+Create a [stats widget](../widgets/stats-overview) to render patient types using the following artisan command (do not specify a resource and select "admin" for the location when prompted):
 
 ```bash
 php artisan make:filament-widget PatientTypeOverview --stats-overview

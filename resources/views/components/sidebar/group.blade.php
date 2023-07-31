@@ -1,6 +1,5 @@
 @props([
     'collapsible' => true,
-    'hasItemIcons' => false,
     'icon' => null,
     'items' => [],
     'label' => null,
@@ -25,14 +24,14 @@
                 x-transition:enter-end="opacity-100"
             @endif
             @class([
-                'flex items-center gap-x-3 px-3 py-2',
+                'flex items-center gap-x-3 px-2 py-2',
                 'cursor-pointer' => $collapsible,
             ])
         >
             @if ($icon)
                 <x-filament::icon
                     :icon="$icon"
-                    class="fi-sidebar-group-icon h-6 w-6 text-gray-600 dark:text-gray-400"
+                    class="fi-sidebar-group-icon h-6 w-6 text-gray-400 dark:text-gray-500"
                 />
             @endif
 
@@ -68,16 +67,16 @@
         @foreach ($items as $item)
             @if ($item->isVisible())
                 <x-filament-panels::sidebar.item
-                    :active="$item->isActive()"
-                    :has-grouped-border="! $hasItemIcons"
-                    :icon="$item->getIcon()"
-                    :first="$loop->first"
-                    :last="$loop->last"
                     :active-icon="$item->getActiveIcon()"
-                    :url="$item->getUrl()"
-                    :badge="$item->getBadge()"
+                    :active="$item->isActive()"
                     :badge-color="$item->getBadgeColor()"
+                    :badge="$item->getBadge()"
+                    :first="$loop->first"
+                    :grouped="filled($label)"
+                    :icon="$item->getIcon()"
+                    :last="$loop->last"
                     :should-open-url-in-new-tab="$item->shouldOpenUrlInNewTab()"
+                    :url="$item->getUrl()"
                 >
                     {{ $item->getLabel() }}
                 </x-filament-panels::sidebar.item>

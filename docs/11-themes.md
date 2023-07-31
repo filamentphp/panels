@@ -4,7 +4,7 @@ title: Themes
 
 ## Changing the colors
 
-In the [configuration](configuration), you can easily change the colors that are used. Filament ships with 7 predefined colors that are used everywhere within the framework. They are customizable as follows:
+In the [configuration](configuration), you can easily change the colors that are used. Filament ships with 6 predefined colors that are used everywhere within the framework. They are customizable as follows:
 
 ```php
 use Filament\Panel;
@@ -66,7 +66,7 @@ $panel
 
 ## Changing the font
 
-By default, we use the [Be Vietnam Pro](https://fonts.google.com/specimen/Be+Vietnam+Pro) font. You can change this using the `font()` method in the [configuration](configuration) file:
+By default, we use the [Inter](https://fonts.google.com/specimen/Inter) font. You can change this using the `font()` method in the [configuration](configuration) file:
 
 ```php
 use Filament\Panel;
@@ -75,7 +75,7 @@ public function panel(Panel $panel): Panel
 {
     return $panel
         // ...
-        ->font('Inter');
+        ->font('Poppins');
 }
 ```
 

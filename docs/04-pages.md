@@ -16,7 +16,7 @@ php artisan make:filament-page Settings
 
 This command will create two files - a page class in the `/Pages` directory of the Filament directory, and a view in the `/pages` directory of the Filament views directory.
 
-Page classes are all full-page [Livewire](https://laravel-livewire.com) components with a few extra utilities you can use with the panel.
+Page classes are all full-page [Livewire](https://livewire.laravel.com) components with a few extra utilities you can use with the panel.
 
 ## Conditionally hiding pages in navigation
 
@@ -46,7 +46,7 @@ Since all pages are Livewire components, you can [add actions](../actions/adding
 
 ### Header actions
 
-You can also easily add actions to the header of any page, including [resource pages](resources). You don't need to worry about adding anything to the Blade, we handle that for you. Just return your actions from the `getHeaderActions()` method of the page class:
+You can also easily add actions to the header of any page, including [resource pages](resources/getting-started). You don't need to worry about adding anything to the Blade, we handle that for you. Just return your actions from the `getHeaderActions()` method of the page class:
 
 ```php
 use Filament\Actions\Action;
