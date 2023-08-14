@@ -6,15 +6,20 @@ return [
 
     'heading' => 'Masuk ke akun Anda',
 
-    'buttons' => [
+    'actions' => [
 
-        'authenticate' => [
-            'label' => 'Masuk',
+        'register' => [
+            'before' => 'atau',
+            'label' => 'buat akun baru',
+        ],
+
+        'request_password_reset' => [
+            'label' => 'Lupa kata sandi?',
         ],
 
     ],
 
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'Alamat Email',
@@ -28,11 +33,28 @@ return [
             'label' => 'Ingat saya',
         ],
 
+        'actions' => [
+
+            'authenticate' => [
+                'label' => 'Masuk',
+            ],
+
+        ],
+
     ],
 
     'messages' => [
+
         'failed' => 'Kredensial yang diberikan tidak dapat ditemukan.',
-        'throttled' => 'Terlalu banyak percobaan masuk. Silakan ulangi dalam :seconds detik.',
+
+    ],
+
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'Terlalu banyak permintaan. Silakan coba lagi dalam :seconds detik.',
+        ],
+
     ],
 
 ];

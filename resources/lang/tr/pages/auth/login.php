@@ -6,15 +6,7 @@ return [
 
     'heading' => 'Hesabınıza giriş yapın',
 
-    'buttons' => [
-
-        'authenticate' => [
-            'label' => 'Giriş yap',
-        ],
-
-    ],
-
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'E-posta adresi',
@@ -28,11 +20,28 @@ return [
             'label' => 'Beni hatırla',
         ],
 
+        'actions' => [
+
+            'authenticate' => [
+                'label' => 'Giriş yap',
+            ],
+
+        ],
+
     ],
 
     'messages' => [
+
         'failed' => 'Bu kimlik bilgileri kayıtlarla eşleşmiyor.',
-        'throttled' => 'Çok fazla giriş denemesi. Lütfen :seconds saniye sonra tekrar deneyin.',
+
+    ],
+
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'Çok fazla giriş denemesi. Lütfen :seconds saniye sonra tekrar deneyin.',
+        ],
+
     ],
 
 ];

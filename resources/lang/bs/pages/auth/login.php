@@ -6,15 +6,7 @@ return [
 
     'heading' => 'Prijavite se na svoj račun',
 
-    'buttons' => [
-
-        'authenticate' => [
-            'label' => 'Prijavite se',
-        ],
-
-    ],
-
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'E-mail adresa',
@@ -28,11 +20,28 @@ return [
             'label' => 'Zapamti me',
         ],
 
+        'actions' => [
+
+            'authenticate' => [
+                'label' => 'Prijavite se',
+            ],
+
+        ],
+
     ],
 
     'messages' => [
+
         'failed' => 'Vaša kombinacija se ne poklapa sa našom evidencijom.',
-        'throttled' => 'Previše pokušaja prijave. Pokušajte ponovo za :seconds sekundi.',
+
+    ],
+
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'Previše pokušaja prijave. Pokušajte ponovo za :seconds sekundi.',
+        ],
+
     ],
 
 ];

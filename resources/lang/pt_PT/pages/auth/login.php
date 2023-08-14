@@ -6,15 +6,7 @@ return [
 
     'heading' => 'Iniciar sessão',
 
-    'buttons' => [
-
-        'authenticate' => [
-            'label' => 'Login',
-        ],
-
-    ],
-
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'E-mail',
@@ -28,11 +20,28 @@ return [
             'label' => 'Manter sessão',
         ],
 
+        'actions' => [
+
+            'authenticate' => [
+                'label' => 'Login',
+            ],
+
+        ],
+
     ],
 
     'messages' => [
+
         'failed' => 'As credênciais não correspondem aos nossos registos.',
-        'throttled' => 'Muitas tentativas de login. Por favor, aguarde :seconds segundos para tentar novamente.',
+
+    ],
+
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'Muitas tentativas de login. Por favor, aguarde :seconds segundos para tentar novamente.',
+        ],
+
     ],
 
 ];

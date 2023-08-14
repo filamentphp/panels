@@ -4,22 +4,22 @@ return [
 
     'direction' => 'ltr',
 
-    'buttons' => [
+    'actions' => [
 
-        'dark_theme' => [
-            'label' => 'Comutați modul întunecat',
-        ],
-
-        'database_notifications' => [
-            'label' => 'Deschideți notificările',
-        ],
-
-        'light_theme' => [
-            'label' => 'Comutați modul deschis',
+        'billing' => [
+            'label' => 'Gestionați abonările',
         ],
 
         'logout' => [
             'label' => 'Deconectare',
+        ],
+
+        'open_database_notifications' => [
+            'label' => 'Deschideți notificările',
+        ],
+
+        'open_user_menu' => [
+            'label' => 'Meniul utilizatorului',
         ],
 
         'sidebar' => [
@@ -34,8 +34,20 @@ return [
 
         ],
 
-        'user_menu' => [
-            'label' => 'meniul utilizatorului',
+        'theme_switcher' => [
+
+            'dark' => [
+                'label' => 'Comutați modul întunecat',
+            ],
+
+            'light' => [
+                'label' => 'Comutați modul deschis',
+            ],
+
+            'system' => [
+                'label' => 'Activează modul de sistem',
+            ],
+
         ],
 
     ],

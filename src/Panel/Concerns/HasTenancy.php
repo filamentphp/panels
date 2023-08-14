@@ -11,7 +11,11 @@ trait HasTenancy
 {
     protected ?BillingProvider $tenantBillingProvider = null;
 
+    protected ?string $tenantRoutePrefix = null;
+
     protected ?string $tenantModel = null;
+
+    protected ?string $tenantProfilePage = null;
 
     protected ?string $tenantRegistrationPage = null;
 
@@ -55,9 +59,23 @@ trait HasTenancy
         return $this;
     }
 
+    public function tenantRoutePrefix(?string $prefix): static
+    {
+        $this->tenantRoutePrefix = $prefix;
+
+        return $this;
+    }
+
     public function tenantBillingProvider(?BillingProvider $provider): static
     {
         $this->tenantBillingProvider = $provider;
+
+        return $this;
+    }
+
+    public function tenantProfile(?string $page): static
+    {
+        $this->tenantProfilePage = $page;
 
         return $this;
     }
@@ -84,14 +102,34 @@ trait HasTenancy
         return filled($this->getTenantBillingProvider());
     }
 
+    public function hasTenantProfile(): bool
+    {
+        return filled($this->getTenantProfilePage());
+    }
+
     public function hasTenantRegistration(): bool
     {
         return filled($this->getTenantRegistrationPage());
     }
 
+    public function hasTenantRoutePrefix(): bool
+    {
+        return filled($this->getTenantRoutePrefix());
+    }
+
+    public function getTenantRoutePrefix(): ?string
+    {
+        return $this->tenantRoutePrefix;
+    }
+
     public function getTenantBillingProvider(): ?BillingProvider
     {
         return $this->tenantBillingProvider;
+    }
+
+    public function getTenantProfilePage(): ?string
+    {
+        return $this->tenantProfilePage;
     }
 
     public function getTenantRegistrationPage(): ?string
@@ -144,6 +182,18 @@ trait HasTenancy
     /**
      * @param  array<mixed>  $parameters
      */
+    public function getTenantProfileUrl(array $parameters = []): ?string
+    {
+        if (! $this->hasTenantProfile()) {
+            return null;
+        }
+
+        return route("filament.{$this->getId()}.tenant.profile", $parameters);
+    }
+
+    /**
+     * @param  array<mixed>  $parameters
+     */
     public function getTenantRegistrationUrl(array $parameters = []): ?string
     {
         if (! $this->hasTenantRegistration()) {
@@ -159,6 +209,13 @@ trait HasTenancy
     public function getTenantMenuItems(): array
     {
         return collect($this->tenantMenuItems)
+            ->filter(function (MenuItem $item, string | int $key): bool {
+                if (in_array($key, ['billing', 'profile', 'register'])) {
+                    return true;
+                }
+
+                return $item->isVisible();
+            })
             ->sort(fn (MenuItem $item): int => $item->getSort())
             ->all();
     }

@@ -6,11 +6,7 @@ return [
 
     'heading' => 'Sign in',
 
-    'buttons' => [
-
-        'authenticate' => [
-            'label' => 'Sign in',
-        ],
+    'actions' => [
 
         'register' => [
             'before' => 'or',
@@ -23,7 +19,7 @@ return [
 
     ],
 
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'Email address',
@@ -37,11 +33,29 @@ return [
             'label' => 'Remember me',
         ],
 
+        'actions' => [
+
+            'authenticate' => [
+                'label' => 'Sign in',
+            ],
+
+        ],
+
     ],
 
     'messages' => [
+
         'failed' => 'These credentials do not match our records.',
-        'throttled' => 'Too many login attempts. Please try again in :seconds seconds.',
+
+    ],
+
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'Too many login attempts',
+            'body' => 'Please try again in :seconds seconds.',
+        ],
+
     ],
 
 ];

@@ -6,15 +6,20 @@ return [
 
     'heading' => 'Zaloguj się',
 
-    'buttons' => [
+    'actions' => [
 
-        'authenticate' => [
-            'label' => 'Zaloguj się',
+        'register' => [
+            'before' => 'lub',
+            'label' => 'zarejestruj się',
+        ],
+
+        'request_password_reset' => [
+            'label' => 'Nie pamiętam hasła',
         ],
 
     ],
 
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'Adres e-mail',
@@ -28,11 +33,29 @@ return [
             'label' => 'Zapamiętaj mnie',
         ],
 
+        'actions' => [
+
+            'authenticate' => [
+                'label' => 'Zaloguj się',
+            ],
+
+        ],
+
     ],
 
     'messages' => [
+
         'failed' => 'Błędny login lub hasło.',
-        'throttled' => 'Za dużo nieudanych prób logowania. Proszę spróbować za :seconds sekund.',
+
+    ],
+
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'Za dużo nieudanych prób logowania',
+            'body' => 'Spróbuj ponownie za :seconds sekund.',
+        ],
+
     ],
 
 ];

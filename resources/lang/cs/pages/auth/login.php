@@ -6,15 +6,7 @@ return [
 
     'heading' => 'Přihlašte se k Vašemu účtu',
 
-    'buttons' => [
-
-        'authenticate' => [
-            'label' => 'Přihlásit se',
-        ],
-
-    ],
-
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'Emailová adresa',
@@ -28,11 +20,28 @@ return [
             'label' => 'Zapamatovat si mě',
         ],
 
+        'actions' => [
+
+            'authenticate' => [
+                'label' => 'Přihlásit se',
+            ],
+
+        ],
+
     ],
 
     'messages' => [
+
         'failed' => 'Chybně zadané přihlašovací údaje.',
-        'throttled' => 'Příliš mnoho pokusů o přihlášení. Zkuste to znovu za :seconds vteřin.',
+
+    ],
+
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'Příliš mnoho pokusů o přihlášení. Zkuste to znovu za :seconds vteřin.',
+        ],
+
     ],
 
 ];

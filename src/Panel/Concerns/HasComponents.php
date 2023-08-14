@@ -2,17 +2,22 @@
 
 namespace Filament\Panel\Concerns;
 
-use Filament\Http\Livewire\DatabaseNotifications;
-use Filament\Http\Livewire\GlobalSearch;
-use Filament\Http\Livewire\Notifications;
+use Filament\Livewire\DatabaseNotifications;
+use Filament\Livewire\GlobalSearch;
+use Filament\Livewire\Notifications;
+use Filament\Pages\Auth\EditProfile;
 use Filament\Pages\Page;
 use Filament\Resources\RelationManagers\RelationGroup;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Resources\RelationManagers\RelationManagerConfiguration;
 use Filament\Resources\Resource;
 use Filament\Widgets\Widget;
+use Filament\Widgets\WidgetConfiguration;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Filesystem\Filesystem;
 use Livewire\Component;
 use Livewire\Livewire;
+use Livewire\Mechanisms\ComponentRegistry;
 use ReflectionClass;
 
 trait HasComponents
@@ -27,27 +32,45 @@ trait HasComponents
      */
     protected array $pages = [];
 
-    protected ?string $pageDirectory = null;
+    /**
+     * @var array<string>
+     */
+    protected array $pageDirectories = [];
 
-    protected ?string $pageNamespace = null;
+    /**
+     * @var array<string>
+     */
+    protected array $pageNamespaces = [];
 
     /**
      * @var array<class-string>
      */
     protected array $resources = [];
 
-    protected ?string $resourceDirectory = null;
-
-    protected ?string $resourceNamespace = null;
+    /**
+     * @var array<string>
+     */
+    protected array $resourceDirectories = [];
 
     /**
-     * @var array<class-string>
+     * @var array<string>
+     */
+    protected array $resourceNamespaces = [];
+
+    /**
+     * @var array<class-string<Widget>>
      */
     protected array $widgets = [];
 
-    protected ?string $widgetDirectory = null;
+    /**
+     * @var array<string>
+     */
+    protected array $widgetDirectories = [];
 
-    protected ?string $widgetNamespace = null;
+    /**
+     * @var array<string>
+     */
+    protected array $widgetNamespaces = [];
 
     /**
      * @param  array<class-string>  $pages
@@ -97,7 +120,7 @@ trait HasComponents
     }
 
     /**
-     * @param  array<class-string>  $widgets
+     * @param  array<class-string<Widget> | WidgetConfiguration>  $widgets
      */
     public function widgets(array $widgets): static
     {
@@ -107,16 +130,29 @@ trait HasComponents
         ];
 
         foreach ($widgets as $widget) {
-            $this->queueLivewireComponentForRegistration($widget);
+            $this->queueLivewireComponentForRegistration($this->normalizeWidgetClass($widget));
         }
 
         return $this;
     }
 
+    /**
+     * @param  class-string<Widget> | WidgetConfiguration  $widget
+     * @return class-string<Widget>
+     */
+    protected function normalizeWidgetClass(string | WidgetConfiguration $widget): string
+    {
+        if ($widget instanceof WidgetConfiguration) {
+            return $widget->widget;
+        }
+
+        return $widget;
+    }
+
     public function discoverPages(string $in, string $for): static
     {
-        $this->pageDirectory ??= $in;
-        $this->pageNamespace ??= $for;
+        $this->pageDirectories[] = $in;
+        $this->pageNamespaces[] = $for;
 
         $this->discoverComponents(
             Page::class,
@@ -128,20 +164,26 @@ trait HasComponents
         return $this;
     }
 
-    public function getPageDirectory(): ?string
+    /**
+     * @return array<string>
+     */
+    public function getPageDirectories(): array
     {
-        return $this->pageDirectory;
+        return $this->pageDirectories;
     }
 
-    public function getPageNamespace(): ?string
+    /**
+     * @return array<string>
+     */
+    public function getPageNamespaces(): array
     {
-        return $this->pageNamespace;
+        return $this->pageNamespaces;
     }
 
     public function discoverResources(string $in, string $for): static
     {
-        $this->resourceDirectory ??= $in;
-        $this->resourceNamespace ??= $for;
+        $this->resourceDirectories[] = $in;
+        $this->resourceNamespaces[] = $for;
 
         $this->discoverComponents(
             Resource::class,
@@ -153,20 +195,26 @@ trait HasComponents
         return $this;
     }
 
-    public function getResourceDirectory(): ?string
+    /**
+     * @return array<string>
+     */
+    public function getResourceDirectories(): array
     {
-        return $this->resourceDirectory;
+        return $this->resourceDirectories;
     }
 
-    public function getResourceNamespace(): ?string
+    /**
+     * @return array<string>
+     */
+    public function getResourceNamespaces(): array
     {
-        return $this->resourceNamespace;
+        return $this->resourceNamespaces;
     }
 
     public function discoverWidgets(string $in, string $for): static
     {
-        $this->widgetDirectory ??= $in;
-        $this->widgetNamespace ??= $for;
+        $this->widgetDirectories[] = $in;
+        $this->widgetNamespaces[] = $for;
 
         $this->discoverComponents(
             Widget::class,
@@ -178,14 +226,20 @@ trait HasComponents
         return $this;
     }
 
-    public function getWidgetDirectory(): ?string
+    /**
+     * @return array<string>
+     */
+    public function getWidgetDirectories(): array
     {
-        return $this->widgetDirectory;
+        return $this->widgetDirectories;
     }
 
-    public function getWidgetNamespace(): ?string
+    /**
+     * @return array<string>
+     */
+    public function getWidgetNamespaces(): array
     {
-        return $this->widgetNamespace;
+        return $this->widgetNamespaces;
     }
 
     /**
@@ -205,18 +259,18 @@ trait HasComponents
     }
 
     /**
-     * @return array<class-string>
+     * @return array<class-string<Widget> | WidgetConfiguration>
      */
     public function getWidgets(): array
     {
         return collect($this->widgets)
             ->unique()
-            ->sortBy(fn (string $widget): int => $widget::getSort())
+            ->sortBy(fn (string | WidgetConfiguration $widget): int => $this->normalizeWidgetClass($widget)::getSort())
             ->all();
     }
 
     /**
-     * @param  array<string, class-string>  $register
+     * @param  array<string, class-string<Component>>  $register
      */
     protected function discoverComponents(string $baseClass, array &$register, ?string $directory, ?string $namespace): void
     {
@@ -270,9 +324,10 @@ trait HasComponents
         }
     }
 
-    public function registerLivewireComponents(): void
+    protected function registerLivewireComponents(): void
     {
         $this->queueLivewireComponentForRegistration(DatabaseNotifications::class);
+        $this->queueLivewireComponentForRegistration(EditProfile::class);
         $this->queueLivewireComponentForRegistration(GlobalSearch::class);
         $this->queueLivewireComponentForRegistration(Notifications::class);
 
@@ -306,29 +361,44 @@ trait HasComponents
             foreach ($resource::getRelations() as $relation) {
                 if ($relation instanceof RelationGroup) {
                     foreach ($relation->getManagers() as $groupedRelation) {
-                        $this->queueLivewireComponentForRegistration($groupedRelation);
+                        $this->queueLivewireComponentForRegistration($this->normalizeRelationManagerClass($groupedRelation));
                     }
 
                     continue;
                 }
 
-                $this->queueLivewireComponentForRegistration($relation);
+                $this->queueLivewireComponentForRegistration($this->normalizeRelationManagerClass($relation));
             }
 
             foreach ($resource::getWidgets() as $widget) {
-                $this->queueLivewireComponentForRegistration($widget);
+                $this->queueLivewireComponentForRegistration($this->normalizeWidgetClass($widget));
             }
         }
 
-        foreach ($this->livewireComponents as $alias => $component) {
-            Livewire::component($alias, $component);
+        foreach ($this->livewireComponents as $componentName => $componentClass) {
+            Livewire::component($componentName, $componentClass);
         }
 
         $this->livewireComponents = [];
     }
 
+    /**
+     * @param  class-string<RelationManager> | RelationManagerConfiguration  $manager
+     * @return class-string<RelationManager>
+     */
+    protected function normalizeRelationManagerClass(string | RelationManagerConfiguration $manager): string
+    {
+        if ($manager instanceof RelationManagerConfiguration) {
+            return $manager->relationManager;
+        }
+
+        return $manager;
+    }
+
     protected function queueLivewireComponentForRegistration(string $component): void
     {
-        $this->livewireComponents[$component::getName()] = $component;
+        $componentName = app(ComponentRegistry::class)->getName($component);
+
+        $this->livewireComponents[$componentName] = $component;
     }
 }

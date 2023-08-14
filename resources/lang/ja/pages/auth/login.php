@@ -6,15 +6,7 @@ return [
 
     'heading' => 'アカウントにログインする',
 
-    'buttons' => [
-
-        'authenticate' => [
-            'label' => 'ログイン',
-        ],
-
-    ],
-
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'メールアドレス',
@@ -28,11 +20,28 @@ return [
             'label' => 'ログイン状態を保持する',
         ],
 
+        'actions' => [
+
+            'authenticate' => [
+                'label' => 'ログイン',
+            ],
+
+        ],
+
     ],
 
     'messages' => [
+
         'failed' => '認証に失敗しました。',
-        'throttled' => 'ログインの試行回数が多すぎます。:seconds 秒後にお試しください。',
+
+    ],
+
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'ログインの試行回数が多すぎます。:seconds 秒後にお試しください。',
+        ],
+
     ],
 
 ];

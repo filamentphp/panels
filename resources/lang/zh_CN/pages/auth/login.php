@@ -6,15 +6,7 @@ return [
 
     'heading' => '登录您的账号',
 
-    'buttons' => [
-
-        'authenticate' => [
-            'label' => '登录',
-        ],
-
-    ],
-
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => '邮箱地址',
@@ -28,11 +20,28 @@ return [
             'label' => '记住我',
         ],
 
+        'actions' => [
+
+            'authenticate' => [
+                'label' => '登录',
+            ],
+
+        ],
+
     ],
 
     'messages' => [
+
         'failed' => '登录凭证与记录不符。',
-        'throttled' => '尝试登录次数过多，请在 :seconds 秒后重试。',
+
+    ],
+
+    'notifications' => [
+
+        'throttled' => [
+            'title' => '尝试登录次数过多，请在 :seconds 秒后重试。',
+        ],
+
     ],
 
 ];

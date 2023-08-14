@@ -6,20 +6,16 @@ return [
 
     'heading' => 'Registrieren',
 
-    'buttons' => [
+    'actions' => [
 
         'login' => [
             'before' => 'oder',
             'label' => 'mit Konto anmelden',
         ],
 
-        'register' => [
-            'label' => 'Registrieren',
-        ],
-
     ],
 
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'E-Mail-Adresse',
@@ -38,10 +34,22 @@ return [
             'label' => 'Passwort bestätigen',
         ],
 
+        'actions' => [
+
+            'register' => [
+                'label' => 'Registrieren',
+            ],
+
+        ],
+
     ],
 
-    'messages' => [
-        'throttled' => 'Zu viele Anmeldeversuche. Versuchen Sie es bitte in :seconds Sekunden nochmal.',
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'Zu viele Anmeldeversuche. Versuchen Sie es bitte in :seconds Sekunden nochmal.',
+        ],
+
     ],
 
 ];

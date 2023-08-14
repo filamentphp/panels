@@ -2,19 +2,24 @@
 
 return [
 
-    'title' => 'Login',
+    'title' => 'Acceso',
 
     'heading' => 'Entre a su cuenta',
 
-    'buttons' => [
+    'actions' => [
 
-        'authenticate' => [
-            'label' => 'Entrar',
+        'register' => [
+            'before' => 'o',
+            'label' => 'Abrir una cuenta',
+        ],
+
+        'request_password_reset' => [
+            'label' => '¿Ha olvidado su contraseña?',
         ],
 
     ],
 
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'Correo electrónico',
@@ -28,11 +33,29 @@ return [
             'label' => 'Recordarme',
         ],
 
+        'actions' => [
+
+            'authenticate' => [
+                'label' => 'Entrar',
+            ],
+
+        ],
+
     ],
 
     'messages' => [
+
         'failed' => 'Estas credenciales no coinciden con nuestros registros.',
-        'throttled' => 'Demasiados intentos. Intente de nuevo en :seconds segundos.',
+
+    ],
+
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'Demasiados intentos. Intente de nuevo en :seconds segundos.',
+            'body' => 'Intente de nuevo en :seconds segundos.',
+        ],
+
     ],
 
 ];

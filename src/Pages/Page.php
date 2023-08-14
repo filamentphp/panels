@@ -4,6 +4,8 @@ namespace Filament\Pages;
 
 use Filament\Facades\Filament;
 use Filament\Navigation\NavigationItem;
+use Filament\Widgets\Widget;
+use Filament\Widgets\WidgetConfiguration;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,9 +14,9 @@ abstract class Page extends BasePage
     use Concerns\HasRoutes;
     use Concerns\InteractsWithHeaderActions;
 
-    protected static bool $isDiscovered = true;
+    protected static string $layout = 'filament-panels::components.layout.index';
 
-    protected static string $layout = 'filament::components.layouts.app';
+    protected static bool $isDiscovered = true;
 
     protected static ?string $navigationGroup = null;
 
@@ -27,12 +29,6 @@ abstract class Page extends BasePage
     protected static ?int $navigationSort = null;
 
     protected static bool $shouldRegisterNavigation = true;
-
-    public static string $formActionsAlignment = 'start';
-
-    public static bool $formActionsAreSticky = false;
-
-    public static bool $hasInlineLabels = false;
 
     /**
      * @param  array<mixed>  $parameters
@@ -63,6 +59,7 @@ abstract class Page extends BasePage
             NavigationItem::make(static::getNavigationLabel())
                 ->group(static::getNavigationGroup())
                 ->icon(static::getNavigationIcon())
+                ->activeIcon(static::getActiveNavigationIcon())
                 ->isActiveWhen(fn (): bool => request()->routeIs(static::getRouteName()))
                 ->sort(static::getNavigationSort())
                 ->badge(static::getNavigationBadge(), color: static::getNavigationBadgeColor())
@@ -144,7 +141,7 @@ abstract class Page extends BasePage
     }
 
     /**
-     * @return array<class-string>
+     * @return array<class-string<Widget> | WidgetConfiguration>
      */
     protected function getHeaderWidgets(): array
     {
@@ -152,7 +149,7 @@ abstract class Page extends BasePage
     }
 
     /**
-     * @return array<class-string>
+     * @return array<class-string<Widget> | WidgetConfiguration>
      */
     public function getVisibleHeaderWidgets(): array
     {
@@ -168,7 +165,7 @@ abstract class Page extends BasePage
     }
 
     /**
-     * @return array<class-string>
+     * @return array<class-string<Widget> | WidgetConfiguration>
      */
     protected function getFooterWidgets(): array
     {
@@ -176,7 +173,7 @@ abstract class Page extends BasePage
     }
 
     /**
-     * @return array<class-string>
+     * @return array<class-string<Widget> | WidgetConfiguration>
      */
     public function getVisibleFooterWidgets(): array
     {
@@ -184,12 +181,25 @@ abstract class Page extends BasePage
     }
 
     /**
-     * @param  array<class-string>  $widgets
-     * @return array<class-string>
+     * @param  array<class-string<Widget> | WidgetConfiguration>  $widgets
+     * @return array<class-string<Widget> | WidgetConfiguration>
      */
     protected function filterVisibleWidgets(array $widgets): array
     {
-        return array_filter($widgets, fn (string $widget): bool => $widget::canView());
+        return array_filter($widgets, fn (string | WidgetConfiguration $widget): bool => $this->normalizeWidgetClass($widget)::canView());
+    }
+
+    /**
+     * @param  class-string<Widget> | WidgetConfiguration  $widget
+     * @return class-string<Widget>
+     */
+    protected function normalizeWidgetClass(string | WidgetConfiguration $widget): string
+    {
+        if ($widget instanceof WidgetConfiguration) {
+            return $widget->widget;
+        }
+
+        return $widget;
     }
 
     /**
@@ -213,69 +223,8 @@ abstract class Page extends BasePage
         return static::$shouldRegisterNavigation;
     }
 
-    public static function stickyFormActions(bool $condition = true): void
-    {
-        static::$formActionsAreSticky = $condition;
-    }
-
-    public static function alignFormActionsStart(): void
-    {
-        static::$formActionsAlignment = 'start';
-    }
-
-    public static function alignFormActionsCenter(): void
-    {
-        static::$formActionsAlignment = 'center';
-    }
-
-    public static function alignFormactionsEnd(): void
-    {
-        static::$formActionsAlignment = 'end';
-    }
-
-    /**
-     * @deprecated Use `alignFormActionsStart()` instead
-     */
-    public static function alignFormActionsLeft(): void
-    {
-        static::alignFormActionsStart();
-    }
-
-    /**
-     * @deprecated Use `alignFormActionsEnd()` instead
-     */
-    public static function alignFormActionsRight(): void
-    {
-        static::alignFormActionsEnd();
-    }
-
-    public function getFormActionsAlignment(): string
-    {
-        return static::$formActionsAlignment;
-    }
-
-    public function areFormActionsSticky(): bool
-    {
-        return static::$formActionsAreSticky;
-    }
-
-    public function hasInlineLabels(): bool
-    {
-        return static::$hasInlineLabels;
-    }
-
     public static function isDiscovered(): bool
     {
         return static::$isDiscovered;
-    }
-
-    public static function formActionsAlignment(string $alignment): void
-    {
-        static::$formActionsAlignment = $alignment;
-    }
-
-    public static function inlineLabels(bool $condition = true): void
-    {
-        static::$hasInlineLabels = $condition;
     }
 }
