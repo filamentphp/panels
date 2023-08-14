@@ -2,13 +2,13 @@
 
 return [
 
-    'actions' => [
+    'buttons' => [
 
-        'open_documentation' => [
+        'visit_documentation' => [
             'label' => 'ចូលមើលឯកសារ',
         ],
 
-        'open_github' => [
+        'visit_github' => [
             'label' => 'GitHub',
         ],
 

@@ -4,52 +4,27 @@ return [
 
     'direction' => 'ltr',
 
-    'actions' => [
+    'buttons' => [
 
-        'billing' => [
-            'label' => 'Gestisci abbonamento',
+        'dark_theme' => [
+            'label' => 'Attiva modalità scura',
+        ],
+
+        'database_notifications' => [
+            'label' => 'Apri notifiche',
+        ],
+
+        'light_theme' => [
+            'label' => 'Attiva modalità chiara',
         ],
 
         'logout' => [
             'label' => 'Disconnetti',
         ],
 
-        'open_database_notifications' => [
-            'label' => 'Apri notifiche',
-        ],
-
-        'open_user_menu' => [
+        'user_menu' => [
             'label' => 'Menu utente',
         ],
-
-        'sidebar' => [
-
-            'collapse' => [
-                'label' => 'Comprimi sidebar',
-            ],
-
-            'expand' => [
-                'label' => 'Espandi sidebar',
-            ],
-
-        ],
-
-        'theme_switcher' => [
-
-            'dark' => [
-                'label' => 'Attiva tema scuro',
-            ],
-
-            'light' => [
-                'label' => 'Attiva tema chiaro',
-            ],
-
-            'system' => [
-                'label' => 'Attiva tema di sistema',
-            ],
-
-        ],
-
     ],
 
 ];

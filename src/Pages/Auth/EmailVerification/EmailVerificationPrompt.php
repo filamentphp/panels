@@ -10,21 +10,21 @@ use Filament\Facades\Filament;
 use Filament\Forms\Form;
 use Filament\Notifications\Auth\VerifyEmail;
 use Filament\Notifications\Notification;
-use Filament\Pages\SimplePage;
+use Filament\Pages\CardPage;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Support\Htmlable;
 
 /**
  * @property Form $form
  */
-class EmailVerificationPrompt extends SimplePage
+class EmailVerificationPrompt extends CardPage
 {
     use WithRateLimiting;
 
     /**
      * @var view-string
      */
-    protected static string $view = 'filament-panels::pages.auth.email-verification.email-verification-prompt';
+    protected static string $view = 'filament::pages.auth.email-verification.email-verification-prompt';
 
     public function mount(): void
     {
@@ -40,20 +40,16 @@ class EmailVerificationPrompt extends SimplePage
     {
         return Action::make('resendNotification')
             ->link()
-            ->label(__('filament-panels::pages/auth/email-verification/email-verification-prompt.actions.resend_notification.label') . '.')
+            ->label(__('filament::pages/auth/email-verification/email-verification-prompt.buttons.resend_notification.label') . '.')
             ->action(function (): void {
                 try {
                     $this->rateLimit(2);
                 } catch (TooManyRequestsException $exception) {
                     Notification::make()
-                        ->title(__('filament-panels::pages/auth/email-verification/email-verification-prompt.notifications.notification_resend_throttled.title', [
+                        ->title(__('filament::pages/auth/email-verification/email-verification-prompt.messages.notification_resend_throttled', [
                             'seconds' => $exception->secondsUntilAvailable,
                             'minutes' => ceil($exception->secondsUntilAvailable / 60),
                         ]))
-                        ->body(array_key_exists('body', __('filament-panels::pages/auth/email-verification/email-verification-prompt.notifications.notification_resend_throttled') ?: []) ? __('filament-panels::pages/auth/email-verification/email-verification-prompt.notifications.notification_resend_throttled.body', [
-                            'seconds' => $exception->secondsUntilAvailable,
-                            'minutes' => ceil($exception->secondsUntilAvailable / 60),
-                        ]) : null)
                         ->danger()
                         ->send();
 
@@ -74,19 +70,24 @@ class EmailVerificationPrompt extends SimplePage
                 $user->notify($notification);
 
                 Notification::make()
-                    ->title(__('filament-panels::pages/auth/email-verification/email-verification-prompt.notifications.notification_resent.title'))
+                    ->title(__('filament::pages/auth/email-verification/email-verification-prompt.messages.notification_resent'))
                     ->success()
                     ->send();
             });
     }
 
+    public static function getName(): string
+    {
+        return 'filament.core.auth.email-verification.email-verification-prompt';
+    }
+
     public function getTitle(): string | Htmlable
     {
-        return __('filament-panels::pages/auth/email-verification/email-verification-prompt.title');
+        return __('filament::pages/auth/email-verification/email-verification-prompt.title');
     }
 
     public function getHeading(): string | Htmlable
     {
-        return __('filament-panels::pages/auth/email-verification/email-verification-prompt.heading');
+        return __('filament::pages/auth/email-verification/email-verification-prompt.heading');
     }
 }

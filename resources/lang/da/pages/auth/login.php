@@ -6,7 +6,15 @@ return [
 
     'heading' => 'Log ind på din konto',
 
-    'form' => [
+    'buttons' => [
+
+        'authenticate' => [
+            'label' => 'Log ind',
+        ],
+
+    ],
+
+    'fields' => [
 
         'email' => [
             'label' => 'E-mail',
@@ -20,28 +28,11 @@ return [
             'label' => 'Husk mig',
         ],
 
-        'actions' => [
-
-            'authenticate' => [
-                'label' => 'Log ind',
-            ],
-
-        ],
-
     ],
 
     'messages' => [
-
         'failed' => 'Den adgangskode, du har indtastet, er forkert.',
-
-    ],
-
-    'notifications' => [
-
-        'throttled' => [
-            'title' => 'For mange loginforsøg. Prøv venligst igen om :seconds sekunder.',
-        ],
-
+        'throttled' => 'For mange loginforsøg. Prøv venligst igen om :seconds sekunder.',
     ],
 
 ];

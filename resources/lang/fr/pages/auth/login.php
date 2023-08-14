@@ -6,20 +6,15 @@ return [
 
     'heading' => 'Connectez-vous à votre compte',
 
-    'actions' => [
+    'buttons' => [
 
-        'register' => [
-            'before' => 'ou',
-            'label' => 'créer un compte',
-        ],
-
-        'request_password_reset' => [
-            'label' => 'Mot de passe oublié ?',
+        'authenticate' => [
+            'label' => 'Connexion',
         ],
 
     ],
 
-    'form' => [
+    'fields' => [
 
         'email' => [
             'label' => 'Adresse e-mail',
@@ -33,29 +28,11 @@ return [
             'label' => 'Se souvenir de moi',
         ],
 
-        'actions' => [
-
-            'authenticate' => [
-                'label' => 'Connexion',
-            ],
-
-        ],
-
     ],
 
     'messages' => [
-
         'failed' => 'Ces identifiants ne correspondent pas à nos enregistrements.',
-
-    ],
-
-    'notifications' => [
-
-        'throttled' => [
-            'title' => 'Tentatives de connexion trop nombreuses. Veuillez essayer de nouveau dans :seconds secondes.',
-            'body' => 'Merci de réessayer dans :seconds secondes.',
-        ],
-
+        'throttled' => 'Tentatives de connexion trop nombreuses. Veuillez essayer de nouveau dans :seconds secondes.',
     ],
 
 ];

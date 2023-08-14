@@ -4,18 +4,22 @@ return [
 
     'direction' => 'ltr',
 
-    'actions' => [
+    'buttons' => [
 
-        'logout' => [
-            'label' => 'Oturumu kapat',
+        'dark_theme' => [
+            'label' => 'Koyu tema',
         ],
 
-        'open_database_notifications' => [
+        'database_notifications' => [
             'label' => 'Bildirimleri aç',
         ],
 
-        'open_user_menu' => [
-            'label' => 'Kullanıcı menüsü',
+        'light_theme' => [
+            'label' => 'Açık tema',
+        ],
+
+        'logout' => [
+            'label' => 'Oturumu kapat',
         ],
 
         'sidebar' => [
@@ -30,16 +34,8 @@ return [
 
         ],
 
-        'theme_switcher' => [
-
-            'dark' => [
-                'label' => 'Koyu tema',
-            ],
-
-            'light' => [
-                'label' => 'Açık tema',
-            ],
-
+        'user_menu' => [
+            'label' => 'Kullanıcı menüsü',
         ],
 
     ],

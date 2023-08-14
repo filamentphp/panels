@@ -7,7 +7,7 @@ use Illuminate\Contracts\Support\Htmlable;
 
 trait HasFont
 {
-    protected ?string $fontFamily = null;
+    protected string $fontFamily = 'Be Vietnam Pro';
 
     protected string $fontProvider = BunnyFontProvider::class;
 
@@ -25,9 +25,9 @@ trait HasFont
         return $this;
     }
 
-    public function getFontFamily(): string
+    public function getFontProvider(): string
     {
-        return $this->fontFamily ?? 'Inter';
+        return $this->fontProvider;
     }
 
     public function getFontHtml(): Htmlable
@@ -38,9 +38,9 @@ trait HasFont
         );
     }
 
-    public function getFontProvider(): string
+    public function getFontFamily(): string
     {
-        return $this->fontProvider;
+        return $this->fontFamily;
     }
 
     public function getFontUrl(): ?string

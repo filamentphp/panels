@@ -6,37 +6,28 @@ return [
 
     'heading' => 'Wachtwoord vergeten?',
 
-    'actions' => [
+    'buttons' => [
 
         'login' => [
             'label' => 'terug naar inloggen',
         ],
 
+        'request' => [
+            'label' => 'E-mail verzenden',
+        ],
+
     ],
 
-    'form' => [
+    'fields' => [
 
         'email' => [
             'label' => 'E-mailadres',
         ],
 
-        'actions' => [
-
-            'request' => [
-                'label' => 'E-mail verzenden',
-            ],
-
-        ],
-
     ],
 
-    'notifications' => [
-
-        'throttled' => [
-            'title' => 'Te veel pogingen',
-            'body' => 'Probeer het opnieuw over :seconds seconden.',
-        ],
-
+    'messages' => [
+        'throttled' => 'Te veel pogingen. Probeer het opnieuw over :seconds seconden.',
     ],
 
 ];

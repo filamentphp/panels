@@ -6,20 +6,15 @@ return [
 
     'heading' => 'الدخول إلى حسابك',
 
-    'actions' => [
+    'buttons' => [
 
-        'register' => [
-            'before' => 'أو',
-            'label' => 'إنشاء حساب',
-        ],
-
-        'request_password_reset' => [
-            'label' => 'نسيت كلمة المرور؟',
+        'authenticate' => [
+            'label' => 'تسجيل الدخول',
         ],
 
     ],
 
-    'form' => [
+    'fields' => [
 
         'email' => [
             'label' => 'البريد الإلكتروني',
@@ -33,29 +28,11 @@ return [
             'label' => 'تذكرني',
         ],
 
-        'actions' => [
-
-            'authenticate' => [
-                'label' => 'تسجيل الدخول',
-            ],
-
-        ],
-
     ],
 
     'messages' => [
-
         'failed' => 'خطأ في إدخال المعرف الخاص بك أو كلمة المرور',
-
-    ],
-
-    'notifications' => [
-
-        'throttled' => [
-            'title' => 'لقد قمت بمحاولات تسجيل دخول كثيرة جدًا',
-            'body' => 'يرجى المحاولة مرة أخرى بعد :seconds ثواني.',
-        ],
-
+        'throttled' => 'محاولات تسجيل دخول كثيرة جدًا. يرجى المحاولة مرة أخرى بعد:seconds ثواني.',
     ],
 
 ];

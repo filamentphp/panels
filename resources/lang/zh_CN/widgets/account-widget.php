@@ -2,7 +2,7 @@
 
 return [
 
-    'actions' => [
+    'buttons' => [
 
         'logout' => [
             'label' => '退出登录',
@@ -10,6 +10,6 @@ return [
 
     ],
 
-    'welcome' => '欢迎',
+    'welcome' => '欢迎，:user',
 
 ];

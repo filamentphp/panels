@@ -2,7 +2,7 @@
 
 return [
 
-    'actions' => [
+    'buttons' => [
 
         'logout' => [
             'label' => 'সাইন আউট',
@@ -10,6 +10,6 @@ return [
 
     ],
 
-    'welcome' => 'স্বাগতম',
+    'welcome' => 'স্বাগতম, :user',
 
 ];

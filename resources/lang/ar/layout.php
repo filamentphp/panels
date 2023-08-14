@@ -4,22 +4,22 @@ return [
 
     'direction' => 'rtl',
 
-    'actions' => [
+    'buttons' => [
 
-        'billing' => [
-            'label' => 'الفواتير',
+        'dark_theme' => [
+            'label' => 'تفعيل الوضع الليلي',
+        ],
+
+        'database_notifications' => [
+            'label' => 'عرض التنبيهات',
+        ],
+
+        'light_theme' => [
+            'label' => 'تفعيل وضع النهار',
         ],
 
         'logout' => [
             'label' => 'تسجيل الخروج',
-        ],
-
-        'open_database_notifications' => [
-            'label' => 'عرض التنبيهات',
-        ],
-
-        'open_user_menu' => [
-            'label' => 'قائمة المستخدم',
         ],
 
         'sidebar' => [
@@ -34,20 +34,8 @@ return [
 
         ],
 
-        'theme_switcher' => [
-
-            'dark' => [
-                'label' => 'تفعيل الوضع الليلي',
-            ],
-
-            'light' => [
-                'label' => 'تفعيل وضع النهار',
-            ],
-
-            'system' => [
-                'label' => 'تفعيل سمة النظام',
-            ],
-
+        'user_menu' => [
+            'label' => 'قائمة المستخدم',
         ],
 
     ],

@@ -1,7 +1,10 @@
+import Alpine from 'alpinejs'
 import Mousetrap from '@danharrin/alpine-mousetrap'
+import Persist from '@alpinejs/persist'
 
 document.addEventListener('alpine:init', () => {
     window.Alpine.plugin(Mousetrap)
+    window.Alpine.plugin(Persist)
 
     window.Alpine.store('sidebar', {
         isOpen: window.Alpine.$persist(true).as('isOpen'),
@@ -37,44 +40,23 @@ document.addEventListener('alpine:init', () => {
         },
     })
 
-    const theme = localStorage.getItem('theme') ?? 'system'
-
     window.Alpine.store(
         'theme',
-        theme === 'dark' ||
-            (theme === 'system' &&
-                window.matchMedia('(prefers-color-scheme: dark)').matches)
+        window.matchMedia('(prefers-color-scheme: dark)').matches
             ? 'dark'
             : 'light',
     )
 
     window.addEventListener('theme-changed', (event) => {
-        let theme = event.detail
-
-        localStorage.setItem('theme', theme)
-
-        if (theme === 'system') {
-            theme = window.matchMedia('(prefers-color-scheme: dark)').matches
-                ? 'dark'
-                : 'light'
-        }
-
-        window.Alpine.store('theme', theme)
+        window.Alpine.store('theme', event.detail)
     })
 
     window
         .matchMedia('(prefers-color-scheme: dark)')
         .addEventListener('change', (event) => {
-            if (localStorage.getItem('theme') === 'system') {
-                window.Alpine.store('theme', event.matches ? 'dark' : 'light')
-            }
+            window.Alpine.store('theme', event.matches ? 'dark' : 'light')
         })
-
-    window.Alpine.effect(() => {
-        const theme = window.Alpine.store('theme')
-
-        theme === 'dark'
-            ? document.documentElement.classList.add('dark')
-            : document.documentElement.classList.remove('dark')
-    })
 })
+
+window.Alpine = Alpine
+Alpine.start()

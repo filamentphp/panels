@@ -4,22 +4,22 @@ return [
 
     'direction' => 'rtl',
 
-    'actions' => [
+    'buttons' => [
 
-        'billing' => [
-            'label' => 'مدیریت آبونمان',
+        'dark_theme' => [
+            'label' => 'حالت تیره',
+        ],
+
+        'database_notifications' => [
+            'label' => 'نمایش اعلانات',
+        ],
+
+        'light_theme' => [
+            'label' => 'حالت روشن',
         ],
 
         'logout' => [
             'label' => 'خروج',
-        ],
-
-        'open_database_notifications' => [
-            'label' => 'نمایش اعلانات',
-        ],
-
-        'open_user_menu' => [
-            'label' => 'منوی کاربر',
         ],
 
         'sidebar' => [
@@ -34,20 +34,8 @@ return [
 
         ],
 
-        'theme_switcher' => [
-
-            'dark' => [
-                'label' => 'حالت تیره',
-            ],
-
-            'light' => [
-                'label' => 'حالت روشن',
-            ],
-
-            'system' => [
-                'label' => 'حالت سیستم',
-            ],
-
+        'user_menu' => [
+            'label' => 'منو کاربر',
         ],
 
     ],

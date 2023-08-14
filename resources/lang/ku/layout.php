@@ -4,17 +4,21 @@ return [
 
     'direction' => 'rtl',
 
-    'actions' => [
-        'logout' => [
-            'label' => 'چوونەدەرەوە',
+    'buttons' => [
+        'dark_theme' => [
+            'label' => 'گۆڕینی ڕوانگە بۆ تاریک',
         ],
 
-        'open_database_notifications' => [
+        'database_notifications' => [
             'label' => 'کردنەوەی ئاگانامەکان',
         ],
 
-        'open_user_menu' => [
-            'label' => 'مێنیوی بەکارهێنەر',
+        'light_theme' => [
+            'label' => 'گۆڕینی ڕوانگە بۆ سپی',
+        ],
+
+        'logout' => [
+            'label' => 'چوونەدەرەوە',
         ],
 
         'sidebar' => [
@@ -29,18 +33,9 @@ return [
 
         ],
 
-        'theme_switcher' => [
-
-            'dark' => [
-                'label' => 'گۆڕینی ڕوانگە بۆ تاریک',
-            ],
-
-            'light' => [
-                'label' => 'گۆڕینی ڕوانگە بۆ سپی',
-            ],
-
+        'user_menu' => [
+            'label' => 'مێنیوی بەکارهێنەر',
         ],
-
     ],
 
 ];

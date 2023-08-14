@@ -2,7 +2,7 @@
 
 return [
 
-    'actions' => [
+    'buttons' => [
 
         'logout' => [
             'label' => 'ចាកចេញពីកម្មវិធីប្រព័ន្ធ',
@@ -10,6 +10,6 @@ return [
 
     ],
 
-    'welcome' => 'សូមស្វាគមន៍',
+    'welcome' => 'សូមស្វាគមន៍, :user',
 
 ];

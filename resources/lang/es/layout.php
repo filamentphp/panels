@@ -4,18 +4,22 @@ return [
 
     'direction' => 'ltr',
 
-    'actions' => [
+    'buttons' => [
 
-        'logout' => [
-            'label' => 'Salir',
+        'dark_theme' => [
+            'label' => 'A modo oscuro',
         ],
 
-        'open_database_notifications' => [
+        'database_notifications' => [
             'label' => 'Abrir notificaciones',
         ],
 
-        'open_user_menu' => [
-            'label' => 'Menú del Usuario',
+        'light_theme' => [
+            'label' => 'A modo claro',
+        ],
+
+        'logout' => [
+            'label' => 'Salir',
         ],
 
         'sidebar' => [
@@ -30,16 +34,8 @@ return [
 
         ],
 
-        'theme_switcher' => [
-
-            'dark' => [
-                'label' => 'A modo oscuro',
-            ],
-
-            'light' => [
-                'label' => 'A modo claro',
-            ],
-
+        'user_menu' => [
+            'label' => 'Menú del Usuario',
         ],
 
     ],

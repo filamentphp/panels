@@ -19,19 +19,15 @@ return [
             ],
 
             'create_another' => [
-                'label' => 'Salvar e criar outro',
+                'label' => 'Criar e criar novo',
             ],
 
         ],
 
     ],
 
-    'notifications' => [
-
-        'created' => [
-            'title' => 'Criado',
-        ],
-
+    'messages' => [
+        'created' => 'Salvo!',
     ],
 
 ];

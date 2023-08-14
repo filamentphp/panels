@@ -26,12 +26,8 @@ return [
 
     ],
 
-    'notifications' => [
-
-        'created' => [
-            'title' => 'Guardado!',
-        ],
-
+    'messages' => [
+        'created' => 'Guardado!',
     ],
 
 ];

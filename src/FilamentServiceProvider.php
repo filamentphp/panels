@@ -21,10 +21,8 @@ use Filament\Http\Responses\Auth\RegistrationResponse;
 use Filament\Support\Assets\Js;
 use Filament\Support\Assets\Theme;
 use Filament\Support\Facades\FilamentAsset;
-use Filament\View\LegacyComponents;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Routing\Router;
-use Illuminate\Support\Facades\Blade;
 use Livewire\Livewire;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -34,7 +32,7 @@ class FilamentServiceProvider extends PackageServiceProvider
     public function configurePackage(Package $package): void
     {
         $package
-            ->name('filament-panels')
+            ->name('filament')
             ->hasCommands($this->getCommands())
             ->hasRoutes('web')
             ->hasTranslations()
@@ -58,11 +56,6 @@ class FilamentServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
-        Blade::components([
-            LegacyComponents\Page::class => 'filament::page',
-            LegacyComponents\Widget::class => 'filament::widget',
-        ]);
-
         FilamentAsset::register([
             Js::make('app', __DIR__ . '/../dist/index.js')->core(),
             Js::make('echo', __DIR__ . '/../dist/echo.js')->core(),

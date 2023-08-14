@@ -4,22 +4,17 @@ return [
 
     'title' => 'Login',
 
-    'heading' => 'Faça login',
+    'heading' => 'Faça login em sua conta',
 
-    'actions' => [
+    'buttons' => [
 
-        'register' => [
-            'before' => 'ou',
-            'label' => 'criar uma conta',
-        ],
-
-        'request_password_reset' => [
-            'label' => 'Esqueceu sua senha?',
+        'authenticate' => [
+            'label' => 'Login',
         ],
 
     ],
 
-    'form' => [
+    'fields' => [
 
         'email' => [
             'label' => 'E-mail',
@@ -33,29 +28,11 @@ return [
             'label' => 'Lembre de mim',
         ],
 
-        'actions' => [
-
-            'authenticate' => [
-                'label' => 'Login',
-            ],
-
-        ],
-
     ],
 
     'messages' => [
-
-        'failed' => 'Essas credenciais não correspondem aos nossos registros.',
-
-    ],
-
-    'notifications' => [
-
-        'throttled' => [
-            'title' => 'Muitas tentativas de login',
-            'body' => 'Por favor tente novamente em :seconds segundos.',
-        ],
-
+        'failed' => 'Essas credenciais não correspondem aos com nossos registros.',
+        'throttled' => 'Muitas tentativas de login. Por favor, aguarde :seconds segundos para tentar novamente.',
     ],
 
 ];

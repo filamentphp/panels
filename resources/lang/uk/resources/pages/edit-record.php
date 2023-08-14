@@ -30,12 +30,8 @@ return [
 
     ],
 
-    'notifications' => [
-
-        'saved' => [
-            'title' => 'Збережено',
-        ],
-
+    'messages' => [
+        'saved' => 'Збережено',
     ],
 
 ];

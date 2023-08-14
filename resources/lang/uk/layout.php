@@ -4,30 +4,26 @@ return [
 
     'direction' => 'ltr',
 
-    'actions' => [
+    'buttons' => [
+
+        'dark_theme' => [
+            'label' => 'Увімкнути темний режим',
+        ],
+
+        'database_notifications' => [
+            'label' => 'Відкрити сповіщення',
+        ],
+
+        'light_theme' => [
+            'label' => 'Увімкнути світлий режим',
+        ],
 
         'logout' => [
             'label' => 'Вийти',
         ],
 
-        'open_database_notifications' => [
-            'label' => 'Відкрити сповіщення',
-        ],
-
-        'open_user_menu' => [
+        'user_menu' => [
             'label' => 'Меню користувача',
-        ],
-
-        'theme_switcher' => [
-
-            'dark' => [
-                'label' => 'Увімкнути темний режим',
-            ],
-
-            'light' => [
-                'label' => 'Увімкнути світлий режим',
-            ],
-
         ],
 
     ],

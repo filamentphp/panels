@@ -1,43 +1,23 @@
 @props([
-    'actions' => [],
-    'breadcrumbs' => [],
+    'actions' => null,
     'heading',
     'subheading' => null,
 ])
 
 <header
-    {{ $attributes->class(['fi-header flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between']) }}
+    {{ $attributes->class(['filament-header items-start justify-between space-y-2 sm:flex sm:space-x-4 sm:space-y-0 sm:py-4 sm:rtl:space-x-reverse']) }}
 >
     <div>
-        @if ($breadcrumbs)
-            <x-filament::breadcrumbs
-                :breadcrumbs="$breadcrumbs"
-                class="mb-2 hidden sm:block"
-            />
-        @endif
-
-        <h1
-            class="fi-header-heading text-2xl font-bold tracking-tight text-gray-950 dark:text-white sm:text-3xl"
-        >
+        <x-filament::header.heading>
             {{ $heading }}
-        </h1>
+        </x-filament::header.heading>
 
         @if ($subheading)
-            <p
-                class="fi-header-subheading mt-2 max-w-2xl text-lg text-gray-600 dark:text-gray-400"
-            >
+            <x-filament::header.subheading class="mt-1">
                 {{ $subheading }}
-            </p>
+            </x-filament::header.subheading>
         @endif
     </div>
 
-    @if ($actions)
-        <x-filament-actions::actions
-            :actions="$actions"
-            @class([
-                'shrink-0',
-                'sm:mt-7' => $breadcrumbs,
-            ])
-        />
-    @endif
+    <x-filament-actions::actions :actions="$actions" class="shrink-0" />
 </header>
