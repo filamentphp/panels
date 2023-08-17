@@ -6,15 +6,7 @@ return [
 
     'heading' => 'Prisijunkite prie savo paskyros',
 
-    'buttons' => [
-
-        'authenticate' => [
-            'label' => 'Prisijungti',
-        ],
-
-    ],
-
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'El. paštas',
@@ -28,11 +20,28 @@ return [
             'label' => 'Prisiminti mane',
         ],
 
+        'actions' => [
+
+            'authenticate' => [
+                'label' => 'Prisijungti',
+            ],
+
+        ],
+
     ],
 
     'messages' => [
+
         'failed' => 'Neteisingi prisijungimo duomenys.',
-        'throttled' => 'Per daug bandymų prisijungti. Bandykite po :seconds sekundžių.',
+
+    ],
+
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'Per daug bandymų prisijungti. Bandykite po :seconds sekundžių.',
+        ],
+
     ],
 
 ];

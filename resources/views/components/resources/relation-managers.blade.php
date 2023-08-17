@@ -1,4 +1,5 @@
 @props([
+    'activeLocale' => null,
     'activeManager',
     'content' => null,
     'contentTabLabel' => null,
@@ -7,47 +8,56 @@
     'pageClass',
 ])
 
-<div class="filament-resources-relation-managers-container space-y-2">
-    @if ((count($managers) > 1) || $content)
-        <div class="flex justify-center">
-            <x-filament::tabs>
-                @php
-                    $tabs = $managers;
+<div class="fi-resource-relation-managers flex flex-col gap-y-6">
+    @php
+        $normalizeRelationManagerClass = function (string | Filament\Resources\RelationManagers\RelationManagerConfiguration $manager): string {
+            if ($manager instanceof \Filament\Resources\RelationManagers\RelationManagerConfiguration) {
+                return $manager->relationManager;
+            }
 
-                    if ($content) {
-                        $tabs = array_replace([null => null], $tabs);
+            return $manager;
+        };
+    @endphp
+
+    @if ((count($managers) > 1) || $content)
+        <x-filament::tabs>
+            @php
+                $tabs = $managers;
+
+                if ($content) {
+                    $tabs = array_replace([null => null], $tabs);
+                }
+            @endphp
+
+            @foreach ($tabs as $tabKey => $manager)
+                @php
+                    $activeManager = strval($activeManager);
+                    $tabKey = strval($tabKey);
+                    $isGroup = $manager instanceof \Filament\Resources\RelationManagers\RelationGroup;
+
+                    if ($isGroup) {
+                        $manager->ownerRecord($ownerRecord);
+                        $manager->pageClass($pageClass);
+                    } elseif (filled($tabKey)) {
+                        $manager = $normalizeRelationManagerClass($manager);
                     }
                 @endphp
 
-                @foreach ($tabs as $tabKey => $manager)
-                    @php
-                        $activeManager = strval($activeManager);
-                        $tabKey = strval($tabKey);
-                        $isGroup = $manager instanceof \Filament\Resources\RelationManagers\RelationGroup;
-
-                        if ($isGroup) {
-                            $manager->ownerRecord($ownerRecord);
-                            $manager->pageClass($pageClass);
-                        }
-                    @endphp
-
-                    <x-filament::tabs.item
-                        :wire:click="'$set(\'activeRelationManager\', ' . (filled($tabKey) ? ('\'' . $tabKey . '\'') : 'null') . ')'"
-                        :active="$activeManager === $tabKey"
-                        :badge="filled($tabKey) ? ($isGroup ? $manager->getBadge() : $manager::getBadge($ownerRecord, $pageClass)) : null"
-                        :icon="filled($tabKey) ? ($isGroup ? $manager->getIcon() : $manager::getIcon($ownerRecord, $pageClass)) : null"
-                        :icon-color="filled($tabKey) ? ($isGroup ? $manager->getIconColor() : $manager::getIconColor($ownerRecord, $pageClass)) : null"
-                        :icon-position="filled($tabKey) ? ($isGroup ? $manager->getIconPosition() : $manager::getIconPosition($ownerRecord, $pageClass)) : null"
-                    >
-                        @if (filled($tabKey))
-                            {{ $isGroup ? $manager->getLabel() : $manager::getTitle($ownerRecord, $pageClass) }}
-                        @elseif ($content)
-                            {{ $contentTabLabel }}
-                        @endif
-                    </x-filament::tabs.item>
-                @endforeach
-            </x-filament::tabs>
-        </div>
+                <x-filament::tabs.item
+                    :active="$activeManager === $tabKey"
+                    :badge="filled($tabKey) ? ($isGroup ? $manager->getBadge() : $manager::getBadge($ownerRecord, $pageClass)) : null"
+                    :icon="filled($tabKey) ? ($isGroup ? $manager->getIcon() : $manager::getIcon($ownerRecord, $pageClass)) : null"
+                    :icon-position="filled($tabKey) ? ($isGroup ? $manager->getIconPosition() : $manager::getIconPosition($ownerRecord, $pageClass)) : null"
+                    :wire:click="'$set(\'activeRelationManager\', ' . (filled($tabKey) ? ('\'' . $tabKey . '\'') : 'null') . ')'"
+                >
+                    @if (filled($tabKey))
+                        {{ $isGroup ? $manager->getLabel() : $manager::getTitle($ownerRecord, $pageClass) }}
+                    @elseif ($content)
+                        {{ $contentTabLabel }}
+                    @endif
+                </x-filament::tabs.item>
+            @endforeach
+        </x-filament::tabs>
     @endif
 
     @if (filled($activeManager) && isset($managers[$activeManager]))
@@ -57,18 +67,39 @@
                 role="tabpanel"
                 tabindex="0"
             @endif
-            class="space-y-4 outline-none"
+            class="flex flex-col gap-y-4"
         >
+            @php
+                $managerLivewireProperties = ['lazy' => false, 'ownerRecord' => $ownerRecord, 'pageClass' => $pageClass];
+
+                if (filled($activeLocale)) {
+                    $managerLivewireProperties['activeLocale'] = $activeLocale;
+                }
+            @endphp
+
             @if ($managers[$activeManager] instanceof \Filament\Resources\RelationManagers\RelationGroup)
                 @foreach ($managers[$activeManager]->ownerRecord($ownerRecord)->pageClass($pageClass)->getManagers() as $groupedManager)
-                    @livewire(\Livewire\Livewire::getAlias($groupedManager, $groupedManager::getName()), ['ownerRecord' => $ownerRecord, 'pageClass' => $pageClass], key($groupedManager))
+                    @php
+                        $normalizedGroupedManagerClass = $normalizeRelationManagerClass($groupedManager);
+                    @endphp
+
+                    @livewire(
+                        $normalizedGroupedManagerClass,
+                        [...$managerLivewireProperties, ...(($groupedManager instanceof \Filament\Resources\RelationManagers\RelationManagerConfiguration) ? $groupedManager->properties : [])],
+                        key($normalizedGroupedManagerClass),
+                    )
                 @endforeach
             @else
                 @php
                     $manager = $managers[$activeManager];
+                    $normalizedManagerClass = $normalizeRelationManagerClass($manager);
                 @endphp
 
-                @livewire(\Livewire\Livewire::getAlias($manager, $manager::getName()), ['ownerRecord' => $ownerRecord, 'pageClass' => $pageClass], key($manager))
+                @livewire(
+                    $normalizedManagerClass,
+                    [...$managerLivewireProperties, ...(($manager instanceof \Filament\Resources\RelationManagers\RelationManagerConfiguration) ? $manager->properties : [])],
+                    key($normalizedManagerClass),
+                )
             @endif
         </div>
     @elseif ($content)

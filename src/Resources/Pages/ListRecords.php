@@ -4,6 +4,7 @@ namespace Filament\Resources\Pages;
 
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists\Infolist;
@@ -14,7 +15,9 @@ use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
+use Livewire\Features\SupportQueryString\Url;
 
 class ListRecords extends Page implements Forms\Contracts\HasForms, Tables\Contracts\HasTable
 {
@@ -26,22 +29,36 @@ class ListRecords extends Page implements Forms\Contracts\HasForms, Tables\Contr
     /**
      * @var view-string
      */
-    protected static string $view = 'filament::resources.pages.list-records';
+    protected static string $view = 'filament-panels::resources.pages.list-records';
+
+    #[Url]
+    public bool $isTableReordering = false;
 
     /**
-     * @var array<int | string, string | array<mixed>>
+     * @var array<string, mixed> | null
      */
-    protected $queryString = [
-        'activeTab' => ['except' => ''],
-        'isTableReordering' => ['except' => false],
-        'tableFilters',
-        'tableGrouping' => ['except' => ''],
-        'tableGroupingDirection' => ['except' => ''],
-        'tableSortColumn' => ['except' => ''],
-        'tableSortDirection' => ['except' => ''],
-        'tableSearch' => ['except' => ''],
-    ];
+    #[Url]
+    public ?array $tableFilters = null;
 
+    #[Url]
+    public ?string $tableGrouping = null;
+
+    #[Url]
+    public ?string $tableGroupingDirection = null;
+
+    /**
+     * @var ?string
+     */
+    #[Url]
+    public $tableSearch = '';
+
+    #[Url]
+    public ?string $tableSortColumn = null;
+
+    #[Url]
+    public ?string $tableSortDirection = null;
+
+    #[Url]
     public ?string $activeTab = null;
 
     public function mount(): void
@@ -58,7 +75,7 @@ class ListRecords extends Page implements Forms\Contracts\HasForms, Tables\Contr
 
     public function getBreadcrumb(): ?string
     {
-        return static::$breadcrumb ?? __('filament::resources/pages/list-records.breadcrumb');
+        return static::$breadcrumb ?? __('filament-panels::resources/pages/list-records.breadcrumb');
     }
 
     public function table(Table $table): Table
@@ -89,15 +106,19 @@ class ListRecords extends Page implements Forms\Contracts\HasForms, Tables\Contr
         return static::getResource()::infolist($infolist);
     }
 
-    protected function configureCreateAction(CreateAction $action): void
+    protected function configureCreateAction(CreateAction | Tables\Actions\CreateAction $action): void
     {
         $resource = static::getResource();
 
         $action
             ->authorize($resource::canCreate())
             ->model($this->getModel())
-            ->modelLabel($this->getModelLabel())
+            ->modelLabel($this->getModelLabel() ?? static::getResource()::getModelLabel())
             ->form(fn (Form $form): Form => $this->form($form->columns(2)));
+
+        if ($action instanceof CreateAction) {
+            $action->relationship(($tenant = Filament::getTenant()) ? fn (): Relation => static::getResource()::getTenantRelationship($tenant) : null);
+        }
 
         if ($resource::hasPage('create')) {
             $action->url(fn (): string => $resource::getUrl('create'));
@@ -107,6 +128,7 @@ class ListRecords extends Page implements Forms\Contracts\HasForms, Tables\Contr
     protected function configureTableAction(Tables\Actions\Action $action): void
     {
         match (true) {
+            $action instanceof Tables\Actions\CreateAction => $this->configureCreateAction($action),
             $action instanceof Tables\Actions\DeleteAction => $this->configureDeleteAction($action),
             $action instanceof Tables\Actions\EditAction => $this->configureEditAction($action),
             $action instanceof Tables\Actions\ForceDeleteAction => $this->configureForceDeleteAction($action),

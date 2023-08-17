@@ -6,15 +6,7 @@ return [
 
     'heading' => 'Logga in på ditt konto',
 
-    'buttons' => [
-
-        'authenticate' => [
-            'label' => 'Logga in',
-        ],
-
-    ],
-
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'E-postadress',
@@ -28,11 +20,28 @@ return [
             'label' => 'Kom ihåg mig',
         ],
 
+        'actions' => [
+
+            'authenticate' => [
+                'label' => 'Logga in',
+            ],
+
+        ],
+
     ],
 
     'messages' => [
+
         'failed' => 'Inloggningen matchar inte våra uppgifter.',
-        'throttled' => 'För många inloggningsförsök. Vänligen försök igen om :seconds sekunder.',
+
+    ],
+
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'För många inloggningsförsök. Vänligen försök igen om :seconds sekunder.',
+        ],
+
     ],
 
 ];

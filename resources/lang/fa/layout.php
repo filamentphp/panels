@@ -4,22 +4,22 @@ return [
 
     'direction' => 'rtl',
 
-    'buttons' => [
+    'actions' => [
 
-        'dark_theme' => [
-            'label' => 'حالت تیره',
-        ],
-
-        'database_notifications' => [
-            'label' => 'نمایش اعلانات',
-        ],
-
-        'light_theme' => [
-            'label' => 'حالت روشن',
+        'billing' => [
+            'label' => 'مدیریت آبونمان',
         ],
 
         'logout' => [
             'label' => 'خروج',
+        ],
+
+        'open_database_notifications' => [
+            'label' => 'نمایش اعلانات',
+        ],
+
+        'open_user_menu' => [
+            'label' => 'منوی کاربر',
         ],
 
         'sidebar' => [
@@ -34,8 +34,20 @@ return [
 
         ],
 
-        'user_menu' => [
-            'label' => 'منو کاربر',
+        'theme_switcher' => [
+
+            'dark' => [
+                'label' => 'حالت تیره',
+            ],
+
+            'light' => [
+                'label' => 'حالت روشن',
+            ],
+
+            'system' => [
+                'label' => 'حالت سیستم',
+            ],
+
         ],
 
     ],

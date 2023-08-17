@@ -6,11 +6,7 @@ return [
 
     'heading' => 'Inloggen op je account',
 
-    'buttons' => [
-
-        'authenticate' => [
-            'label' => 'Inloggen',
-        ],
+    'actions' => [
 
         'register' => [
             'before' => 'of',
@@ -23,7 +19,7 @@ return [
 
     ],
 
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'E-mailadres',
@@ -34,14 +30,32 @@ return [
         ],
 
         'remember' => [
-            'label' => 'Herinner mij',
+            'label' => 'Onthoud mij',
+        ],
+
+        'actions' => [
+
+            'authenticate' => [
+                'label' => 'Inloggen',
+            ],
+
         ],
 
     ],
 
     'messages' => [
+
         'failed' => 'Onjuiste inloggegevens.',
-        'throttled' => 'Te veel inlogpogingen. Probeer opnieuw over :seconds seconden.',
+
+    ],
+
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'Te veel inlogpogingen',
+            'body' => 'Probeer het opnieuw over :seconds seconden.',
+        ],
+
     ],
 
 ];

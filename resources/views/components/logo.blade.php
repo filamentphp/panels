@@ -1,6 +1,10 @@
 @if (filled($brand = filament()->getBrandName()))
     <div
-        class="filament-brand text-xl font-bold leading-5 tracking-tight dark:text-white"
+        {{
+            $attributes->class([
+                'fi-logo text-xl font-bold leading-5 tracking-tight text-gray-950 dark:text-white',
+            ])
+        }}
     >
         {{ $brand }}
     </div>

@@ -6,15 +6,7 @@ return [
 
     'heading' => 'Wachtwoord opnieuw instellen',
 
-    'buttons' => [
-
-        'reset' => [
-            'label' => 'Wachtwoord opnieuw instellen',
-        ],
-
-    ],
-
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'E-mailadres',
@@ -25,14 +17,27 @@ return [
             'validation_attribute' => 'wachtwoord',
         ],
 
-        'passwordConfirmation' => [
+        'password_confirmation' => [
             'label' => 'Wachtwoord bevestigen',
+        ],
+
+        'actions' => [
+
+            'reset' => [
+                'label' => 'Wachtwoord opnieuw instellen',
+            ],
+
         ],
 
     ],
 
-    'messages' => [
-        'throttled' => 'Te veel pogingen. Probeer het opnieuw over :seconds seconden.',
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'Te veel resetpogingen',
+            'body' => 'Probeer het opnieuw over :seconds seconden.',
+        ],
+
     ],
 
 ];
