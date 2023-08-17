@@ -6,7 +6,7 @@ return [
 
     'heading' => 'Pierakstīties savā kontā',
 
-    'actions' => [
+    'buttons' => [
 
         'submit' => [
             'label' => 'Pierakstīties',
@@ -14,7 +14,7 @@ return [
 
     ],
 
-    'form' => [
+    'fields' => [
 
         'email' => [
             'label' => 'E-pasta adrese',
@@ -31,17 +31,8 @@ return [
     ],
 
     'messages' => [
-
         'failed' => 'Šie akreditācijas dati neatbilst mūsu ierakstiem.',
-
-    ],
-
-    'notifications' => [
-
-        'throttled' => [
-            'title' => 'Pārāk daudz pieteikšanās mēģinājumu. Lūdzu, mēģiniet vēlreiz pēc :seconds sekundēm.',
-        ],
-
+        'throttled' => 'Pārāk daudz pieteikšanās mēģinājumu. Lūdzu, mēģiniet vēlreiz pēc :seconds sekundēm.',
     ],
 
 ];

@@ -22,12 +22,8 @@ return [
 
     ],
 
-    'notifications' => [
-
-        'saved' => [
-            'title' => 'သိမ်းဆည်းထားသည်',
-        ],
-
+    'messages' => [
+        'saved' => 'သိမ်းဆည်းထားသည်',
     ],
 
 ];

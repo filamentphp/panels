@@ -4,18 +4,22 @@ return [
 
     'direction' => 'ltr',
 
-    'actions' => [
+    'buttons' => [
 
-        'logout' => [
-            'label' => '退出登录',
+        'dark_theme' => [
+            'label' => '切换暗黑模式',
         ],
 
-        'open_database_notifications' => [
+        'database_notifications' => [
             'label' => '打开通知',
         ],
 
-        'open_user_menu' => [
-            'label' => '用户菜单',
+        'light_theme' => [
+            'label' => '切换明亮模式',
+        ],
+
+        'logout' => [
+            'label' => '退出登录',
         ],
 
         'sidebar' => [
@@ -30,16 +34,8 @@ return [
 
         ],
 
-        'theme_switcher' => [
-
-            'dark' => [
-                'label' => '切换暗黑模式',
-            ],
-
-            'light' => [
-                'label' => '切换明亮模式',
-            ],
-
+        'user_menu' => [
+            'label' => '用户菜单',
         ],
 
     ],

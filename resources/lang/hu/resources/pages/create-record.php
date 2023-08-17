@@ -26,12 +26,8 @@ return [
 
     ],
 
-    'notifications' => [
-
-        'created' => [
-            'title' => 'Létrehozva',
-        ],
-
+    'messages' => [
+        'created' => 'Létrehozva',
     ],
 
 ];

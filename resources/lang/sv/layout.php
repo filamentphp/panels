@@ -4,18 +4,22 @@ return [
 
     'direction' => 'ltr',
 
-    'actions' => [
+    'buttons' => [
 
-        'logout' => [
-            'label' => 'Logga ut',
+        'dark_theme' => [
+            'label' => 'Växla till mörkt läge',
         ],
 
-        'open_database_notifications' => [
+        'database_notifications' => [
             'label' => 'Öppna aviseringar',
         ],
 
-        'open_user_menu' => [
-            'label' => 'Användarmeny',
+        'light_theme' => [
+            'label' => 'Växla till ljust läge',
+        ],
+
+        'logout' => [
+            'label' => 'Logga ut',
         ],
 
         'sidebar' => [
@@ -30,16 +34,8 @@ return [
 
         ],
 
-        'theme_switcher' => [
-
-            'dark' => [
-                'label' => 'Växla till mörkt läge',
-            ],
-
-            'light' => [
-                'label' => 'Växla till ljust läge',
-            ],
-
+        'user_menu' => [
+            'label' => 'Användarmeny',
         ],
 
     ],

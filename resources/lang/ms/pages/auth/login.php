@@ -6,20 +6,15 @@ return [
 
     'heading' => 'Log masuk ke akaun anda',
 
-    'actions' => [
+    'buttons' => [
 
-        'register' => [
-            'before' => 'atau',
-            'label' => 'mendaftar akaun',
-        ],
-
-        'request_password_reset' => [
-            'label' => 'Lupa kata laluan?',
+        'authenticate' => [
+            'label' => 'Log masuk',
         ],
 
     ],
 
-    'form' => [
+    'fields' => [
 
         'email' => [
             'label' => 'Emel',
@@ -33,29 +28,11 @@ return [
             'label' => 'Ingat saya',
         ],
 
-        'actions' => [
-
-            'authenticate' => [
-                'label' => 'Log masuk',
-            ],
-
-        ],
-
     ],
 
     'messages' => [
-
         'failed' => 'Bukti kelayakan ini tidak sepadan dengan rekod kami.',
-
-    ],
-
-    'notifications' => [
-
-        'throttled' => [
-            'title' => 'Terlalu banyak percubaan log masuk. Sila cuba lagi dalam :seconds saat.',
-            'body' => 'Sila cuba lagi dalam masa :seconds saat.',
-        ],
-
+        'throttled' => 'Terlalu banyak percubaan log masuk. Sila cuba lagi dalam :seconds saat.',
     ],
 
 ];

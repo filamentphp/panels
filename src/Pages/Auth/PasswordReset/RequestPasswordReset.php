@@ -6,15 +6,12 @@ use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use DanHarrin\LivewireRateLimiting\WithRateLimiting;
 use Exception;
 use Filament\Actions\Action;
-use Filament\Actions\ActionGroup;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Notifications\Auth\ResetPassword as ResetPasswordNotification;
 use Filament\Notifications\Notification;
-use Filament\Pages\Concerns\InteractsWithFormActions;
-use Filament\Pages\SimplePage;
+use Filament\Pages\CardPage;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Password;
@@ -22,20 +19,16 @@ use Illuminate\Support\Facades\Password;
 /**
  * @property Form $form
  */
-class RequestPasswordReset extends SimplePage
+class RequestPasswordReset extends CardPage
 {
-    use InteractsWithFormActions;
     use WithRateLimiting;
 
     /**
      * @var view-string
      */
-    protected static string $view = 'filament-panels::pages.auth.password-reset.request-password-reset';
+    protected static string $view = 'filament::pages.auth.password-reset.request-password-reset';
 
-    /**
-     * @var array<string, mixed> | null
-     */
-    public ?array $data = [];
+    public ?string $email = '';
 
     public function mount(): void
     {
@@ -52,14 +45,10 @@ class RequestPasswordReset extends SimplePage
             $this->rateLimit(2);
         } catch (TooManyRequestsException $exception) {
             Notification::make()
-                ->title(__('filament-panels::pages/auth/password-reset/request-password-reset.notifications.throttled.title', [
+                ->title(__('filament::pages/auth/password-reset/request-password-reset.messages.throttled', [
                     'seconds' => $exception->secondsUntilAvailable,
                     'minutes' => ceil($exception->secondsUntilAvailable / 60),
                 ]))
-                ->body(array_key_exists('body', __('filament-panels::pages/auth/password-reset/request-password-reset.notifications.throttled') ?: []) ? __('filament-panels::pages/auth/password-reset/request-password-reset.notifications.throttled.body', [
-                    'seconds' => $exception->secondsUntilAvailable,
-                    'minutes' => ceil($exception->secondsUntilAvailable / 60),
-                ]) : null)
                 ->danger()
                 ->send();
 
@@ -68,7 +57,7 @@ class RequestPasswordReset extends SimplePage
 
         $data = $this->form->getState();
 
-        $status = Password::broker(Filament::getAuthPasswordBroker())->sendResetLink(
+        $status = Password::sendResetLink(
             $data,
             function (CanResetPassword $user, string $token): void {
                 if (! method_exists($user, 'notify')) {
@@ -84,7 +73,7 @@ class RequestPasswordReset extends SimplePage
             },
         );
 
-        if ($status !== Password::RESET_LINK_SENT) {
+        if ($status === Password::RESET_THROTTLED) {
             Notification::make()
                 ->title(__($status))
                 ->danger()
@@ -93,74 +82,58 @@ class RequestPasswordReset extends SimplePage
             return;
         }
 
+        $this->form->fill();
+
         Notification::make()
-            ->title(__($status))
+            ->title(__(Password::RESET_LINK_SENT))
             ->success()
             ->send();
-
-        $this->form->fill();
     }
 
     public function form(Form $form): Form
     {
         return $form
             ->schema([
-                $this->getEmailFormComponent(),
-            ])
-            ->statePath('data');
+                TextInput::make('email')
+                    ->label(__('filament::pages/auth/password-reset/request-password-reset.fields.email.label'))
+                    ->email()
+                    ->required()
+                    ->autocomplete()
+                    ->autofocus(),
+            ]);
     }
 
-    protected function getEmailFormComponent(): Component
+    public function requestAction(): Action
     {
-        return TextInput::make('email')
-            ->label(__('filament-panels::pages/auth/password-reset/request-password-reset.form.email.label'))
-            ->email()
-            ->required()
-            ->autocomplete()
-            ->autofocus();
+        return Action::make('request')
+            ->label(__('filament::pages/auth/password-reset/request-password-reset.buttons.request.label'))
+            ->submit('request');
     }
 
     public function loginAction(): Action
     {
         return Action::make('login')
             ->link()
-            ->label(__('filament-panels::pages/auth/password-reset/request-password-reset.actions.login.label'))
-            ->icon(match (__('filament-panels::layout.direction')) {
+            ->label(__('filament::pages/auth/password-reset/request-password-reset.buttons.login.label'))
+            ->icon(match (__('filament::layout.direction')) {
                 'rtl' => 'heroicon-m-arrow-right',
                 default => 'heroicon-m-arrow-left',
             })
             ->url(filament()->getLoginUrl());
     }
 
+    public static function getName(): string
+    {
+        return 'filament.core.auth.password-reset.request-password-reset';
+    }
+
     public function getTitle(): string | Htmlable
     {
-        return __('filament-panels::pages/auth/password-reset/request-password-reset.title');
+        return __('filament::pages/auth/password-reset/request-password-reset.title');
     }
 
     public function getHeading(): string | Htmlable
     {
-        return __('filament-panels::pages/auth/password-reset/request-password-reset.heading');
-    }
-
-    /**
-     * @return array<Action | ActionGroup>
-     */
-    protected function getFormActions(): array
-    {
-        return [
-            $this->getRequestFormAction(),
-        ];
-    }
-
-    protected function getRequestFormAction(): Action
-    {
-        return Action::make('request')
-            ->label(__('filament-panels::pages/auth/password-reset/request-password-reset.form.actions.request.label'))
-            ->submit('request');
-    }
-
-    protected function hasFullWidthFormActions(): bool
-    {
-        return true;
+        return __('filament::pages/auth/password-reset/request-password-reset.heading');
     }
 }

@@ -26,12 +26,8 @@ return [
 
     ],
 
-    'notifications' => [
-
-        'created' => [
-            'title' => 'Imeundwa',
-        ],
-
+    'messages' => [
+        'created' => 'Imeundwa',
     ],
 
 ];

@@ -4,22 +4,22 @@ return [
 
     'direction' => 'ltr',
 
-    'actions' => [
+    'buttons' => [
 
-        'billing' => [
-            'label' => 'Urus langganan',
+        'dark_theme' => [
+            'label' => 'Tukar mod gelap',
+        ],
+
+        'database_notifications' => [
+            'label' => 'Buka pemberitahuan',
+        ],
+
+        'light_theme' => [
+            'label' => 'Tukar mod terang',
         ],
 
         'logout' => [
             'label' => 'Log keluar',
-        ],
-
-        'open_database_notifications' => [
-            'label' => 'Buka pemberitahuan',
-        ],
-
-        'open_user_menu' => [
-            'label' => 'Menu Pengguna',
         ],
 
         'sidebar' => [
@@ -34,20 +34,8 @@ return [
 
         ],
 
-        'theme_switcher' => [
-
-            'dark' => [
-                'label' => 'Tukar mod gelap',
-            ],
-
-            'light' => [
-                'label' => 'Tukar mod terang',
-            ],
-
-            'system' => [
-                'label' => 'Dayakan tema sistem',
-            ],
-
+        'user_menu' => [
+            'label' => 'Menu Pengguna',
         ],
 
     ],

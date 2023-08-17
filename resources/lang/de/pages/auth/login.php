@@ -6,7 +6,11 @@ return [
 
     'heading' => 'Melden Sie sich an.',
 
-    'actions' => [
+    'buttons' => [
+
+        'authenticate' => [
+            'label' => 'Anmelden',
+        ],
 
         'register' => [
             'before' => 'oder',
@@ -16,10 +20,9 @@ return [
         'request_password_reset' => [
             'label' => 'Passwort vergessen?',
         ],
-
     ],
 
-    'form' => [
+    'fields' => [
 
         'email' => [
             'label' => 'E-Mail-Adresse',
@@ -33,28 +36,11 @@ return [
             'label' => 'Angemeldet bleiben',
         ],
 
-        'actions' => [
-
-            'authenticate' => [
-                'label' => 'Anmelden',
-            ],
-
-        ],
-
     ],
 
     'messages' => [
-
         'failed' => 'Diese Kombination aus Zugangsdaten wurde nicht in unserer Datenbank gefunden.',
-
-    ],
-
-    'notifications' => [
-
-        'throttled' => [
-            'title' => 'Zu viele Loginversuche. Versuchen Sie es bitte in :seconds Sekunden nochmal.',
-        ],
-
+        'throttled' => 'Zu viele Loginversuche. Versuchen Sie es bitte in :seconds Sekunden nochmal.',
     ],
 
 ];

@@ -1,8 +1,8 @@
-<x-filament-panels::page
+<x-filament::page
     @class([
-        'fi-resource-view-record-page',
-        'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug()),
-        'fi-resource-record-' . $record->getKey(),
+        'filament-resources-view-record-page',
+        'filament-resources-' . str_replace('/', '-', $this->getResource()::getSlug()),
+        'filament-resources-record-' . $record->getKey(),
     ])
 >
     @php
@@ -13,17 +13,16 @@
         @if ($this->hasInfolist())
             {{ $this->infolist }}
         @else
-            <div
-                wire:key="{{ $this->getId() }}.forms.{{ $this->getFormStatePath() }}"
-            >
-                {{ $this->form }}
-            </div>
+            {{ $this->form }}
         @endif
     @endif
 
     @if (count($relationManagers))
-        <x-filament-panels::resources.relation-managers
-            :active-locale="isset($activeLocale) ? $activeLocale : null"
+        @if (! $this->hasCombinedRelationManagerTabsWithContent())
+            <x-filament::hr />
+        @endif
+
+        <x-filament::resources.relation-managers
             :active-manager="$activeRelationManager"
             :content-tab-label="$this->getContentTabLabel()"
             :managers="$relationManagers"
@@ -39,6 +38,6 @@
                     @endif
                 </x-slot>
             @endif
-        </x-filament-panels::resources.relation-managers>
+        </x-filament::resources.relation-managers>
     @endif
-</x-filament-panels::page>
+</x-filament::page>

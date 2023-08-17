@@ -1,18 +1,15 @@
-<x-filament-panels::page.simple>
+<div>
     @if (filament()->hasRegistration())
         <x-slot name="subheading">
-            {{ __('filament-panels::pages/auth/login.actions.register.before') }}
+            {{ __('filament::pages/auth/login.buttons.register.before') }}
 
             {{ $this->registerAction }}
         </x-slot>
     @endif
 
-    <x-filament-panels::form wire:submit="authenticate">
+    <form wire:submit.prevent="authenticate" class="grid gap-y-8">
         {{ $this->form }}
 
-        <x-filament-panels::form.actions
-            :actions="$this->getCachedFormActions()"
-            :full-width="$this->hasFullWidthFormActions()"
-        />
-    </x-filament-panels::form>
-</x-filament-panels::page.simple>
+        {{ $this->authenticateAction }}
+    </form>
+</div>

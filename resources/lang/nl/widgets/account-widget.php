@@ -2,7 +2,7 @@
 
 return [
 
-    'actions' => [
+    'buttons' => [
 
         'logout' => [
             'label' => 'Uitloggen',
@@ -10,6 +10,6 @@ return [
 
     ],
 
-    'welcome' => 'Welkom',
+    'welcome' => 'Welkom, :user',
 
 ];

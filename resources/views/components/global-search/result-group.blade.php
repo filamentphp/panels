@@ -3,27 +3,27 @@
     'results',
 ])
 
-<li
-    {{ $attributes->class(['fi-global-search-result-group']) }}
+<ul
+    {{ $attributes->class(['filament-global-search-result-group divide-y dark:divide-gray-700']) }}
 >
-    <div
-        class="sticky top-0 z-10 border-b border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-gray-900"
-    >
-        <h3
-            class="px-4 py-2 text-sm font-semibold capitalize text-gray-950 dark:bg-white/5 dark:text-white"
+    <li class="sticky top-0 z-10">
+        <header
+            class="bg-gray-50/80 px-6 py-2 backdrop-blur-xl backdrop-saturate-150 dark:bg-gray-700"
         >
-            {{ $label }}
-        </h3>
-    </div>
+            <p
+                class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400"
+            >
+                {{ $label }}
+            </p>
+        </header>
+    </li>
 
-    <ul class="divide-y divide-gray-200 dark:divide-white/10">
-        @foreach ($results as $result)
-            <x-filament-panels::global-search.result
-                :actions="$result->actions"
-                :details="$result->details"
-                :title="$result->title"
-                :url="$result->url"
-            />
-        @endforeach
-    </ul>
-</li>
+    @foreach ($results as $result)
+        <x-filament::global-search.result
+            :actions="$result->actions"
+            :details="$result->details"
+            :title="$result->title"
+            :url="$result->url"
+        />
+    @endforeach
+</ul>

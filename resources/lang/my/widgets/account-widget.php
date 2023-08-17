@@ -2,7 +2,7 @@
 
 return [
 
-    'actions' => [
+    'buttons' => [
 
         'logout' => [
             'label' => 'ထွက်မည်',
@@ -10,6 +10,6 @@ return [
 
     ],
 
-    'welcome' => 'ကြိုဆိုပါတယ်',
+    'welcome' => 'ကြိုဆိုပါတယ် :user',
 
 ];

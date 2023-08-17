@@ -4,50 +4,26 @@ return [
 
     'direction' => 'ltr',
 
-    'actions' => [
+    'buttons' => [
 
-        'billing' => [
-            'label' => 'Előfizetésem kezelése',
+        'dark_theme' => [
+            'label' => 'Sötét mód bekapcsolása',
+        ],
+
+        'database_notifications' => [
+            'label' => 'Értesítések',
+        ],
+
+        'light_theme' => [
+            'label' => 'Világos mód bekapcsolása',
         ],
 
         'logout' => [
             'label' => 'Kijelentkezés',
         ],
 
-        'open_database_notifications' => [
-            'label' => 'Értesítések',
-        ],
-
-        'open_user_menu' => [
+        'user_menu' => [
             'label' => 'felhasználói menü',
-        ],
-
-        'sidebar' => [
-
-            'collapse' => [
-                'label' => 'Oldsáv becsukása',
-            ],
-
-            'expand' => [
-                'label' => 'Oldalsáv kinyitása',
-            ],
-
-        ],
-
-        'theme_switcher' => [
-
-            'dark' => [
-                'label' => 'Sötét mód bekapcsolása',
-            ],
-
-            'light' => [
-                'label' => 'Világos mód bekapcsolása',
-            ],
-
-            'system' => [
-                'label' => 'Rendszer alapján',
-            ],
-
         ],
 
     ],

@@ -29,21 +29,28 @@ class ViewRecord extends Page implements HasInfolists
     /**
      * @var view-string
      */
-    protected static string $view = 'filament-panels::resources.pages.view-record';
+    protected static string $view = 'filament::resources.pages.view-record';
 
     /**
      * @var array<string, mixed> | null
      */
     public ?array $data = [];
 
+    /**
+     * @var array<int | string, string | array<mixed>>
+     */
+    protected $queryString = [
+        'activeRelationManager',
+    ];
+
     public function getBreadcrumb(): string
     {
-        return static::$breadcrumb ?? __('filament-panels::resources/pages/view-record.breadcrumb');
+        return static::$breadcrumb ?? __('filament::resources/pages/view-record.breadcrumb');
     }
 
     public function getContentTabLabel(): ?string
     {
-        return __('filament-panels::resources/pages/view-record.content.tab.label');
+        return __('filament::resources/pages/view-record.content.tab.label');
     }
 
     public function mount(int | string $record): void
@@ -52,9 +59,11 @@ class ViewRecord extends Page implements HasInfolists
 
         $this->authorizeAccess();
 
-        if (! $this->hasInfolist()) {
-            $this->fillForm();
+        if ($this->hasInfolist()) {
+            return;
         }
+
+        $this->fillForm();
     }
 
     protected function authorizeAccess(): void
@@ -71,20 +80,9 @@ class ViewRecord extends Page implements HasInfolists
 
     protected function fillForm(): void
     {
-        $data = $this->getRecord()->attributesToArray();
-
-        /** @internal Read the DocBlock above the following method. */
-        $this->fillFormWithDataAndCallHooks($data);
-    }
-
-    /**
-     * @internal Never override or call this method. If you completely override `fillForm()`, copy the contents of this method into your override.
-     *
-     * @param  array<string, mixed>  $data
-     */
-    protected function fillFormWithDataAndCallHooks(array $data): void
-    {
         $this->callHook('beforeFill');
+
+        $data = $this->getRecord()->attributesToArray();
 
         $data = $this->mutateFormDataBeforeFill($data);
 
@@ -178,7 +176,7 @@ class ViewRecord extends Page implements HasInfolists
             return static::$title;
         }
 
-        return __('filament-panels::resources/pages/view-record.title', [
+        return __('filament::resources/pages/view-record.title', [
             'label' => $this->getRecordTitle(),
         ]);
     }
@@ -190,15 +188,10 @@ class ViewRecord extends Page implements HasInfolists
                 ->operation('view')
                 ->disabled()
                 ->model($this->getRecord())
-                ->statePath($this->getFormStatePath())
+                ->statePath('data')
                 ->columns($this->hasInlineLabels() ? 1 : 2)
                 ->inlineLabel($this->hasInlineLabels()),
         );
-    }
-
-    public function getFormStatePath(): ?string
-    {
-        return 'data';
     }
 
     public function infolist(Infolist $infolist): Infolist

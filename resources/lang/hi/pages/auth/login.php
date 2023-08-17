@@ -6,7 +6,15 @@ return [
 
     'heading' => 'अपने अकाउंट में साइन इन करें',
 
-    'form' => [
+    'buttons' => [
+
+        'authenticate' => [
+            'label' => 'लॉग इन',
+        ],
+
+    ],
+
+    'fields' => [
 
         'email' => [
             'label' => 'ईमेल',
@@ -20,28 +28,11 @@ return [
             'label' => 'मुझे याद रखना',
         ],
 
-        'actions' => [
-
-            'authenticate' => [
-                'label' => 'लॉग इन',
-            ],
-
-        ],
-
     ],
 
     'messages' => [
-
         'failed' => 'ये प्रमाण हमारे रिकॉर्ड से मेल नहीं खा रहे हैं।',
-
-    ],
-
-    'notifications' => [
-
-        'throttled' => [
-            'title' => 'बहुत सारे लॉगिन प्रयास। :seconds सेकंड में फिर से कोशिश करें।',
-        ],
-
+        'throttled' => 'बहुत सारे लॉगिन प्रयास। :seconds सेकंड में फिर से कोशिश करें।',
     ],
 
 ];
