@@ -56,11 +56,10 @@ Tab::make()
 You can also change the icon's position to be after the label instead of before it, using the `iconPosition()` method:
 
 ```php
-use Filament\Support\Enums\IconPosition;
-
 Tab::make()
     ->icon('heroicon-m-user-group')
-    ->iconPosition(IconPosition::After)
+    ->icon('heroicon-m-pencil-square')
+    ->iconPosition('after')
 ```
 
 ### Adding badges to filter tabs
@@ -109,12 +108,12 @@ protected static string $view = 'filament.resources.users.pages.list-users';
 
 This assumes that you have created a view at `resources/views/filament/resources/users/pages/list-users.blade.php`.
 
-Here's a basic example of what that view might contain:
+Here's a very simple example of what that view might contain:
 
 ```blade
-<x-filament-panels::page>
+<x-filament::page>
     {{ $this->table }}
-</x-filament-panels::page>
+</x-filament::page>
 ```
 
 To see everything that the default view contains, you can check the `vendor/filament/filament/resources/views/resources/pages/list-records.blade.php` file in your project.

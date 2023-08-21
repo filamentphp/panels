@@ -2,7 +2,7 @@
 
 return [
 
-    'actions' => [
+    'buttons' => [
 
         'logout' => [
             'label' => 'Դուրս գալ',
@@ -10,6 +10,6 @@ return [
 
     ],
 
-    'welcome' => 'Բարի գալուստ',
+    'welcome' => 'Բարի գալուստ, :user',
 
 ];

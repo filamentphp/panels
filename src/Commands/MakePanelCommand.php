@@ -3,13 +3,14 @@
 namespace Filament\Commands;
 
 use Filament\Support\Commands\Concerns\CanManipulateFiles;
+use Filament\Support\Commands\Concerns\CanValidateInput;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
-use function Laravel\Prompts\text;
 
 class MakePanelCommand extends Command
 {
     use CanManipulateFiles;
+    use CanValidateInput;
 
     protected $description = 'Create a new Filament panel';
 
@@ -17,11 +18,7 @@ class MakePanelCommand extends Command
 
     public function handle(): int
     {
-        $id = Str::lcfirst($this->argument('id') ?? text(
-            label: 'What is the ID?',
-            placeholder: 'app',
-            required: true,
-        ));
+        $id = Str::lcfirst($this->argument('id') ?? $this->askRequired('ID (e.g. `app`)', 'id'));
 
         $class = (string) str($id)
             ->studly()
@@ -48,14 +45,13 @@ class MakePanelCommand extends Command
 
         if (! Str::contains($appConfig, "App\\Providers\\Filament\\{$class}::class")) {
             file_put_contents(config_path('app.php'), str_replace(
-                'App\\Providers\\RouteServiceProvider::class,',
-                "App\\Providers\\Filament\\{$class}::class," . PHP_EOL . '        App\\Providers\\RouteServiceProvider::class,',
+                'App\\Providers\\RouteServiceProvider::class,' . PHP_EOL,
+                "App\\Providers\\Filament\\{$class}::class," . PHP_EOL . '        App\\Providers\\RouteServiceProvider::class,' . PHP_EOL,
                 $appConfig,
             ));
         }
 
         $this->components->info("Successfully created {$class}!");
-        $this->components->warn("We've attempted to register the {$class} in your [config/app.php] file as a service provider.  If you get an error while trying to access your panel then this process has probably failed. You can manually register the service provider by adding it to the [providers] array.");
 
         return static::SUCCESS;
     }

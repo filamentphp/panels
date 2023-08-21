@@ -6,7 +6,15 @@ return [
 
     'heading' => 'Ingia kwenye akaunti yako',
 
-    'form' => [
+    'buttons' => [
+
+        'authenticate' => [
+            'label' => 'Ingia',
+        ],
+
+    ],
+
+    'fields' => [
 
         'email' => [
             'label' => 'Barua pepe',
@@ -20,28 +28,11 @@ return [
             'label' => 'Nikumbuke',
         ],
 
-        'actions' => [
-
-            'authenticate' => [
-                'label' => 'Ingia',
-            ],
-
-        ],
-
     ],
 
     'messages' => [
-
         'failed' => 'Hati hizi hazilingani na rekodi zetu.',
-
-    ],
-
-    'notifications' => [
-
-        'throttled' => [
-            'title' => 'Majaribio mengi sana ya kuingia. Tafadhali jaribu tena ndani ya sekunde :seconds.',
-        ],
-
+        'throttled' => 'Majaribio mengi sana ya kuingia. Tafadhali jaribu tena ndani ya sekunde :seconds.',
     ],
 
 ];

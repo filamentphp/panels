@@ -6,36 +6,28 @@ return [
 
     'heading' => 'Passwort vergessen?',
 
-    'actions' => [
+    'buttons' => [
 
         'login' => [
             'label' => 'zurück zum Login',
         ],
 
+        'request' => [
+            'label' => 'E-Mail zusenden',
+        ],
+
     ],
 
-    'form' => [
+    'fields' => [
 
         'email' => [
             'label' => 'E-Mail-Adresse',
         ],
 
-        'actions' => [
-
-            'request' => [
-                'label' => 'E-Mail zusenden',
-            ],
-
-        ],
-
     ],
 
-    'notifications' => [
-
-        'throttled' => [
-            'title' => 'Zu viele Versuche. Versuchen Sie es bitte in :seconds Sekunden nochmal.',
-        ],
-
+    'messages' => [
+        'throttled' => 'Zu viele Versuche. Versuchen Sie es bitte in :seconds Sekunden nochmal.',
     ],
 
 ];

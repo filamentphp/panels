@@ -5,7 +5,7 @@ namespace Filament\Http\Responses\Auth;
 use Filament\Facades\Filament;
 use Filament\Http\Responses\Auth\Contracts\EmailVerificationResponse as Responsable;
 use Illuminate\Http\RedirectResponse;
-use Livewire\Features\SupportRedirects\Redirector;
+use Livewire\Redirector;
 
 class EmailVerificationResponse implements Responsable
 {

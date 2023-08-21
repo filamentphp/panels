@@ -4,22 +4,17 @@ return [
 
     'title' => 'Autentificare',
 
-    'heading' => 'Loghează-te în contul tau',
+    'heading' => 'Logheaza-te în contul tau',
 
-    'actions' => [
+    'buttons' => [
 
-        'register' => [
-            'before' => 'sau',
-            'label' => 'creează cont',
-        ],
-
-        'request_password_reset' => [
-            'label' => 'Ai uitat parola?',
+        'authenticate' => [
+            'label' => 'Autentificare',
         ],
 
     ],
 
-    'form' => [
+    'fields' => [
 
         'email' => [
             'label' => 'Email',
@@ -33,29 +28,11 @@ return [
             'label' => 'Ține-mă minte',
         ],
 
-        'actions' => [
-
-            'authenticate' => [
-                'label' => 'Autentificare',
-            ],
-
-        ],
-
     ],
 
     'messages' => [
-
         'failed' => 'Emailul sau parola nu sunt corecte',
-
-    ],
-
-    'notifications' => [
-
-        'throttled' => [
-            'title' => 'Te rugăm să aștepți :seconds secunde înainte de a încerca din nou',
-            'body' => 'Te rugăm sa reîncerci in :seconds secunde.',
-        ],
-
+        'throttled' => 'Te rugăm să aștepți :seconds secunde înainte de a încerca din nou',
     ],
 
 ];

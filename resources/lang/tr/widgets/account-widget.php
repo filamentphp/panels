@@ -2,7 +2,7 @@
 
 return [
 
-    'actions' => [
+    'buttons' => [
 
         'logout' => [
             'label' => 'Oturumu kapat',
@@ -10,6 +10,6 @@ return [
 
     ],
 
-    'welcome' => 'Hoş geldin',
+    'welcome' => 'Hoş geldin, :user',
 
 ];

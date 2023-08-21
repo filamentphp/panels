@@ -6,7 +6,7 @@ return [
 
     'heading' => 'E-mailadres verifiëren',
 
-    'actions' => [
+    'buttons' => [
 
         'resend_notification' => [
             'label' => 'Opnieuw verzenden',
@@ -17,20 +17,8 @@ return [
     'messages' => [
         'notification_not_received' => 'Geen e-mail ontvangen?',
         'notification_sent' => 'We hebben een e-mail gestuurd naar :email met instructies om je e-mailadres te verifiëren.',
-
-    ],
-
-    'notifications' => [
-
-        'notification_resent' => [
-            'title' => 'E-mail opnieuw verzonden.',
-        ],
-
-        'notification_resend_throttled' => [
-            'title' => 'Te veel verzendpogingen',
-            'body' => 'Probeer het opnieuw over :seconds seconden.',
-        ],
-
+        'notification_resent' => 'E-mail opnieuw verzonden.',
+        'notification_resend_throttled' => 'Te veel pogingen. Probeer het opnieuw over :seconds seconden.',
     ],
 
 ];

@@ -5,8 +5,6 @@ namespace Filament\Pages;
 use Filament\Facades\Filament;
 use Filament\Panel;
 use Filament\Support\Facades\FilamentIcon;
-use Filament\Widgets\Widget;
-use Filament\Widgets\WidgetConfiguration;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Route;
 
@@ -17,20 +15,20 @@ class Dashboard extends Page
     /**
      * @var view-string
      */
-    protected static string $view = 'filament-panels::pages.dashboard';
+    protected static string $view = 'filament::pages.dashboard';
 
     public static function getNavigationLabel(): string
     {
         return static::$navigationLabel ??
             static::$title ??
-            __('filament-panels::pages/dashboard.title');
+            __('filament::pages/dashboard.title');
     }
 
     public static function getNavigationIcon(): ?string
     {
-        return static::$navigationIcon
-            ?? FilamentIcon::resolve('panels::pages.dashboard.navigation-item')
-            ?? (Filament::hasTopNavigation() ? 'heroicon-m-home' : 'heroicon-o-home');
+        return static::$navigationIcon ??
+            FilamentIcon::resolve('panels::pages.dashboard.navigation')?->name ??
+            'heroicon-o-home';
     }
 
     public static function routes(Panel $panel): void
@@ -41,19 +39,11 @@ class Dashboard extends Page
     }
 
     /**
-     * @return array<class-string<Widget> | WidgetConfiguration>
+     * @return array<class-string>
      */
     public function getWidgets(): array
     {
         return Filament::getWidgets();
-    }
-
-    /**
-     * @return array<class-string<Widget> | WidgetConfiguration>
-     */
-    public function getVisibleWidgets(): array
-    {
-        return $this->filterVisibleWidgets($this->getWidgets());
     }
 
     /**
@@ -66,6 +56,6 @@ class Dashboard extends Page
 
     public function getTitle(): string | Htmlable
     {
-        return static::$title ?? __('filament-panels::pages/dashboard.title');
+        return static::$title ?? __('filament::pages/dashboard.title');
     }
 }

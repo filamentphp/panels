@@ -26,12 +26,8 @@ return [
 
     ],
 
-    'notifications' => [
-
-        'created' => [
-            'title' => 'बन गया',
-        ],
-
+    'messages' => [
+        'created' => 'बन गया',
     ],
 
 ];

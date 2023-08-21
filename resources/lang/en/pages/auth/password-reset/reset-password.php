@@ -6,7 +6,15 @@ return [
 
     'heading' => 'Reset your password',
 
-    'form' => [
+    'buttons' => [
+
+        'reset' => [
+            'label' => 'Reset password',
+        ],
+
+    ],
+
+    'fields' => [
 
         'email' => [
             'label' => 'Email address',
@@ -21,23 +29,10 @@ return [
             'label' => 'Confirm password',
         ],
 
-        'actions' => [
-
-            'reset' => [
-                'label' => 'Reset password',
-            ],
-
-        ],
-
     ],
 
-    'notifications' => [
-
-        'throttled' => [
-            'title' => 'Too many reset attempts',
-            'body' => 'Please try again in :seconds seconds.',
-        ],
-
+    'messages' => [
+        'throttled' => 'Too many reset attempts. Please try again in :seconds seconds.',
     ],
 
 ];

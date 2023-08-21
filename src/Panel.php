@@ -38,14 +38,6 @@ class Panel extends Component
 
     protected ?Closure $bootUsing = null;
 
-    public static function make(): static
-    {
-        $static = app(static::class);
-        $static->configure();
-
-        return $static;
-    }
-
     public function default(bool $condition = true): static
     {
         $this->isDefault = $condition;
@@ -58,11 +50,7 @@ class Panel extends Component
         FilamentColor::register($this->colors);
 
         FilamentIcon::register($this->icons);
-
-        $this->registerRenderHooks();
-
         $this->registerLivewireComponents();
-        $this->registerLivewirePersistentMiddleware();
 
         foreach ($this->plugins as $plugin) {
             $plugin->boot($this);

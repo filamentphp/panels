@@ -4,22 +4,26 @@ return [
 
     'direction' => 'ltr',
 
-    'actions' => [
+    'buttons' => [
 
         'billing' => [
             'label' => 'Manage subscription',
         ],
 
-        'logout' => [
-            'label' => 'Sign out',
+        'dark_theme' => [
+            'label' => 'Toggle dark theme',
         ],
 
-        'open_database_notifications' => [
+        'database_notifications' => [
             'label' => 'Open notifications',
         ],
 
-        'open_user_menu' => [
-            'label' => 'User menu',
+        'light_theme' => [
+            'label' => 'Toggle light theme',
+        ],
+
+        'logout' => [
+            'label' => 'Sign out',
         ],
 
         'sidebar' => [
@@ -34,20 +38,12 @@ return [
 
         ],
 
-        'theme_switcher' => [
+        'system_theme' => [
+            'label' => 'Toggle system theme',
+        ],
 
-            'dark' => [
-                'label' => 'Enable dark theme',
-            ],
-
-            'light' => [
-                'label' => 'Enable light theme',
-            ],
-
-            'system' => [
-                'label' => 'Enable system theme',
-            ],
-
+        'user_menu' => [
+            'label' => 'User menu',
         ],
 
     ],

@@ -2,9 +2,9 @@
 
 return [
 
-    'title' => 'ایجاد :label',
+    'title' => 'ساختن :label',
 
-    'breadcrumb' => 'ایجاد',
+    'breadcrumb' => 'ساختن',
 
     'form' => [
 
@@ -15,23 +15,19 @@ return [
             ],
 
             'create' => [
-                'label' => 'ایجاد',
+                'label' => 'ساختن',
             ],
 
             'create_another' => [
-                'label' => 'ایجاد و ایجاد یکی دیگر',
+                'label' => 'ساختن و ساختن یکی دیگر',
             ],
 
         ],
 
     ],
 
-    'notifications' => [
-
-        'created' => [
-            'title' => 'ایجاد شد',
-        ],
-
+    'messages' => [
+        'created' => 'ساخته شد',
     ],
 
 ];

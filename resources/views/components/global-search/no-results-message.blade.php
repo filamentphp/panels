@@ -1,5 +1,5 @@
-<p
-    {{ $attributes->class(['fi-global-search-no-results-message px-4 py-4 text-sm text-gray-500 dark:text-gray-400']) }}
+<div
+    {{ $attributes->class(['filament-global-search-no-results-message px-6 py-4 dark:text-gray-200']) }}
 >
-    {{ __('filament-panels::global-search.no_results_message') }}
-</p>
+    {{ __('filament::global-search.no_results_message') }}
+</div>

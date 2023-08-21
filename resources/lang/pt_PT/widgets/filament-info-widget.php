@@ -2,13 +2,13 @@
 
 return [
 
-    'actions' => [
+    'buttons' => [
 
-        'open_documentation' => [
+        'visit_documentation' => [
             'label' => 'Documentação',
         ],
 
-        'open_github' => [
+        'visit_github' => [
             'label' => 'GitHub',
         ],
 

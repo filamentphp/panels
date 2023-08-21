@@ -2,13 +2,13 @@
 
 return [
 
-    'actions' => [
+    'buttons' => [
 
-        'open_documentation' => [
+        'visit_documentation' => [
             'label' => 'ব্যবহার গাইড',
         ],
 
-        'open_github' => [
+        'visit_github' => [
             'label' => 'গিটহাব',
         ],
 
