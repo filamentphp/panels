@@ -6,15 +6,20 @@ return [
 
     'heading' => 'Kirjaudu tilillesi',
 
-    'buttons' => [
+    'actions' => [
 
-        'authenticate' => [
-            'label' => 'Kirjaudu',
+        'register' => [
+            'before' => 'tai',
+            'label' => 'luo tili',
+        ],
+
+        'request_password_reset' => [
+            'label' => 'Salasana hukassa?',
         ],
 
     ],
 
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'Sähköpostiosoite',
@@ -28,11 +33,29 @@ return [
             'label' => 'Muista minut',
         ],
 
+        'actions' => [
+
+            'authenticate' => [
+                'label' => 'Kirjaudu',
+            ],
+
+        ],
+
     ],
 
     'messages' => [
+
         'failed' => 'Kirjautuminen epäonnistui.',
-        'throttled' => 'Liian monta kirjautumisyritystä. Yritä uudelleen :seconds sekunnin kuluttua.',
+
+    ],
+
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'Liian monta kirjautumisyritystä',
+            'body' => 'Yritä uudelleen :seconds sekunnin kuluttua.',
+        ],
+
     ],
 
 ];

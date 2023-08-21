@@ -1,7 +1,3 @@
-@import 'tippy.js/dist/tippy.css';
-@import 'tippy.js/themes/light.css';
-@import '../../../forms/dist/index.css';
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,11 +9,5 @@
 
     :root.dark {
         color-scheme: dark;
-    }
-
-    [dir='rtl'] select {
-        background-position: left 0.5rem center !important;
-        padding-left: 2.5rem;
-        padding-right: 0.75rem;
     }
 }

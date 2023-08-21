@@ -2,14 +2,14 @@
 
 return [
 
-    'buttons' => [
+    'actions' => [
 
-        'visit_documentation' => [
-            'label' => 'پەڕگەی یارماتیدەر',
+        'open_documentation' => [
+            'label' => 'Documentation',
         ],
 
-        'visit_github' => [
-            'label' => 'گیت هەب',
+        'open_github' => [
+            'label' => 'GitHub',
         ],
 
     ],

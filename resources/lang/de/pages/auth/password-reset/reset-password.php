@@ -6,15 +6,7 @@ return [
 
     'heading' => 'Passwort zurücksetzen',
 
-    'buttons' => [
-
-        'reset' => [
-            'label' => 'Passwort zurücksetzen',
-        ],
-
-    ],
-
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'E-Mail-Adresse',
@@ -29,10 +21,22 @@ return [
             'label' => 'Passwort bestätigen',
         ],
 
+        'actions' => [
+
+            'reset' => [
+                'label' => 'Passwort zurücksetzen',
+            ],
+
+        ],
+
     ],
 
-    'messages' => [
-        'throttled' => 'Zu viele Versuche. Versuchen Sie es bitte in :seconds Sekunden nochmal.',
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'Zu viele Versuche. Versuchen Sie es bitte in :seconds Sekunden nochmal.',
+        ],
+
     ],
 
 ];

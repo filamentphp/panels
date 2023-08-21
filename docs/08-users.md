@@ -6,7 +6,7 @@ title: Users
 
 By default, all `App\Models\User`s can access Filament locally. To allow them to access Filament in production, you must take a few extra steps to ensure that only the correct users have access to the app.
 
-## Authorizing access to the app
+## Authorizing access to the panel
 
 To set up your `App\Models\User` to access Filament in non-local environments, you must implement the `FilamentUser` contract:
 
@@ -30,7 +30,7 @@ class User extends Authenticatable implements FilamentUser
 }
 ```
 
-The `canAccessPanel()` method returns `true` or `false` depending on whether the user is allowed to access Filament. In this example, we check if the user's email ends with `@yourdomain.com` and if they have verified their email address.
+The `canAccessPanel()` method returns `true` or `false` depending on whether the user is allowed to access the `$panel`. In this example, we check if the user's email ends with `@yourdomain.com` and if they have verified their email address.
 
 ## Setting up user avatars
 
@@ -102,7 +102,7 @@ public function panel(Panel $panel): Panel
 }
 ```
 
-## Configuring the user name attribute
+## Configuring the user's name attribute
 
 By default, Filament will use the `name` attribute of the user to display their name in the app. To change this, you can implement the `HasName` contract:
 
@@ -142,26 +142,94 @@ public function panel(Panel $panel): Panel
         ->login()
         ->registration()
         ->passwordReset()
-        ->emailVerification();
+        ->emailVerification()
+        ->profile();
 }
 ```
 
 ### Customizing the authentication features
 
-If you'd like to replace these pages with your own, you can pass in a "route action" to any of these methods.
+If you'd like to replace these pages with your own, you can pass in any Filament page class to these methods.
 
-A route action could be a callback function that gets executed when you visit the page, or the name of a controller, or a Livewire component - anything that works when using `Route::get()` in Laravel normally.
-
-Most people will be able to make their desired customizations by extending the default Livewire class from the Filament codebase, overriding methods like `form()`, and then passing the new Livewire class in as the route action:
+Most people will be able to make their desired customizations by extending the base page class from the Filament codebase, overriding methods like `form()`, and then passing the new page class in to the configuration:
 
 ```php
-use App\Http\Livewire\Auth\Login;
+use App\Filament\Pages\Auth\EditProfile;
 use Filament\Panel;
 
 public function panel(Panel $panel): Panel
 {
     return $panel
         // ...
-        ->login(Login::class);
+        ->profile(EditProfile::class);
+}
+```
+
+In this example, we will customize the profile page. We need to create a new PHP class at `app/Filament/Pages/Auth/EditProfile.php`:
+
+```php
+<?php
+
+namespace App\Filament\Pages\Auth;
+
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Pages\Auth\EditProfile as BaseEditProfile;
+
+class EditProfile extends BaseEditProfile
+{
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TextInput::make('username')
+                    ->required()
+                    ->maxLength(255),
+                $this->getNameFormComponent(),
+                $this->getEmailFormComponent(),
+                $this->getPasswordFormComponent(),
+                $this->getPasswordConfirmationFormComponent(),
+            ]);
+    }
+}
+```
+
+This class extends the base profile page class from the Filament codebase. Other page classes you could extend include:
+
+- `Filament\Pages\Auth\Login`
+- `Filament\Pages\Auth\Register`
+- `Filament\Pages\Auth\EmailVerification\EmailVerificationPrompt`
+- `Filament\Pages\Auth\PasswordReset\RequestPasswordReset`
+- `Filament\Pages\Auth\PasswordReset\ResetPassword`
+
+In the `form()` method of the example, we call methods like `getNameFormComponent()` to get the default form components for the page. You can customize these components as required. For all the available customization options, see the base `EditProfile` page class in the Filament codebase - it contains all the methods that you can override to make changes.
+
+### Setting the authentication guard
+
+To set the authentication guard that Filament uses, you can pass in the guard name to the `authGuard()` configuration method:
+
+```php
+use Filament\Panel;
+
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        // ...
+        ->authGuard('web');
+}
+```
+
+### Setting the password broker
+
+To set the password broker that Filament uses, you can pass in the broker name to the `authPasswordBroker()` configuration method:
+
+```php
+use Filament\Panel;
+
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        // ...
+        ->authPasswordBroker('users');
 }
 ```

@@ -6,28 +6,37 @@ return [
 
     'heading' => 'Forgotten your password?',
 
-    'buttons' => [
+    'actions' => [
 
         'login' => [
             'label' => 'back to login',
         ],
 
-        'request' => [
-            'label' => 'Send email',
-        ],
-
     ],
 
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'Email address',
         ],
 
+        'actions' => [
+
+            'request' => [
+                'label' => 'Send email',
+            ],
+
+        ],
+
     ],
 
-    'messages' => [
-        'throttled' => 'Too many requests. Please try again in :seconds seconds.',
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'Too many requests',
+            'body' => 'Please try again in :seconds seconds.',
+        ],
+
     ],
 
 ];

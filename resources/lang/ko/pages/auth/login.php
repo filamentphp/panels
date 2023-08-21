@@ -6,15 +6,7 @@ return [
 
     'heading' => '로그인하세요',
 
-    'buttons' => [
-
-        'authenticate' => [
-            'label' => '로그인',
-        ],
-
-    ],
-
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => '이메일',
@@ -28,11 +20,28 @@ return [
             'label' => '기억하기',
         ],
 
+        'actions' => [
+
+            'authenticate' => [
+                'label' => '로그인',
+            ],
+
+        ],
+
     ],
 
     'messages' => [
+
         'failed' => '일치하는 계정이 없습니다.',
-        'throttled' => '로그인 시도가 너무 많이 발생했습니다. :seconds 초 후에 다시 시도 해주세요.',
+
+    ],
+
+    'notifications' => [
+
+        'throttled' => [
+            'title' => '로그인 시도가 너무 많이 발생했습니다. :seconds 초 후에 다시 시도 해주세요.',
+        ],
+
     ],
 
 ];

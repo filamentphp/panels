@@ -1,12 +1,14 @@
-<x-filament::page
+<x-filament-panels::page
     @class([
-        'filament-resources-list-records-page',
-        'filament-resources-' . str_replace('/', '-', $this->getResource()::getSlug()),
+        'fi-resource-list-records-page',
+        'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug()),
     ])
 >
-    @if (count($tabs = $this->getTabs()))
-        <div class="flex justify-center">
+    <div class="flex flex-col gap-y-6">
+        @if (count($tabs = $this->getTabs()))
             <x-filament::tabs>
+                {{ \Filament\Support\Facades\FilamentView::renderHook('panels::resource.pages.list-records.tabs.start', scopes: $this->getRenderHookScopes()) }}
+
                 @foreach ($tabs as $tabKey => $tab)
                     @php
                         $activeTab = strval($activeTab);
@@ -14,23 +16,24 @@
                     @endphp
 
                     <x-filament::tabs.item
-                        :wire:click="'$set(\'activeTab\', ' . (filled($tabKey) ? ('\'' . $tabKey . '\'') : 'null') . ')'"
                         :active="$activeTab === $tabKey"
                         :badge="$tab->getBadge()"
                         :icon="$tab->getIcon()"
-                        :icon-color="$tab->getIconColor()"
                         :icon-position="$tab->getIconPosition()"
+                        :wire:click="'$set(\'activeTab\', ' . (filled($tabKey) ? ('\'' . $tabKey . '\'') : 'null') . ')'"
                     >
                         {{ $tab->getLabel() ?? $this->generateTabLabel($tabKey) }}
                     </x-filament::tabs.item>
                 @endforeach
+
+                {{ \Filament\Support\Facades\FilamentView::renderHook('panels::resource.pages.list-records.tabs.end', scopes: $this->getRenderHookScopes()) }}
             </x-filament::tabs>
-        </div>
-    @endif
+        @endif
 
-    {{ filament()->renderHook('resource.pages.list-records.table.start') }}
+        {{ \Filament\Support\Facades\FilamentView::renderHook('panels::resource.pages.list-records.table.before', scopes: $this->getRenderHookScopes()) }}
 
-    {{ $this->table }}
+        {{ $this->table }}
 
-    {{ filament()->renderHook('resource.pages.list-records.table.end') }}
-</x-filament::page>
+        {{ \Filament\Support\Facades\FilamentView::renderHook('panels::resource.pages.list-records.table.after', scopes: $this->getRenderHookScopes()) }}
+    </div>
+</x-filament-panels::page>

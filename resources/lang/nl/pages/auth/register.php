@@ -6,20 +6,16 @@ return [
 
     'heading' => 'Registreren',
 
-    'buttons' => [
+    'actions' => [
 
         'login' => [
             'before' => 'of',
             'label' => 'inloggen op je account',
         ],
 
-        'register' => [
-            'label' => 'Registreren',
-        ],
-
     ],
 
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'E-mailadres',
@@ -38,10 +34,23 @@ return [
             'label' => 'Wachtwoord bevestigen',
         ],
 
+        'actions' => [
+
+            'register' => [
+                'label' => 'Registreren',
+            ],
+
+        ],
+
     ],
 
-    'messages' => [
-        'throttled' => 'Te veel pogingen. Probeer het opnieuw over :seconds seconden.',
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'Te veel registratiepogingen',
+            'body' => 'Probeer het opnieuw over :seconds seconden.',
+        ],
+
     ],
 
 ];

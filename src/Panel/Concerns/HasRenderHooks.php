@@ -3,30 +3,39 @@
 namespace Filament\Panel\Concerns;
 
 use Closure;
-use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Support\HtmlString;
+use Filament\Support\Facades\FilamentView;
 
 trait HasRenderHooks
 {
     /**
-     * @var array<string, array<Closure>>
+     * @var array<string, array<string, array<Closure>>>
      */
     protected array $renderHooks = [];
 
-    public function renderHook(string $name, Closure $hook): static
+    /**
+     * @param  string | array<string> | null  $scopes
+     */
+    public function renderHook(string $name, Closure $hook, string | array | null $scopes = null): static
     {
-        $this->renderHooks[$name][] = $hook;
+        if (! is_array($scopes)) {
+            $scopes = [$scopes];
+        }
+
+        foreach ($scopes as $scopeName) {
+            $this->renderHooks[$name][$scopeName][] = $hook;
+        }
 
         return $this;
     }
 
-    public function getRenderHook(string $name): Htmlable
+    protected function registerRenderHooks(): void
     {
-        $hooks = array_map(
-            fn (callable $hook): string => (string) app()->call($hook),
-            $this->renderHooks[$name] ?? [],
-        );
-
-        return new HtmlString(implode('', $hooks));
+        foreach ($this->renderHooks as $hookName => $scopedHooks) {
+            foreach ($scopedHooks as $scope => $hooks) {
+                foreach ($hooks as $hook) {
+                    FilamentView::registerRenderHook($hookName, $hook, $scope);
+                }
+            }
+        }
     }
 }

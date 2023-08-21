@@ -2,11 +2,11 @@
 
 namespace Filament\Resources\RelationManagers;
 
-use function Filament\authorize;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Support\Enums\IconPosition;
 use Filament\Tables;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Table;
@@ -16,7 +16,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
+
+use function Filament\authorize;
 
 class RelationManager extends Component implements Forms\Contracts\HasForms, Tables\Contracts\HasTable
 {
@@ -25,8 +28,10 @@ class RelationManager extends Component implements Forms\Contracts\HasForms, Tab
         makeTable as makeBaseTable;
     }
 
+    #[Locked]
     public Model $ownerRecord;
 
+    #[Locked]
     public ?string $pageClass = null;
 
     protected static string $relationship;
@@ -35,19 +40,14 @@ class RelationManager extends Component implements Forms\Contracts\HasForms, Tab
 
     protected static ?string $icon = null;
 
-    /**
-     * @var string | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | null
-     */
-    protected static string | array | null $iconColor = null;
-
-    protected static ?string $iconPosition = 'before';
+    protected static IconPosition $iconPosition = IconPosition::Before;
 
     protected static ?string $badge = null;
 
     /**
      * @var view-string
      */
-    protected static string $view = 'filament::resources.relation-manager';
+    protected static string $view = 'filament-panels::resources.relation-manager';
 
     /**
      * @deprecated Override the `table()` method to configure the table.
@@ -175,7 +175,7 @@ class RelationManager extends Component implements Forms\Contracts\HasForms, Tab
     protected function configureViewAction(Tables\Actions\ViewAction $action): void
     {
         $action
-            ->authorize(static fn (RelationManager $livewire, Model $record): bool => (! $livewire->isReadOnly()) && $livewire->canView($record))
+            ->authorize(static fn (RelationManager $livewire, Model $record): bool => $livewire->canView($record))
             ->infolist(fn (Infolist $infolist): Infolist => $this->infolist($infolist->columns(2)))
             ->form(fn (Form $form): Form => $this->form($form->columns(2)));
     }
@@ -222,7 +222,7 @@ class RelationManager extends Component implements Forms\Contracts\HasForms, Tab
             ->authorize(static fn (RelationManager $livewire): bool => (! $livewire->isReadOnly()) && $livewire->canRestoreAny());
     }
 
-    protected function can(string $action, Model $record = null): bool
+    protected function can(string $action, ?Model $record = null): bool
     {
         if (static::shouldSkipAuthorization()) {
             return true;
@@ -307,15 +307,7 @@ class RelationManager extends Component implements Forms\Contracts\HasForms, Tab
         return static::$icon;
     }
 
-    /**
-     * @return string | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | null
-     */
-    public static function getIconColor(Model $ownerRecord, string $pageClass): string | array | null
-    {
-        return static::$iconColor;
-    }
-
-    public static function getIconPosition(Model $ownerRecord, string $pageClass): ?string
+    public static function getIconPosition(Model $ownerRecord, string $pageClass): IconPosition
     {
         return static::$iconPosition;
     }
@@ -544,5 +536,29 @@ class RelationManager extends Component implements Forms\Contracts\HasForms, Tab
     protected function getForms(): array
     {
         return [];
+    }
+
+    /**
+     * @param  array<string, mixed>  $properties
+     */
+    public static function make(array $properties = []): RelationManagerConfiguration
+    {
+        return app(RelationManagerConfiguration::class, ['relationManager' => static::class, 'properties' => $properties]);
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function getRenderHookScopes(): array
+    {
+        return [
+            static::class,
+            $this->pageClass,
+        ];
+    }
+
+    public function placeholder(): View
+    {
+        return view('filament::components.loading-section');
     }
 }

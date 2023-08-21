@@ -4,26 +4,22 @@ return [
 
     'direction' => 'ltr',
 
-    'buttons' => [
+    'actions' => [
 
         'billing' => [
             'label' => 'Quản lý gói đăng ký',
         ],
 
-        'dark_theme' => [
-            'label' => 'Chuyển chế độ tối',
+        'logout' => [
+            'label' => 'Đăng xuất',
         ],
 
-        'database_notifications' => [
+        'open_database_notifications' => [
             'label' => 'Mở thông báo',
         ],
 
-        'light_theme' => [
-            'label' => 'Chuyển chế độ sáng',
-        ],
-
-        'logout' => [
-            'label' => 'Đăng xuất',
+        'open_user_menu' => [
+            'label' => 'Menu người dùng',
         ],
 
         'sidebar' => [
@@ -38,8 +34,20 @@ return [
 
         ],
 
-        'user_menu' => [
-            'label' => 'Menu người dùng',
+        'theme_switcher' => [
+
+            'dark' => [
+                'label' => 'Bật chế độ tối',
+            ],
+
+            'light' => [
+                'label' => 'Bật chế độ sáng',
+            ],
+
+            'system' => [
+                'label' => 'Bật chế độ theo hệ thống',
+            ],
+
         ],
 
     ],

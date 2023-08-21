@@ -2,7 +2,7 @@
 
 namespace Filament\Resources;
 
-use function Filament\authorize;
+use Exception;
 use Filament\Facades\Filament;
 use Filament\Forms\Form;
 use Filament\GlobalSearch\Actions\Action;
@@ -12,21 +12,29 @@ use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\Resources\Pages\PageRegistration;
 use Filament\Resources\RelationManagers\RelationGroup;
-use function Filament\Support\get_model_label;
-use function Filament\Support\locale_has_pluralization;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Resources\RelationManagers\RelationManagerConfiguration;
 use Filament\Tables\Table;
+use Filament\Widgets\Widget;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 use Illuminate\Support\Traits\Macroable;
+
+use function Filament\authorize;
+use function Filament\Support\get_model_label;
+use function Filament\Support\locale_has_pluralization;
 
 abstract class Resource
 {
@@ -74,6 +82,10 @@ abstract class Resource
 
     protected static ?string $slug = null;
 
+    protected static ?string $tenantOwnershipRelationshipName = null;
+
+    protected static ?string $tenantRelationshipName = null;
+
     /**
      * @var string | array<string>
      */
@@ -89,6 +101,8 @@ abstract class Resource
     protected static bool $shouldCheckPolicyExistence = true;
 
     protected static bool $shouldSkipAuthorization = false;
+
+    protected static ?bool $isGlobalSearchForcedCaseInsensitive = null;
 
     public static function form(Form $form): Form
     {
@@ -145,7 +159,7 @@ abstract class Resource
             ->first();
     }
 
-    public static function can(string $action, Model $record = null): bool
+    public static function can(string $action, ?Model $record = null): bool
     {
         if (static::shouldSkipAuthorization()) {
             return true;
@@ -163,7 +177,7 @@ abstract class Resource
     /**
      * @throws AuthorizationException
      */
-    public static function authorize(string $action, Model $record = null): ?Response
+    public static function authorize(string $action, ?Model $record = null): ?Response
     {
         if (static::shouldSkipAuthorization()) {
             return null;
@@ -299,9 +313,23 @@ abstract class Resource
         return $query;
     }
 
-    public static function scopeEloquentQueryToTenant(Builder $query, Model $tenant): Builder
+    public static function scopeEloquentQueryToTenant(Builder $query, ?Model $tenant): Builder
     {
-        return $query->whereBelongsTo($tenant);
+        $tenant ??= Filament::getTenant();
+
+        $tenantOwnershipRelationship = static::getTenantOwnershipRelationship($query->getModel());
+        $tenantOwnershipRelationshipName = static::getTenantOwnershipRelationshipName();
+
+        return match (true) {
+            $tenantOwnershipRelationship instanceof BelongsTo => $query->whereBelongsTo(
+                $tenant,
+                $tenantOwnershipRelationshipName,
+            ),
+            default => $query->whereHas(
+                $tenantOwnershipRelationshipName,
+                fn (Builder $query) => $query->whereKey($tenant->getKey()),
+            ),
+        };
     }
 
     /**
@@ -359,9 +387,11 @@ abstract class Resource
 
     public static function getGlobalSearchResults(string $search): Collection
     {
-        $search = strtolower($search);
-
         $query = static::getGlobalSearchEloquentQuery();
+
+        if (static::isGlobalSearchForcedCaseInsensitive($query)) {
+            $search = Str::lower($search);
+        }
 
         foreach (explode(' ', $search) as $searchWord) {
             $query->where(function (Builder $query) use ($searchWord) {
@@ -458,7 +488,7 @@ abstract class Resource
     }
 
     /**
-     * @return array<class-string | RelationGroup>
+     * @return array<class-string<RelationManager> | RelationGroup | RelationManagerConfiguration>
      */
     public static function getRelations(): array
     {
@@ -466,14 +496,14 @@ abstract class Resource
     }
 
     /**
-     * @return array<class-string>
+     * @return array<class-string<Widget>>
      */
     public static function getWidgets(): array
     {
         return [];
     }
 
-    public static function getRouteBaseName(string $panel = null): string
+    public static function getRouteBaseName(?string $panel = null): string
     {
         $panel ??= Filament::getCurrentPanel()->getId();
 
@@ -564,7 +594,7 @@ abstract class Resource
     /**
      * @param  array<mixed>  $parameters
      */
-    public static function getUrl(string $name = 'index', array $parameters = [], bool $isAbsolute = true, string $panel = null, Model $tenant = null): string
+    public static function getUrl(string $name = 'index', array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?Model $tenant = null): string
     {
         $parameters['tenant'] ??= ($tenant ?? Filament::getTenant());
 
@@ -583,6 +613,17 @@ abstract class Resource
         return static::getRecordTitleAttribute() !== null;
     }
 
+    public static function isGlobalSearchForcedCaseInsensitive(Builder $query): bool
+    {
+        /** @var Connection $databaseConnection */
+        $databaseConnection = $query->getConnection();
+
+        return static::$isGlobalSearchForcedCaseInsensitive ?? match ($databaseConnection->getDriverName()) {
+            'pgsql' => true,
+            default => false,
+        };
+    }
+
     /**
      * @param  array<string>  $searchAttributes
      */
@@ -591,42 +632,58 @@ abstract class Resource
         /** @var Connection $databaseConnection */
         $databaseConnection = $query->getConnection();
 
-        $searchOperator = match ($databaseConnection->getDriverName()) {
-            'pgsql' => 'ilike',
-            default => 'like',
-        };
-
         $model = $query->getModel();
+
+        $isForcedCaseInsensitive = static::isGlobalSearchForcedCaseInsensitive($query);
 
         foreach ($searchAttributes as $searchAttribute) {
             $whereClause = $isFirst ? 'where' : 'orWhere';
 
             $query->when(
                 method_exists($model, 'isTranslatableAttribute') && $model->isTranslatableAttribute($searchAttribute),
-                function (Builder $query) use ($databaseConnection, $searchAttribute, $searchOperator, $search, $whereClause): Builder {
+                function (Builder $query) use ($databaseConnection, $isForcedCaseInsensitive, $searchAttribute, $search, $whereClause): Builder {
                     $searchColumn = match ($databaseConnection->getDriverName()) {
                         'pgsql' => "{$searchAttribute}::text",
                         default => $searchAttribute,
                     };
 
-                    return $query->{"{$whereClause}Raw"}(
-                        "lower({$searchColumn}) {$searchOperator} ?",
+                    $caseAwareSearchColumn = $isForcedCaseInsensitive ?
+                        new Expression("lower({$searchColumn})") :
+                        $searchColumn;
+
+                    return $query->$whereClause(
+                        $caseAwareSearchColumn,
+                        'like',
                         "%{$search}%",
                     );
                 },
                 fn (Builder $query): Builder => $query->when(
                     str($searchAttribute)->contains('.'),
-                    fn ($query) => $query->{"{$whereClause}Relation"}(
-                        (string) str($searchAttribute)->beforeLast('.'),
-                        (string) str($searchAttribute)->afterLast('.'),
-                        $searchOperator,
-                        "%{$search}%",
-                    ),
-                    fn ($query) => $query->{$whereClause}(
-                        $searchAttribute,
-                        $searchOperator,
-                        "%{$search}%",
-                    ),
+                    function (Builder $query) use ($isForcedCaseInsensitive, $searchAttribute, $search, $whereClause): Builder {
+                        $searchColumn = (string) str($searchAttribute)->afterLast('.');
+
+                        $caseAwareSearchColumn = $isForcedCaseInsensitive ?
+                            new Expression("lower({$searchColumn})") :
+                            $searchColumn;
+
+                        return $query->{"{$whereClause}Relation"}(
+                            (string) str($searchAttribute)->beforeLast('.'),
+                            $caseAwareSearchColumn,
+                            'like',
+                            "%{$search}%",
+                        );
+                    },
+                    function ($query) use ($isForcedCaseInsensitive, $whereClause, $searchAttribute, $search) {
+                        $caseAwareSearchColumn = $isForcedCaseInsensitive ?
+                            new Expression("lower({$searchAttribute})") :
+                            $searchAttribute;
+
+                        return $query->{$whereClause}(
+                            $caseAwareSearchColumn,
+                            'like',
+                            "%{$search}%",
+                        );
+                    },
                 ),
             );
 
@@ -707,5 +764,46 @@ abstract class Resource
     public static function isDiscovered(): bool
     {
         return static::$isDiscovered;
+    }
+
+    public static function getTenantOwnershipRelationshipName(): string
+    {
+        return static::$tenantOwnershipRelationshipName ?? Filament::getTenantOwnershipRelationshipName();
+    }
+
+    public static function getTenantOwnershipRelationship(Model $record): Relation
+    {
+        $relationshipName = static::getTenantOwnershipRelationshipName();
+
+        if (! $record->isRelation($relationshipName)) {
+            $resourceClass = static::class;
+            $recordClass = $record::class;
+
+            throw new Exception("The model [{$recordClass}] does not have a relationship named [{$relationshipName}]. You can change the relationship being used by passing it to the [ownershipRelationship] argument of the [tenant()] method in configuration. You can change the relationship being used per-resource by setting it as the [\$tenantOwnershipRelationshipName] static property on the [{$resourceClass}] resource class.");
+        }
+
+        return $record->{$relationshipName}();
+    }
+
+    public static function getTenantRelationshipName(): string
+    {
+        return static::$tenantRelationshipName ?? (string) str(static::getModel())
+            ->classBasename()
+            ->pluralStudly()
+            ->camel();
+    }
+
+    public static function getTenantRelationship(Model $tenant): Relation
+    {
+        $relationshipName = static::getTenantRelationshipName();
+
+        if (! $tenant->isRelation($relationshipName)) {
+            $resourceClass = static::class;
+            $tenantClass = $tenant::class;
+
+            throw new Exception("The model [{$tenantClass}] does not have a relationship named [{$relationshipName}]. You can change the relationship being used by setting it as the [\$tenantRelationshipName] static property on the [{$resourceClass}] resource class.");
+        }
+
+        return $tenant->{$relationshipName}();
     }
 }

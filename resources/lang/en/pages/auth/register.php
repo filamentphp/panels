@@ -6,20 +6,16 @@ return [
 
     'heading' => 'Sign up',
 
-    'buttons' => [
+    'actions' => [
 
         'login' => [
             'before' => 'or',
             'label' => 'sign in to your account',
         ],
 
-        'register' => [
-            'label' => 'Sign up',
-        ],
-
     ],
 
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'Email address',
@@ -38,10 +34,23 @@ return [
             'label' => 'Confirm password',
         ],
 
+        'actions' => [
+
+            'register' => [
+                'label' => 'Sign up',
+            ],
+
+        ],
+
     ],
 
-    'messages' => [
-        'throttled' => 'Too many registration attempts. Please try again in :seconds seconds.',
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'Too many registration attempts',
+            'body' => 'Please try again in :seconds seconds.',
+        ],
+
     ],
 
 ];

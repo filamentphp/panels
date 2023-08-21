@@ -6,15 +6,7 @@ return [
 
     'heading' => 'আপনার অ্যাকাউন্টে সাইন ইন করুন',
 
-    'buttons' => [
-
-        'authenticate' => [
-            'label' => 'সাইন ইন',
-        ],
-
-    ],
-
-    'fields' => [
+    'form' => [
 
         'email' => [
             'label' => 'ইমেইল এড্রেস',
@@ -28,11 +20,28 @@ return [
             'label' => 'মনে রাখুন',
         ],
 
+        'actions' => [
+
+            'authenticate' => [
+                'label' => 'সাইন ইন',
+            ],
+
+        ],
+
     ],
 
     'messages' => [
+
         'failed' => 'আপনার নথি পাওয়া যায় নি।',
-        'throttled' => 'বহুসংখ্যক চেষ্টা, :seconds সেকেন্ড পরে পুনরায় চেষ্টা করুন।',
+
+    ],
+
+    'notifications' => [
+
+        'throttled' => [
+            'title' => 'বহুসংখ্যক চেষ্টা, :seconds সেকেন্ড পরে পুনরায় চেষ্টা করুন।',
+        ],
+
     ],
 
 ];
