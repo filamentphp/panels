@@ -4,9 +4,13 @@ return [
 
     'title' => 'Đăng nhập',
 
-    'heading' => 'Đăng nhập',
+    'heading' => 'Đăng nhập vào tài khoản của bạn',
 
-    'actions' => [
+    'buttons' => [
+
+        'authenticate' => [
+            'label' => 'Đăng nhập',
+        ],
 
         'register' => [
             'before' => 'hoặc',
@@ -19,10 +23,10 @@ return [
 
     ],
 
-    'form' => [
+    'fields' => [
 
         'email' => [
-            'label' => 'Địa chỉ email',
+            'label' => 'E-mail',
         ],
 
         'password' => [
@@ -33,29 +37,11 @@ return [
             'label' => 'Ghi nhớ đăng nhập',
         ],
 
-        'actions' => [
-
-            'authenticate' => [
-                'label' => 'Đăng nhập',
-            ],
-
-        ],
-
     ],
 
     'messages' => [
-
-        'failed' => 'Thông tin đăng nhập không chính xác.',
-
-    ],
-
-    'notifications' => [
-
-        'throttled' => [
-            'title' => 'Quá nhiều lần đăng nhập thất bại',
-            'body' => 'Vui lòng thử lại sau :seconds giây.',
-        ],
-
+        'failed' => 'E-mail hoặc mật khẩu không hợp lệ.',
+        'throttled' => 'Đăng nhập sai quá nhiều lần. Vui lòng thử lại sau :seconds giây nữa.',
     ],
 
 ];

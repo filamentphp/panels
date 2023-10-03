@@ -6,10 +6,10 @@ return [
 
     'breadcrumb' => '详情',
 
-    'content' => [
+    'form' => [
 
         'tab' => [
-            'label' => '详情',
+            'label' => '视图',
         ],
 
     ],

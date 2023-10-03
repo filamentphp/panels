@@ -21,22 +21,13 @@ class MenuItem extends Component
 
     protected string | Closure | Native | null $url = null;
 
-    protected bool | Closure $shouldOpenUrlInNewTab = false;
-
-    protected bool | Closure $isHidden = false;
-
-    protected bool | Closure $isVisible = true;
-
     final public function __construct()
     {
     }
 
     public static function make(): static
     {
-        $static = app(static::class);
-        $static->configure();
-
-        return $static;
+        return app(static::class);
     }
 
     /**
@@ -70,47 +61,11 @@ class MenuItem extends Component
         return $this;
     }
 
-    public function url(string | Closure | null $url, bool | Closure $shouldOpenInNewTab = false): static
+    public function url(string | Closure | null $url): static
     {
-        $this->openUrlInNewTab($shouldOpenInNewTab);
         $this->url = $url;
 
         return $this;
-    }
-
-    public function openUrlInNewTab(bool | Closure $condition = true): static
-    {
-        $this->shouldOpenUrlInNewTab = $condition;
-
-        return $this;
-    }
-
-    public function hidden(bool | Closure $condition = true): static
-    {
-        $this->isHidden = $condition;
-
-        return $this;
-    }
-
-    public function visible(bool | Closure $condition = true): static
-    {
-        $this->isVisible = $condition;
-
-        return $this;
-    }
-
-    public function isVisible(): bool
-    {
-        return ! $this->isHidden();
-    }
-
-    public function isHidden(): bool
-    {
-        if ($this->evaluate($this->isHidden)) {
-            return true;
-        }
-
-        return ! $this->evaluate($this->isVisible);
     }
 
     /**
@@ -139,10 +94,5 @@ class MenuItem extends Component
     public function getUrl(): ?string
     {
         return $this->evaluate($this->url);
-    }
-
-    public function shouldOpenUrlInNewTab(): bool
-    {
-        return (bool) $this->evaluate($this->shouldOpenUrlInNewTab);
     }
 }

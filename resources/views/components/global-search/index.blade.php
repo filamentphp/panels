@@ -1,15 +1,17 @@
-<div class="fi-global-search flex items-center">
-    {{ \Filament\Support\Facades\FilamentView::renderHook('panels::global-search.start') }}
+<div class="filament-global-search ms-4 flex items-center">
+    {{ filament()->renderHook('global-search.start') }}
 
-    <div class="sm:relative">
-        <x-filament-panels::global-search.field />
+    @if ($this->isEnabled())
+        <div class="relative">
+            <x-filament::global-search.input />
 
-        @if ($results !== null)
-            <x-filament-panels::global-search.results-container
-                :results="$results"
-            />
-        @endif
-    </div>
+            @if ($results !== null)
+                <x-filament::global-search.results-container
+                    :results="$results"
+                />
+            @endif
+        </div>
+    @endif
 
-    {{ \Filament\Support\Facades\FilamentView::renderHook('panels::global-search.end') }}
+    {{ filament()->renderHook('global-search.end') }}
 </div>

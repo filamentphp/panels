@@ -26,12 +26,8 @@ return [
 
     ],
 
-    'notifications' => [
-
-        'created' => [
-            'title' => '생성 완료',
-        ],
-
+    'messages' => [
+        'created' => '생성 완료',
     ],
 
 ];

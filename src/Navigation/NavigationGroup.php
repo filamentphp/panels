@@ -22,17 +22,14 @@ class NavigationGroup extends Component
 
     protected string | Closure | null $label = null;
 
-    final public function __construct(string | Closure | null $label = null)
+    final public function __construct(string $label = null)
     {
         $this->label($label);
     }
 
-    public static function make(string | Closure | null $label = null): static
+    public static function make(string $label = null): static
     {
-        $static = app(static::class, ['label' => $label]);
-        $static->configure();
-
-        return $static;
+        return app(static::class, ['label' => $label]);
     }
 
     public function collapsed(bool | Closure $condition = true): static

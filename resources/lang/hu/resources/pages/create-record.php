@@ -19,19 +19,15 @@ return [
             ],
 
             'create_another' => [
-                'label' => 'Létrehoz és másik hozzáadása',
+                'label' => 'Létrehoz és új létrehozása',
             ],
 
         ],
 
     ],
 
-    'notifications' => [
-
-        'created' => [
-            'title' => 'Létrehozva',
-        ],
-
+    'messages' => [
+        'created' => 'Létrehozva',
     ],
 
 ];

@@ -4,22 +4,22 @@ return [
 
     'direction' => 'ltr',
 
-    'actions' => [
+    'buttons' => [
 
-        'billing' => [
-            'label' => 'Aboneliği yönet',
+        'dark_theme' => [
+            'label' => 'Koyu tema',
+        ],
+
+        'database_notifications' => [
+            'label' => 'Bildirimleri aç',
+        ],
+
+        'light_theme' => [
+            'label' => 'Açık tema',
         ],
 
         'logout' => [
             'label' => 'Oturumu kapat',
-        ],
-
-        'open_database_notifications' => [
-            'label' => 'Bildirimleri aç',
-        ],
-
-        'open_user_menu' => [
-            'label' => 'Kullanıcı menüsü',
         ],
 
         'sidebar' => [
@@ -34,20 +34,8 @@ return [
 
         ],
 
-        'theme_switcher' => [
-
-            'dark' => [
-                'label' => 'Koyu tema',
-            ],
-
-            'light' => [
-                'label' => 'Açık tema',
-            ],
-
-            'system' => [
-                'label' => 'Sistem varsayılanı',
-            ],
-
+        'user_menu' => [
+            'label' => 'Kullanıcı menüsü',
         ],
 
     ],

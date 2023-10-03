@@ -6,16 +6,15 @@ use Filament\Facades\Filament;
 use Filament\Panel;
 use Filament\Support\Commands\Concerns\CanIndentStrings;
 use Filament\Support\Commands\Concerns\CanManipulateFiles;
+use Filament\Support\Commands\Concerns\CanValidateInput;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
-
-use function Laravel\Prompts\select;
-use function Laravel\Prompts\text;
 
 class MakeRelationManagerCommand extends Command
 {
     use CanIndentStrings;
     use CanManipulateFiles;
+    use CanValidateInput;
 
     protected $description = 'Create a new Filament relation manager class for a resource';
 
@@ -23,13 +22,7 @@ class MakeRelationManagerCommand extends Command
 
     public function handle(): int
     {
-        $resource = (string) str(
-            $this->argument('resource') ?? text(
-                label: 'What is the resource you would like to create this in?',
-                placeholder: 'DepartmentResource',
-                required: true,
-            ),
-        )
+        $resource = (string) str($this->argument('resource') ?? $this->askRequired('Resource (e.g. `DepartmentResource`)', 'resource'))
             ->studly()
             ->trim('/')
             ->trim('\\')
@@ -40,21 +33,13 @@ class MakeRelationManagerCommand extends Command
             $resource .= 'Resource';
         }
 
-        $relationship = (string) str($this->argument('relationship') ?? text(
-            label: 'What is the relationship?',
-            placeholder: 'members',
-            required: true,
-        ))
+        $relationship = (string) str($this->argument('relationship') ?? $this->askRequired('Relationship (e.g. `members`)', 'relationship'))
             ->trim(' ');
         $managerClass = (string) str($relationship)
             ->studly()
             ->append('RelationManager');
 
-        $recordTitleAttribute = (string) str($this->argument('recordTitleAttribute') ?? text(
-            label: 'What is the title attribute?',
-            placeholder: 'name',
-            required: true,
-        ))
+        $recordTitleAttribute = (string) str($this->argument('recordTitleAttribute') ?? $this->askRequired('Title attribute (e.g. `name`)', 'title attribute'))
             ->trim(' ');
 
         $panel = $this->option('panel');
@@ -67,28 +52,18 @@ class MakeRelationManagerCommand extends Command
             $panels = Filament::getPanels();
 
             /** @var Panel $panel */
-            $panel = (count($panels) > 1) ? $panels[select(
-                label: 'Which panel would you like to create this in?',
-                options: array_map(
+            $panel = (count($panels) > 1) ? $panels[$this->choice(
+                'Which panel would you like to create this in?',
+                array_map(
                     fn (Panel $panel): string => $panel->getId(),
                     $panels,
                 ),
-                default: Filament::getDefaultPanel()->getId()
+                Filament::getDefaultPanel()->getId(),
             )] : Arr::first($panels);
         }
 
-        $resourceDirectories = $panel->getResourceDirectories();
-        $resourceNamespaces = $panel->getResourceNamespaces();
-
-        $resourceNamespace = (count($resourceNamespaces) > 1) ?
-            select(
-                label: 'Which namespace would you like to create this in?',
-                options: $resourceNamespaces
-            ) :
-            (Arr::first($resourceNamespaces) ?? 'App\\Filament\\Resources');
-        $resourcePath = (count($resourceDirectories) > 1) ?
-            $resourceDirectories[array_search($resourceNamespace, $resourceNamespaces)] :
-            (Arr::first($resourceDirectories) ?? app_path('Filament/Resources/'));
+        $resourcePath = $panel->getResourceDirectory() ?? app_path('Filament/Resources/');
+        $resourceNamespace = $panel->getResourceNamespace() ?? 'App\\Filament\\Resources';
 
         $path = (string) str($managerClass)
             ->prepend("{$resourcePath}/{$resource}/RelationManagers/")
@@ -166,7 +141,7 @@ class MakeRelationManagerCommand extends Command
         $tableBulkActions = implode(PHP_EOL, $tableBulkActions);
 
         $this->copyStubToApp('RelationManager', $path, [
-            'modifyQueryUsing' => filled($modifyQueryUsing) ? PHP_EOL . $this->indentString($modifyQueryUsing, 3) : $modifyQueryUsing,
+            'modifyQueryUsing' => $this->indentString($modifyQueryUsing, 3),
             'namespace' => "{$resourceNamespace}\\{$resource}\\RelationManagers",
             'managerClass' => $managerClass,
             'recordTitleAttribute' => $recordTitleAttribute,

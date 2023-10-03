@@ -12,23 +12,23 @@
 
                 evaluatePageScrollPosition: function () {
                     this.isSticky =
-                        document.body.scrollHeight >=
-                        window.scrollY + window.innerHeight * 2
+                        window.scrollY + window.innerHeight * 2 <=
+                        document.body.scrollHeight
                 },
             }"
             x-init="evaluatePageScrollPosition"
             x-on:scroll.window="evaluatePageScrollPosition"
             x-bind:class="{
-                'fi-sticky sticky bottom-0 -mx-4 transform bg-white p-4 shadow-lg ring-1 ring-gray-950/5 transition dark:bg-gray-900 dark:ring-white/10 md:bottom-4 md:rounded-xl':
+                'filament-form-actions-sticky-panel sticky bottom-0 -mx-4 transform bg-white p-4 shadow-lg transition ring-1 ring-gray-950/5 md:-translate-y-4 md:rounded-xl dark:bg-gray-800 dark:ring-white/20':
                     isSticky,
             }"
         @endif
-        class="fi-form-actions"
     >
         <x-filament-actions::actions
             :actions="$actions"
             :alignment="$alignment ?? $this->getFormActionsAlignment()"
             :full-width="$fullWidth"
+            class="filament-form-actions"
         />
     </div>
 @endif

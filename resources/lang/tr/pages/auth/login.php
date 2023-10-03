@@ -2,60 +2,37 @@
 
 return [
 
-    'title' => 'Giriş Yap',
+    'title' => 'Giriş yap',
 
-    'heading' => 'Oturum Aç',
+    'heading' => 'Hesabınıza giriş yapın',
 
-    'actions' => [
+    'buttons' => [
 
-        'register' => [
-            'before' => 'veya',
-            'label' => 'bir hesap oluşturun',
-        ],
-
-        'request_password_reset' => [
-            'label' => 'Şifrenizi mi unuttunuz?',
+        'authenticate' => [
+            'label' => 'Giriş yap',
         ],
 
     ],
 
-    'form' => [
+    'fields' => [
 
         'email' => [
             'label' => 'E-posta adresi',
         ],
 
         'password' => [
-            'label' => 'Şifre',
+            'label' => 'Parola',
         ],
 
         'remember' => [
-            'label' => 'Beni Hatırla',
-        ],
-
-        'actions' => [
-
-            'authenticate' => [
-                'label' => 'Giriş Yap',
-            ],
-
+            'label' => 'Beni hatırla',
         ],
 
     ],
 
     'messages' => [
-
-        'failed' => 'Bu kimlik bilgileri kayıtlarımızla eşleşmiyor.',
-
-    ],
-
-    'notifications' => [
-
-        'throttled' => [
-            'title' => 'Çok fazla giriş denemesi',
-            'body' => 'Lütfen :seconds saniye sonra tekrar deneyin.',
-        ],
-
+        'failed' => 'Bu kimlik bilgileri kayıtlarla eşleşmiyor.',
+        'throttled' => 'Çok fazla giriş denemesi. Lütfen :seconds saniye sonra tekrar deneyin.',
     ],
 
 ];

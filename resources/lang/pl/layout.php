@@ -4,22 +4,22 @@ return [
 
     'direction' => 'ltr',
 
-    'actions' => [
+    'buttons' => [
 
-        'billing' => [
-            'label' => 'Zarządzaj subskrypcją',
+        'dark_theme' => [
+            'label' => 'Tryb ciemny',
+        ],
+
+        'database_notifications' => [
+            'label' => 'Otwórz powiadomienia',
+        ],
+
+        'light_theme' => [
+            'label' => 'Tryb jasny',
         ],
 
         'logout' => [
             'label' => 'Wyloguj się',
-        ],
-
-        'open_database_notifications' => [
-            'label' => 'Otwórz powiadomienia',
-        ],
-
-        'open_user_menu' => [
-            'label' => 'Menu użytkownika',
         ],
 
         'sidebar' => [
@@ -34,20 +34,8 @@ return [
 
         ],
 
-        'theme_switcher' => [
-
-            'dark' => [
-                'label' => 'Tryb ciemny',
-            ],
-
-            'light' => [
-                'label' => 'Tryb jasny',
-            ],
-
-            'system' => [
-                'label' => 'Tryb systemowy',
-            ],
-
+        'user_menu' => [
+            'label' => 'Menu użytkownika',
         ],
 
     ],

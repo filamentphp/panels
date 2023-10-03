@@ -22,12 +22,8 @@ return [
 
     ],
 
-    'notifications' => [
-
-        'saved' => [
-            'title' => '저장 완료',
-        ],
-
+    'messages' => [
+        'saved' => '저장 완료',
     ],
 
 ];

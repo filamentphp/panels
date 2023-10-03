@@ -100,7 +100,6 @@ trait HasNavigation
         }
 
         return collect($this->getNavigationItems())
-            ->filter(fn (NavigationItem $item): bool => $item->isVisible())
             ->sortBy(fn (NavigationItem $item): int => $item->getSort())
             ->groupBy(fn (NavigationItem $item): ?string => $item->getGroup())
             ->map(function (Collection $items, ?string $groupIndex): NavigationGroup {

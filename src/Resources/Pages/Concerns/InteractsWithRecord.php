@@ -2,16 +2,13 @@
 
 namespace Filament\Resources\Pages\Concerns;
 
-use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
-use Livewire\Attributes\Locked;
 
 trait InteractsWithRecord
 {
-    #[Locked]
-    public Model | int | string | null $record;
+    public Model | int | string $record;
 
     protected function resolveRecord(int | string $key): Model
     {
@@ -29,7 +26,7 @@ trait InteractsWithRecord
         return $this->record;
     }
 
-    public function getRecordTitle(): string | Htmlable
+    public function getRecordTitle(): string
     {
         $resource = static::getResource();
 
@@ -70,16 +67,5 @@ trait InteractsWithRecord
         $breadcrumbs[] = $this->getBreadcrumb();
 
         return $breadcrumbs;
-    }
-
-    protected function afterActionCalled(): void
-    {
-        if ($this->getRecord()->exists) {
-            return;
-        }
-
-        // Ensure that Livewire does not attempt to dehydrate
-        // a record that does not exist.
-        $this->record = null;
     }
 }

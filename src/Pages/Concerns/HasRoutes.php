@@ -3,7 +3,6 @@
 namespace Filament\Pages\Concerns;
 
 use Filament\Panel;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
 
 trait HasRoutes
@@ -32,7 +31,7 @@ trait HasRoutes
 
     public static function getSlug(): string
     {
-        return static::$slug ?? (string) str(class_basename(static::class))
+        return static::$slug ?? str(class_basename(static::class))
             ->kebab()
             ->slug();
     }
@@ -45,7 +44,7 @@ trait HasRoutes
         return [
             ...(static::isEmailVerificationRequired($panel) ? [static::getEmailVerifiedMiddleware($panel)] : []),
             ...(static::isTenantSubscriptionRequired($panel) ? [static::getTenantSubscribedMiddleware($panel)] : []),
-            ...Arr::wrap(static::$routeMiddleware),
+            ...static::$routeMiddleware,
         ];
     }
 

@@ -4,18 +4,22 @@ return [
 
     'direction' => 'ltr',
 
-    'actions' => [
+    'buttons' => [
 
-        'logout' => [
-            'label' => 'Odhlásit se',
+        'dark_theme' => [
+            'label' => 'Zapnout tmavý režim',
         ],
 
-        'open_database_notifications' => [
+        'database_notifications' => [
             'label' => 'Zobrazit notifikace',
         ],
 
-        'open_user_menu' => [
-            'label' => 'Nabídka uživatele',
+        'light_theme' => [
+            'label' => 'Zapnout světlý režim',
+        ],
+
+        'logout' => [
+            'label' => 'Odhlásit se',
         ],
 
         'sidebar' => [
@@ -30,16 +34,8 @@ return [
 
         ],
 
-        'theme_switcher' => [
-
-            'dark' => [
-                'label' => 'Zapnout tmavý režim',
-            ],
-
-            'light' => [
-                'label' => 'Zapnout světlý režim',
-            ],
-
+        'user_menu' => [
+            'label' => 'Nabídka uživatele',
         ],
 
     ],

@@ -15,7 +15,7 @@ protected function mutateFormDataBeforeCreate(array $data): array
 }
 ```
 
-Alternatively, if you're creating records in a modal action, check out the [Actions documentation](../../actions/prebuilt-actions/create#customizing-data-before-saving).
+Alternatively, if you're creating records in a modal action, check out the [actions documentation](../../actions/prebuilt-actions/create#customizing-data-before-saving).
 
 ## Customizing the creation process
 
@@ -30,7 +30,7 @@ protected function handleRecordCreation(array $data): Model
 }
 ```
 
-Alternatively, if you're creating records in a modal action, check out the [Actions documentation](../../actions/prebuilt-actions/create#customizing-the-creation-process).
+Alternatively, if you're creating records in a modal action, check out the [actions documentation](../../actions/prebuilt-actions/create#customizing-the-creation-process).
 
 ## Customizing redirects
 
@@ -69,7 +69,7 @@ protected function getCreatedNotificationTitle(): ?string
 }
 ```
 
-Alternatively, if you're creating records in a modal action, check out the [Actions documentation](../../actions/prebuilt-actions/create#customizing-the-save-notification).
+Alternatively, if you're creating records in a modal action, check out the [actions documentation](../../actions/prebuilt-actions/create#customizing-the-save-notification).
 
 You may customize the entire notification by overriding the `getCreatedNotification()` method on the create page class:
 
@@ -150,7 +150,7 @@ class CreateUser extends CreateRecord
 }
 ```
 
-Alternatively, if you're creating records in a modal action, check out the [Actions documentation](../../actions/prebuilt-actions/create#lifecycle-hooks).
+Alternatively, if you're creating records in a modal action, check out the [actions documentation](../../actions/prebuilt-actions/create#lifecycle-hooks).
 
 ## Halting the creation process
 
@@ -162,7 +162,7 @@ use Filament\Notifications\Notification;
 
 protected function beforeCreate(): void
 {
-    if (! $this->getRecord()->team->subscribed()) {
+    if (! $this->record->team->subscribed()) {
         Notification::make()
             ->warning()
             ->title('You don\'t have an active subscription!')
@@ -180,7 +180,7 @@ protected function beforeCreate(): void
 }
 ```
 
-Alternatively, if you're creating records in a modal action, check out the [Actions documentation](../../actions/prebuilt-actions/create#halting-the-creation-process).
+Alternatively, if you're creating records in a modal action, check out the [actions documentation](../../actions/prebuilt-actions/create#halting-the-creation-process).
 
 ## Authorization
 
@@ -229,7 +229,7 @@ protected function getSteps(): array
             ->schema([
                 TextInput::make('name')
                     ->required()
-                    ->live()
+                    ->reactive()
                     ->afterStateUpdated(fn ($state, callable $set) => $set('slug', Str::slug($state))),
                 TextInput::make('slug')
                     ->disabled()
@@ -253,7 +253,7 @@ protected function getSteps(): array
 }
 ```
 
-Alternatively, if you're creating records in a modal action, check out the [Actions documentation](../../actions/prebuilt-actions/create#using-a-wizard).
+Alternatively, if you're creating records in a modal action, check out the [actions documentation](../../actions/prebuilt-actions/create#using-a-wizard).
 
 Now, create a new record to see your wizard in action! Edit will still use the form defined within the resource class.
 
@@ -291,7 +291,7 @@ class CategoryResource extends Resource
     {
         return TextInput::make('name')
             ->required()
-            ->live()
+            ->reactive()
             ->afterStateUpdated(fn ($state, callable $set) => $set('slug', Str::slug($state)));
     }
     
@@ -340,19 +340,19 @@ protected static string $view = 'filament.resources.users.pages.create-user';
 
 This assumes that you have created a view at `resources/views/filament/resources/users/pages/create-user.blade.php`.
 
-Here's a basic example of what that view might contain:
+Here's a very simple example of what that view might contain:
 
 ```blade
-<x-filament-panels::page>
-    <x-filament-panels::form wire:submit="create">
+<x-filament::page>
+    <x-filament::form wire:submit.prevent="create">
         {{ $this->form }}
 
-        <x-filament-panels::form.actions
+        <x-filament::form.actions
             :actions="$this->getCachedFormActions()"
             :full-width="$this->hasFullWidthFormActions()"
         />
-    </x-filament-panels::form>
-</x-filament-panels::page>
+    </x-filament::form>
+</x-filament::page>
 ```
 
 To see everything that the default view contains, you can check the `vendor/filament/filament/resources/views/resources/pages/create-record.blade.php` file in your project.

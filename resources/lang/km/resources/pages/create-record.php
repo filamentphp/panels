@@ -26,12 +26,8 @@ return [
 
     ],
 
-    'notifications' => [
-
-        'created' => [
-            'title' => 'បានបង្កើត :label បានជោគជ័យ',
-        ],
-
+    'messages' => [
+        'created' => 'បានបង្កើត :label បានជោគជ័យ',
     ],
 
 ];

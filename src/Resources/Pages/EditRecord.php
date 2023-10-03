@@ -29,7 +29,7 @@ class EditRecord extends Page
     /**
      * @var view-string
      */
-    protected static string $view = 'filament-panels::resources.pages.edit-record';
+    protected static string $view = 'filament::resources.pages.edit-record';
 
     /**
      * @var array<string, mixed> | null
@@ -38,16 +38,21 @@ class EditRecord extends Page
 
     public ?string $previousUrl = null;
 
-    protected static ?string $navigationIcon = 'heroicon-o-pencil';
+    /**
+     * @var array<int | string, string | array<mixed>>
+     */
+    protected $queryString = [
+        'activeRelationManager',
+    ];
 
     public function getBreadcrumb(): string
     {
-        return static::$breadcrumb ?? __('filament-panels::resources/pages/edit-record.breadcrumb');
+        return static::$breadcrumb ?? __('filament::resources/pages/edit-record.breadcrumb');
     }
 
     public function getContentTabLabel(): ?string
     {
-        return __('filament-panels::resources/pages/edit-record.content.tab.label');
+        return __('filament::resources/pages/edit-record.content.tab.label');
     }
 
     public function mount(int | string $record): void
@@ -70,20 +75,9 @@ class EditRecord extends Page
 
     protected function fillForm(): void
     {
-        $data = $this->getRecord()->attributesToArray();
-
-        /** @internal Read the DocBlock above the following method. */
-        $this->fillFormWithDataAndCallHooks($data);
-    }
-
-    /**
-     * @internal Never override or call this method. If you completely override `fillForm()`, copy the contents of this method into your override.
-     *
-     * @param  array<string, mixed>  $data
-     */
-    protected function fillFormWithDataAndCallHooks(array $data): void
-    {
         $this->callHook('beforeFill');
+
+        $data = $this->getRecord()->attributesToArray();
 
         $data = $this->mutateFormDataBeforeFill($data);
 
@@ -117,41 +111,23 @@ class EditRecord extends Page
         $this->authorizeAccess();
 
         try {
-            /** @internal Read the DocBlock above the following method. */
-            $this->validateFormAndUpdateRecordAndCallHooks();
+            $this->callHook('beforeValidate');
+
+            $data = $this->form->getState();
+
+            $this->callHook('afterValidate');
+
+            $data = $this->mutateFormDataBeforeSave($data);
+
+            $this->callHook('beforeSave');
+
+            $this->handleRecordUpdate($this->getRecord(), $data);
+
+            $this->callHook('afterSave');
         } catch (Halt $exception) {
             return;
         }
 
-        /** @internal Read the DocBlock above the following method. */
-        $this->sendSavedNotificationAndRedirect(shouldRedirect: $shouldRedirect);
-    }
-
-    /**
-     * @internal Never override or call this method. If you completely override `save()`, copy the contents of this method into your override.
-     */
-    protected function validateFormAndUpdateRecordAndCallHooks(): void
-    {
-        $this->callHook('beforeValidate');
-
-        $data = $this->form->getState();
-
-        $this->callHook('afterValidate');
-
-        $data = $this->mutateFormDataBeforeSave($data);
-
-        $this->callHook('beforeSave');
-
-        $this->handleRecordUpdate($this->getRecord(), $data);
-
-        $this->callHook('afterSave');
-    }
-
-    /**
-     * @internal Never override or call this method. If you completely override `save()`, copy the contents of this method into your override.
-     */
-    protected function sendSavedNotificationAndRedirect(bool $shouldRedirect = true): void
-    {
         $this->getSavedNotification()?->send();
 
         if ($shouldRedirect && ($redirectUrl = $this->getRedirectUrl())) {
@@ -174,7 +150,7 @@ class EditRecord extends Page
 
     protected function getSavedNotificationTitle(): ?string
     {
-        return $this->getSavedNotificationMessage() ?? __('filament-panels::resources/pages/edit-record.notifications.saved.title');
+        return $this->getSavedNotificationMessage() ?? __('filament::resources/pages/edit-record.messages.saved');
     }
 
     /**
@@ -202,6 +178,13 @@ class EditRecord extends Page
     protected function mutateFormDataBeforeSave(array $data): array
     {
         return $data;
+    }
+
+    public function openDeleteModal(): void
+    {
+        $this->dispatchBrowserEvent('open-modal', [
+            'id' => 'delete',
+        ]);
     }
 
     protected function configureAction(Action $action): void
@@ -270,7 +253,7 @@ class EditRecord extends Page
             return static::$title;
         }
 
-        return __('filament-panels::resources/pages/edit-record.title', [
+        return __('filament::resources/pages/edit-record.title', [
             'label' => $this->getRecordTitle(),
         ]);
     }
@@ -289,7 +272,7 @@ class EditRecord extends Page
     protected function getSaveFormAction(): Action
     {
         return Action::make('save')
-            ->label(__('filament-panels::resources/pages/edit-record.form.actions.save.label'))
+            ->label(__('filament::resources/pages/edit-record.form.actions.save.label'))
             ->submit('save')
             ->keyBindings(['mod+s']);
     }
@@ -302,36 +285,21 @@ class EditRecord extends Page
     protected function getCancelFormAction(): Action
     {
         return Action::make('cancel')
-            ->label(__('filament-panels::resources/pages/edit-record.form.actions.cancel.label'))
+            ->label(__('filament::resources/pages/edit-record.form.actions.cancel.label'))
             ->url($this->previousUrl ?? static::getResource()::getUrl())
             ->color('gray');
     }
 
     public function form(Form $form): Form
     {
-        return $form;
-    }
-
-    /**
-     * @return array<int | string, string | Form>
-     */
-    protected function getForms(): array
-    {
-        return [
-            'form' => $this->form(static::getResource()::form(
-                $this->makeForm()
-                    ->operation('edit')
-                    ->model($this->getRecord())
-                    ->statePath($this->getFormStatePath())
-                    ->columns($this->hasInlineLabels() ? 1 : 2)
-                    ->inlineLabel($this->hasInlineLabels()),
-            )),
-        ];
-    }
-
-    public function getFormStatePath(): ?string
-    {
-        return 'data';
+        return static::getResource()::form(
+            $form
+                ->operation('edit')
+                ->model($this->getRecord())
+                ->statePath('data')
+                ->columns($this->hasInlineLabels() ? 1 : 2)
+                ->inlineLabel($this->hasInlineLabels()),
+        );
     }
 
     protected function getRedirectUrl(): ?string
@@ -352,25 +320,5 @@ class EditRecord extends Page
         return [
             'record' => $this->getRecord(),
         ];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function getSubNavigationParameters(): array
-    {
-        return [
-            'record' => $this->getRecord(),
-        ];
-    }
-
-    public function getSubNavigation(): array
-    {
-        return static::getResource()::getRecordSubNavigation($this);
-    }
-
-    public static function shouldRegisterNavigation(array $parameters = []): bool
-    {
-        return parent::shouldRegisterNavigation($parameters) && static::getResource()::canEdit($parameters['record']);
     }
 }

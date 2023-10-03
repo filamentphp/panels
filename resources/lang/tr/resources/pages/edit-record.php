@@ -15,14 +15,10 @@ return [
             ],
 
             'save' => [
-                'label' => 'Değişiklikleri kaydet',
+                'label' => 'Kaydet',
             ],
 
         ],
-
-    ],
-
-    'content' => [
 
         'tab' => [
             'label' => 'Düzenle',
@@ -30,12 +26,8 @@ return [
 
     ],
 
-    'notifications' => [
-
-        'saved' => [
-            'title' => 'Kaydedildi',
-        ],
-
+    'messages' => [
+        'saved' => 'Kaydedildi',
     ],
 
 ];

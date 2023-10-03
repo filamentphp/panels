@@ -3,34 +3,27 @@
 namespace Filament\Pages\Tenancy;
 
 use Filament\Actions\Action;
-use Filament\Actions\ActionGroup;
 use Filament\Facades\Filament;
 use Filament\Forms\Form;
+use Filament\Pages\CardPage;
 use Filament\Pages\Concerns;
-use Filament\Pages\Concerns\InteractsWithFormActions;
-use Filament\Pages\SimplePage;
 use Filament\Panel;
 use Filament\Support\Exceptions\Halt;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
-
-use function Filament\authorize;
 
 /**
  * @property Form $form
  */
-abstract class RegisterTenant extends SimplePage
+abstract class RegisterTenant extends CardPage
 {
-    use InteractsWithFormActions;
     use Concerns\HasRoutes;
 
     /**
      * @var view-string
      */
-    protected static string $view = 'filament-panels::pages.tenancy.register-tenant';
+    protected static string $view = 'filament::pages.tenancy.register-tenant';
 
     /**
      * @var array<string, mixed> | null
@@ -47,7 +40,6 @@ abstract class RegisterTenant extends SimplePage
 
         Route::get("/{$slug}", static::class)
             ->middleware(static::getRouteMiddleware($panel))
-            ->withoutMiddleware(static::getWithoutRouteMiddleware($panel))
             ->name('registration');
     }
 
@@ -58,14 +50,12 @@ abstract class RegisterTenant extends SimplePage
     {
         return [
             ...(static::isEmailVerificationRequired($panel) ? [static::getEmailVerifiedMiddleware($panel)] : []),
-            ...Arr::wrap(static::$routeMiddleware),
+            ...static::$routeMiddleware,
         ];
     }
 
     public function mount(): void
     {
-        abort_unless(static::canView(), 404);
-
         $this->form->fill();
     }
 
@@ -118,11 +108,6 @@ abstract class RegisterTenant extends SimplePage
         return Filament::getUrl($this->tenant);
     }
 
-    public function form(Form $form): Form
-    {
-        return $form;
-    }
-
     /**
      * @return array<int | string, string | Form>
      */
@@ -135,6 +120,13 @@ abstract class RegisterTenant extends SimplePage
                     ->statePath('data'),
             ),
         ];
+    }
+
+    public function registerAction(): Action
+    {
+        return Action::make('register')
+            ->label(static::getLabel())
+            ->submit('register');
     }
 
     public function getModel(): string
@@ -150,41 +142,5 @@ abstract class RegisterTenant extends SimplePage
     public static function getSlug(): string
     {
         return static::$slug ?? 'new';
-    }
-
-    public function hasLogo(): bool
-    {
-        return false;
-    }
-
-    /**
-     * @return array<Action | ActionGroup>
-     */
-    protected function getFormActions(): array
-    {
-        return [
-            $this->getRegisterFormAction(),
-        ];
-    }
-
-    public function getRegisterFormAction(): Action
-    {
-        return Action::make('register')
-            ->label(static::getLabel())
-            ->submit('register');
-    }
-
-    protected function hasFullWidthFormActions(): bool
-    {
-        return true;
-    }
-
-    public static function canView(): bool
-    {
-        try {
-            return authorize('create', Filament::getTenantModel())->allowed();
-        } catch (AuthorizationException $exception) {
-            return $exception->toResponse()->allowed();
-        }
     }
 }

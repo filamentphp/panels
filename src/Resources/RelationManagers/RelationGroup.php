@@ -18,7 +18,7 @@ class RelationGroup extends Component
     protected ?string $pageClass = null;
 
     /**
-     * @param  array<class-string<RelationManager> | RelationManagerConfiguration>  $managers
+     * @param  array<class-string>  $managers
      */
     public function __construct(
         protected string | Closure $label,
@@ -27,7 +27,7 @@ class RelationGroup extends Component
     }
 
     /**
-     * @param  array<class-string<RelationManager> | RelationManagerConfiguration>  $managers
+     * @param  array<class-string>  $managers
      */
     public static function make(string | Closure $label, array | Closure $managers): static
     {
@@ -64,7 +64,7 @@ class RelationGroup extends Component
     }
 
     /**
-     * @return array<class-string<RelationManager> | RelationManagerConfiguration>
+     * @return array<class-string>
      */
     public function getManagers(): array
     {
@@ -77,21 +77,8 @@ class RelationGroup extends Component
 
         return array_filter(
             $this->managers,
-            fn (string | RelationManagerConfiguration $manager): bool => $this->normalizeRelationManagerClass($manager)::canViewForRecord($ownerRecord, $pageClass),
+            fn (string $manager): bool => $manager::canViewForRecord($ownerRecord, $pageClass),
         );
-    }
-
-    /**
-     * @param  class-string<RelationManager> | RelationManagerConfiguration  $manager
-     * @return class-string<RelationManager>
-     */
-    protected function normalizeRelationManagerClass(string | RelationManagerConfiguration $manager): string
-    {
-        if ($manager instanceof RelationManagerConfiguration) {
-            return $manager->relationManager;
-        }
-
-        return $manager;
     }
 
     public function getBadge(): ?string

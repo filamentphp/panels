@@ -4,23 +4,21 @@ namespace Filament\Resources\Pages;
 
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
-use Filament\Facades\Filament;
+use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists\Infolist;
-use Filament\Resources\Concerns\HasTabs;
+use Filament\Resources\Pages\ListRecords\Tab;
 use Filament\Tables;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
-use Livewire\Attributes\Url;
 
-class ListRecords extends Page implements Tables\Contracts\HasTable
+class ListRecords extends Page implements Forms\Contracts\HasForms, Tables\Contracts\HasTable
 {
-    use HasTabs;
+    use Forms\Concerns\InteractsWithForms;
     use Tables\Concerns\InteractsWithTable {
         makeTable as makeBaseTable;
     }
@@ -28,48 +26,39 @@ class ListRecords extends Page implements Tables\Contracts\HasTable
     /**
      * @var view-string
      */
-    protected static string $view = 'filament-panels::resources.pages.list-records';
-
-    #[Url]
-    public bool $isTableReordering = false;
+    protected static string $view = 'filament::resources.pages.list-records';
 
     /**
-     * @var array<string, mixed> | null
+     * @var array<int | string, string | array<mixed>>
      */
-    #[Url]
-    public ?array $tableFilters = null;
+    protected $queryString = [
+        'activeTab' => ['except' => ''],
+        'isTableReordering' => ['except' => false],
+        'tableFilters',
+        'tableGrouping' => ['except' => ''],
+        'tableGroupingDirection' => ['except' => ''],
+        'tableSortColumn' => ['except' => ''],
+        'tableSortDirection' => ['except' => ''],
+        'tableSearch' => ['except' => ''],
+    ];
 
-    #[Url]
-    public ?string $tableGrouping = null;
-
-    #[Url]
-    public ?string $tableGroupingDirection = null;
-
-    /**
-     * @var ?string
-     */
-    #[Url]
-    public $tableSearch = '';
-
-    #[Url]
-    public ?string $tableSortColumn = null;
-
-    #[Url]
-    public ?string $tableSortDirection = null;
-
-    #[Url]
     public ?string $activeTab = null;
 
     public function mount(): void
     {
         static::authorizeResourceAccess();
 
-        $this->loadDefaultActiveTab();
+        if (
+            blank($this->activeTab) &&
+            count($tabs = $this->getTabs())
+        ) {
+            $this->activeTab = array_key_first($tabs);
+        }
     }
 
     public function getBreadcrumb(): ?string
     {
-        return static::$breadcrumb ?? __('filament-panels::resources/pages/list-records.breadcrumb');
+        return static::$breadcrumb ?? __('filament::resources/pages/list-records.breadcrumb');
     }
 
     public function table(Table $table): Table
@@ -100,19 +89,15 @@ class ListRecords extends Page implements Tables\Contracts\HasTable
         return static::getResource()::infolist($infolist);
     }
 
-    protected function configureCreateAction(CreateAction | Tables\Actions\CreateAction $action): void
+    protected function configureCreateAction(CreateAction $action): void
     {
         $resource = static::getResource();
 
         $action
             ->authorize($resource::canCreate())
             ->model($this->getModel())
-            ->modelLabel($this->getModelLabel() ?? static::getResource()::getModelLabel())
+            ->modelLabel($this->getModelLabel())
             ->form(fn (Form $form): Form => $this->form($form->columns(2)));
-
-        if ($action instanceof CreateAction) {
-            $action->relationship(($tenant = Filament::getTenant()) ? fn (): Relation => static::getResource()::getTenantRelationship($tenant) : null);
-        }
 
         if ($resource::hasPage('create')) {
             $action->url(fn (): string => $resource::getUrl('create'));
@@ -122,7 +107,6 @@ class ListRecords extends Page implements Tables\Contracts\HasTable
     protected function configureTableAction(Tables\Actions\Action $action): void
     {
         match (true) {
-            $action instanceof Tables\Actions\CreateAction => $this->configureCreateAction($action),
             $action instanceof Tables\Actions\DeleteAction => $this->configureDeleteAction($action),
             $action instanceof Tables\Actions\EditAction => $this->configureEditAction($action),
             $action instanceof Tables\Actions\ForceDeleteAction => $this->configureForceDeleteAction($action),
@@ -237,7 +221,6 @@ class ListRecords extends Page implements Tables\Contracts\HasTable
     {
         return $this->makeBaseTable()
             ->query(fn (): Builder => $this->getTableQuery())
-            ->modifyQueryUsing($this->modifyQueryWithActiveTab(...))
             ->modelLabel($this->getModelLabel() ?? static::getResource()::getModelLabel())
             ->pluralModelLabel($this->getPluralModelLabel() ?? static::getResource()::getPluralModelLabel())
             ->recordAction(function (Model $record, Table $table): ?string {
@@ -306,12 +289,20 @@ class ListRecords extends Page implements Tables\Contracts\HasTable
             ->reorderable(condition: static::getResource()::canReorder());
     }
 
-    /**
-     * @deprecated Override the `table()` method to configure the table.
-     */
-    protected function getTableQuery(): ?Builder
+    protected function getTableQuery(): Builder
     {
-        return static::getResource()::getEloquentQuery();
+        $query = static::getResource()::getEloquentQuery();
+
+        $tabs = $this->getTabs();
+
+        if (
+            filled($this->activeTab) &&
+            array_key_exists($this->activeTab, $tabs)
+        ) {
+            $tabs[$this->activeTab]->modifyQuery($query);
+        }
+
+        return $query;
     }
 
     /**
@@ -320,5 +311,20 @@ class ListRecords extends Page implements Tables\Contracts\HasTable
     protected function getForms(): array
     {
         return [];
+    }
+
+    /**
+     * @return array<string | int, Tab>
+     */
+    public function getTabs(): array
+    {
+        return [];
+    }
+
+    public function generateTabLabel(string $key): string
+    {
+        return (string) str($key)
+            ->replace(['_', '-'], ' ')
+            ->ucfirst();
     }
 }

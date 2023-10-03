@@ -30,12 +30,8 @@ return [
 
     ],
 
-    'notifications' => [
-
-        'saved' => [
-            'title' => 'Imehifadhiwa',
-        ],
-
+    'messages' => [
+        'saved' => 'Imehifadhiwa',
     ],
 
 ];

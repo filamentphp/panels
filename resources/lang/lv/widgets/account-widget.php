@@ -2,7 +2,7 @@
 
 return [
 
-    'actions' => [
+    'buttons' => [
 
         'logout' => [
             'label' => 'Iziet',
@@ -10,6 +10,6 @@ return [
 
     ],
 
-    'welcome' => 'Laipni lūdzam',
+    'welcome' => 'Laipni lūdzam, :user',
 
 ];

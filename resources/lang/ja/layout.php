@@ -4,18 +4,22 @@ return [
 
     'direction' => 'ltr',
 
-    'actions' => [
+    'buttons' => [
 
-        'logout' => [
-            'label' => 'ログアウト',
+        'dark_theme' => [
+            'label' => 'ダークモードに切り替える',
         ],
 
-        'open_database_notifications' => [
+        'database_notifications' => [
             'label' => 'お知らせを確認',
         ],
 
-        'open_user_menu' => [
-            'label' => 'ユーザーメニュー',
+        'light_theme' => [
+            'label' => 'ライトモードに切り替える',
+        ],
+
+        'logout' => [
+            'label' => 'ログアウト',
         ],
 
         'sidebar' => [
@@ -30,16 +34,8 @@ return [
 
         ],
 
-        'theme_switcher' => [
-
-            'dark' => [
-                'label' => 'ダークモードに切り替える',
-            ],
-
-            'light' => [
-                'label' => 'ライトモードに切り替える',
-            ],
-
+        'user_menu' => [
+            'label' => 'ユーザーメニュー',
         ],
 
     ],

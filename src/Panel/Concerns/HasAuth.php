@@ -3,7 +3,6 @@
 namespace Filament\Panel\Concerns;
 
 use Closure;
-use Filament\Pages\Auth\EditProfile;
 use Filament\Pages\Auth\EmailVerification\EmailVerificationPrompt;
 use Filament\Pages\Auth\Login;
 use Filament\Pages\Auth\PasswordReset\RequestPasswordReset;
@@ -18,8 +17,6 @@ use Illuminate\Support\Facades\URL;
 
 trait HasAuth
 {
-    protected string | Closure $emailVerifiedMiddlewareName = 'verified';
-
     /**
      * @var string | Closure | array<class-string, string> | null
      */
@@ -47,11 +44,7 @@ trait HasAuth
      */
     protected string | Closure | array | null $resetPasswordRouteAction = null;
 
-    protected ?string $profilePage = null;
-
     protected string $authGuard = 'web';
-
-    protected ?string $authPasswordBroker = null;
 
     /**
      * @param  string | Closure | array<class-string, string> | null  $promptAction
@@ -60,13 +53,6 @@ trait HasAuth
     {
         $this->emailVerificationRouteAction = $promptAction;
         $this->requiresEmailVerification($isRequired);
-
-        return $this;
-    }
-
-    public function emailVerifiedMiddlewareName(string | Closure $name): static
-    {
-        $this->emailVerifiedMiddlewareName = $name;
 
         return $this;
     }
@@ -110,16 +96,9 @@ trait HasAuth
         return $this;
     }
 
-    public function profile(?string $page = EditProfile::class): static
-    {
-        $this->profilePage = $page;
-
-        return $this;
-    }
-
     public function auth(): Guard
     {
-        return auth()->guard($this->getAuthGuard());
+        return auth()->guard($this->authGuard);
     }
 
     public function authGuard(string $guard): static
@@ -129,26 +108,9 @@ trait HasAuth
         return $this;
     }
 
-    public function authPasswordBroker(?string $broker = null): static
-    {
-        $this->authPasswordBroker = $broker;
-
-        return $this;
-    }
-
     public function isEmailVerificationRequired(): bool
     {
         return $this->isEmailVerificationRequired;
-    }
-
-    public function hasProfile(): bool
-    {
-        return filled($this->getProfilePage());
-    }
-
-    public function getProfilePage(): ?string
-    {
-        return $this->profilePage;
     }
 
     /**
@@ -170,7 +132,7 @@ trait HasAuth
 
     public function getEmailVerifiedMiddleware(): string
     {
-        return "{$this->getEmailVerifiedMiddlewareName()}:{$this->getEmailVerificationPromptRouteName()}";
+        return "verified:{$this->getEmailVerificationPromptRouteName()}";
     }
 
     /**
@@ -243,26 +205,9 @@ trait HasAuth
     /**
      * @param  array<mixed>  $parameters
      */
-    public function getProfileUrl(array $parameters = []): ?string
-    {
-        if (! $this->hasProfile()) {
-            return null;
-        }
-
-        return route("filament.{$this->getId()}.auth.profile", $parameters);
-    }
-
-    /**
-     * @param  array<mixed>  $parameters
-     */
     public function getLogoutUrl(array $parameters = []): string
     {
         return route("filament.{$this->getId()}.auth.logout", $parameters);
-    }
-
-    public function getEmailVerifiedMiddlewareName(): string
-    {
-        return $this->evaluate($this->emailVerifiedMiddlewareName);
     }
 
     /**
@@ -325,13 +270,8 @@ trait HasAuth
         return filled($this->getRegistrationRouteAction());
     }
 
-    public function getAuthGuard(): string
+    public function getAuthGuard(): ?string
     {
         return $this->authGuard;
-    }
-
-    public function getAuthPasswordBroker(): ?string
-    {
-        return $this->authPasswordBroker;
     }
 }

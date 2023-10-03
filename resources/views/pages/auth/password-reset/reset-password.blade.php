@@ -1,10 +1,5 @@
-<x-filament-panels::page.simple>
-    <x-filament-panels::form wire:submit="resetPassword">
-        {{ $this->form }}
+<form wire:submit.prevent="resetPassword" class="grid gap-y-8">
+    {{ $this->form }}
 
-        <x-filament-panels::form.actions
-            :actions="$this->getCachedFormActions()"
-            :full-width="$this->hasFullWidthFormActions()"
-        />
-    </x-filament-panels::form>
-</x-filament-panels::page.simple>
+    {{ $this->resetPasswordAction }}
+</form>

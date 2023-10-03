@@ -5,35 +5,36 @@
     'url',
 ])
 
-<li
-    {{ $attributes->class(['fi-global-search-result transition duration-75 focus-within:bg-gray-50 hover:bg-gray-50 dark:focus-within:bg-white/5 dark:hover:bg-white/5']) }}
->
-    <a
-        {{ \Filament\Support\generate_href_html($url) }}
-        @class([
-            'block outline-none',
-            'pe-4 ps-4 pt-4' => $actions,
-            'p-4' => ! $actions,
-        ])
+<li {{ $attributes->class(['filament-global-search-result']) }}>
+    <div
+        class="relative block px-6 py-4 hover:bg-gray-500/5 focus:bg-gray-500/5 focus:ring-1 focus:ring-gray-300"
     >
-        <h4 class="text-sm font-medium text-gray-950 dark:text-white">
-            {{ $title }}
-        </h4>
+        <a href="{{ $url }}" class="">
+            <p class="font-medium dark:text-gray-200">
+                {{ $title }}
+            </p>
 
-        @if ($details)
-            <dl class="mt-1">
+            <p
+                class="space-x-2 text-sm font-medium text-gray-500 rtl:space-x-reverse dark:text-gray-400"
+            >
                 @foreach ($details as $label => $value)
-                    <div class="text-sm text-gray-500 dark:text-gray-400">
-                        <dt class="inline font-medium">{{ $label }}:</dt>
+                    <span>
+                        <span
+                            class="font-medium text-gray-700 dark:text-gray-200"
+                        >
+                            {{ $label }}:
+                        </span>
 
-                        <dd class="inline">{{ $value }}</dd>
-                    </div>
+                        <span>
+                            {{ $value }}
+                        </span>
+                    </span>
                 @endforeach
-            </dl>
-        @endif
-    </a>
+            </p>
+        </a>
 
-    @if ($actions)
-        <x-filament-panels::global-search.actions :actions="$actions" />
-    @endif
+        @if ($actions)
+            <x-filament::global-search.actions :actions="$actions" />
+        @endif
+    </div>
 </li>

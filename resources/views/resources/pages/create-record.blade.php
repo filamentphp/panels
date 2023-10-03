@@ -1,18 +1,15 @@
-<x-filament-panels::page
+<x-filament::page
     @class([
-        'fi-resource-create-record-page',
-        'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug()),
+        'filament-resources-create-record-page',
+        'filament-resources-' . str_replace('/', '-', $this->getResource()::getSlug()),
     ])
 >
-    <x-filament-panels::form
-        :wire:key="$this->getId() . '.forms.' . $this->getFormStatePath()"
-        wire:submit="create"
-    >
+    <x-filament::form wire:submit.prevent="create">
         {{ $this->form }}
 
-        <x-filament-panels::form.actions
+        <x-filament::form.actions
             :actions="$this->getCachedFormActions()"
             :full-width="$this->hasFullWidthFormActions()"
         />
-    </x-filament-panels::form>
-</x-filament-panels::page>
+    </x-filament::form>
+</x-filament::page>
