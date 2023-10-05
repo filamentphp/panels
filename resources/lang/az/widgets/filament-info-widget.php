@@ -5,7 +5,7 @@ return [
     'actions' => [
 
         'open_documentation' => [
-            'label' => 'ドキュメント',
+            'label' => 'Dokumentasiya',
         ],
 
         'open_github' => [
