@@ -7,7 +7,7 @@ return [
         'actions' => [
 
             'save' => [
-                'label' => 'Guardar mudanças',
+                'label' => 'Guardar alterações',
             ],
 
         ],
