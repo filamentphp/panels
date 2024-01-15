@@ -66,6 +66,17 @@
 
         {{ \Filament\Support\Facades\FilamentView::renderHook('panels::styles.after') }}
 
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(() => {
+                    const activeSidebarItem = document.querySelector('.fi-sidebar-item-active')
+                    const sidebarWrapper = document.querySelector('.fi-sidebar-nav')
+
+                    sidebarWrapper.scrollTo(0, activeSidebarItem.offsetTop - (window.innerHeight / 2))
+                }, 0)
+            })
+        </script>
+
         @if (! filament()->hasDarkMode())
             <script>
                 localStorage.setItem('theme', 'light')
@@ -93,7 +104,7 @@
     </head>
 
     <body
-        class="fi-body min-h-screen bg-gray-50 font-normal text-gray-950 antialiased dark:bg-gray-950 dark:text-white"
+        class="fi-body fi-panel-{{ filament()->getId() }} min-h-screen bg-gray-50 font-normal text-gray-950 antialiased dark:bg-gray-950 dark:text-white"
     >
         {{ \Filament\Support\Facades\FilamentView::renderHook('panels::body.start') }}
 

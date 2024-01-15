@@ -189,6 +189,11 @@ class FilamentManager
         return $this->getCurrentPanel()->getHomeUrl() ?? $this->getCurrentPanel()->getUrl();
     }
 
+    public function getId(): ?string
+    {
+        return $this->getCurrentPanel()?->getId();
+    }
+
     /**
      * @param  array<mixed>  $parameters
      */
@@ -605,6 +610,11 @@ class FilamentManager
         return $this->getCurrentPanel()->hasTopNavigation();
     }
 
+    public function hasUnsavedChangesAlerts(): bool
+    {
+        return $this->getCurrentPanel()->hasUnsavedChangesAlerts();
+    }
+
     public function isGlobalSearchEnabled(): bool
     {
         if ($this->getGlobalSearchProvider() === null) {
@@ -834,5 +844,10 @@ class FilamentManager
     public function getDefaultThemeMode(): ThemeMode
     {
         return $this->getCurrentPanel()->getDefaultThemeMode();
+    }
+
+    public function arePasswordsRevealable(): bool
+    {
+        return $this->getCurrentPanel()->arePasswordsRevealable();
     }
 }

@@ -198,6 +198,7 @@ class EditProfile extends SimplePage
         return TextInput::make('password')
             ->label(__('filament-panels::pages/auth/edit-profile.form.password.label'))
             ->password()
+            ->revealable(filament()->arePasswordsRevealable())
             ->rule(Password::default())
             ->autocomplete('new-password')
             ->dehydrated(fn ($state): bool => filled($state))
@@ -211,6 +212,7 @@ class EditProfile extends SimplePage
         return TextInput::make('passwordConfirmation')
             ->label(__('filament-panels::pages/auth/edit-profile.form.password_confirmation.label'))
             ->password()
+            ->revealable(filament()->arePasswordsRevealable())
             ->required()
             ->visible(fn (Get $get): bool => filled($get('password')))
             ->dehydrated(false);
