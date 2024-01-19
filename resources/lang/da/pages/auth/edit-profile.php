@@ -2,30 +2,30 @@
 
 return [
 
-    'label' => 'Hisob qaydnomasi',
+    'label' => 'Profil',
 
     'form' => [
 
         'email' => [
-            'label' => 'Elektron pochta manzili',
+            'label' => 'E-mail',
         ],
 
         'name' => [
-            'label' => 'Ism',
+            'label' => 'Navn',
         ],
 
         'password' => [
-            'label' => 'Yangi parol',
+            'label' => 'Ny adgangskode',
         ],
 
         'password_confirmation' => [
-            'label' => 'Yangi parolni tasdiqlang',
+            'label' => 'Bekræft ny adgangskode',
         ],
 
         'actions' => [
 
             'save' => [
-                'label' => 'O\'zgarishlarni saqlash',
+                'label' => 'Gem ændringer',
             ],
 
         ],
@@ -35,7 +35,7 @@ return [
     'notifications' => [
 
         'saved' => [
-            'title' => 'Saqlandi',
+            'title' => 'Gemt',
         ],
 
     ],
@@ -43,7 +43,7 @@ return [
     'actions' => [
 
         'cancel' => [
-            'label' => 'Qaytish',
+            'label' => 'Annuller',
         ],
 
     ],
