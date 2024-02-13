@@ -65,6 +65,7 @@
     @if ($hasDropdown)
         <x-filament::dropdown
             :placement="(__('filament-panels::layout.direction') === 'rtl') ? 'left-start' : 'right-start'"
+            teleport
             x-show="! $store.sidebar.isOpen"
         >
             <x-slot name="trigger">
@@ -121,6 +122,12 @@
                 }
             @endphp
 
+            @if (filled($label))
+                <x-filament::dropdown.header>
+                    {{ $label }}
+                </x-filament::dropdown.header>
+            @endif
+
             @foreach ($lists as $list)
                 <x-filament::dropdown.list>
                     @foreach ($list as $item)
@@ -163,6 +170,10 @@
         class="fi-sidebar-group-items flex flex-col gap-y-1"
     >
         @foreach ($items as $item)
+            @php
+                $itemIcon = $item->getIcon();
+            @endphp
+
             <x-filament-panels::sidebar.item
                 :active="$item->isActive()"
                 :active-child-items="$item->isChildItemsActive()"
@@ -173,7 +184,7 @@
                 :child-items="$item->getChildItems()"
                 :first="$loop->first"
                 :grouped="filled($label)"
-                :icon="$icon ? ($hasDropdown ? null : throw new \Exception('Navigation group [' . $label . '] has an icon but one or more of its items also have icons. Either the group or its items can have icons, but not both. This is to ensure a proper user experience.')) : $item->getIcon()"
+                :icon="$icon ? (($hasDropdown || blank($itemIcon)) ? null : throw new \Exception('Navigation group [' . $label . '] has an icon but one or more of its items also have icons. Either the group or its items can have icons, but not both. This is to ensure a proper user experience.')) : $itemIcon"
                 :last="$loop->last"
                 :should-open-url-in-new-tab="$item->shouldOpenUrlInNewTab()"
                 :sidebar-collapsible="$sidebarCollapsible"
