@@ -179,8 +179,13 @@
                 $itemIcon = $item->getIcon();
                 $itemActiveIcon = $item->getActiveIcon();
 
-                if ($icon && (! $hasDropdown) && (filled($itemIcon) || filled($itemActiveIcon))) {
-                    throw new \Exception('Navigation group [' . $label . '] has an icon but one or more of its items also have icons. Either the group or its items can have icons, but not both. This is to ensure a proper user experience.');
+                if ($icon) {
+                    if ($hasDropdown || (blank($itemIcon) && blank($itemActiveIcon))) {
+                        $itemIcon = null;
+                        $itemActiveIcon = null;
+                    } else {
+                        throw new \Exception('Navigation group [' . $label . '] has an icon but one or more of its items also have icons. Either the group or its items can have icons, but not both. This is to ensure a proper user experience.');
+                    }
                 }
             @endphp
 
