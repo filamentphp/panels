@@ -79,7 +79,7 @@ class Register extends SimplePage
         $user = $this->wrapInDatabaseTransaction(function () {
             $data = $this->form->getState();
 
-            return $this->getUserModel()::create($data);
+            return $this->handleRegistration($data);
         });
 
         event(new Registered($user));
@@ -91,6 +91,14 @@ class Register extends SimplePage
         session()->regenerate();
 
         return app(RegistrationResponse::class);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    protected function handleRegistration(array $data): Model
+    {
+        return $this->getUserModel()::create($data);
     }
 
     protected function sendEmailVerificationNotification(Model $user): void
