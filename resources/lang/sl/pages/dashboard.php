@@ -2,23 +2,23 @@
 
 return [
 
-    'title' => 'ダッシュボード',
+    'title' => 'Nadzorna plošča',
 
     'actions' => [
 
         'filter' => [
 
-            'label' => 'フィルタ',
+            'label' => 'Filter',
 
             'modal' => [
 
-                'heading' => 'フィルタ',
+                'heading' => 'Filter',
 
                 'actions' => [
 
                     'apply' => [
 
-                        'label' => '適用',
+                        'label' => 'Uporabi',
 
                     ],
 

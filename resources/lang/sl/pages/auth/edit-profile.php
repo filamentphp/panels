@@ -7,25 +7,25 @@ return [
     'form' => [
 
         'email' => [
-            'label' => 'E-postadresse',
+            'label' => 'E-poštni naslov',
         ],
 
         'name' => [
-            'label' => 'Navn',
+            'label' => 'Ime',
         ],
 
         'password' => [
-            'label' => 'Nytt passord',
+            'label' => 'Novo geslo',
         ],
 
         'password_confirmation' => [
-            'label' => 'Bekreft nytt passord',
+            'label' => 'Potrdite novo geslo',
         ],
 
         'actions' => [
 
             'save' => [
-                'label' => 'Lagre endringer',
+                'label' => 'Shrani spremembe',
             ],
 
         ],
@@ -35,7 +35,7 @@ return [
     'notifications' => [
 
         'saved' => [
-            'title' => 'Lagret',
+            'title' => 'Shranjeno',
         ],
 
     ],
@@ -43,7 +43,7 @@ return [
     'actions' => [
 
         'cancel' => [
-            'label' => 'tilbake',
+            'label' => 'Prekliči',
         ],
 
     ],

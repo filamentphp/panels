@@ -7,29 +7,29 @@ return [
     'actions' => [
 
         'billing' => [
-            'label' => 'Håndter abonnementer',
+            'label' => 'Upravljanje naročnine',
         ],
 
         'logout' => [
-            'label' => 'Logg ut',
+            'label' => 'Odjava',
         ],
 
         'open_database_notifications' => [
-            'label' => 'Åpne varsler',
+            'label' => 'Odpri obvestila',
         ],
 
         'open_user_menu' => [
-            'label' => 'Brukermeny',
+            'label' => 'Uporabniški meni',
         ],
 
         'sidebar' => [
 
             'collapse' => [
-                'label' => 'Skjul sidefeltet',
+                'label' => 'Strni stranski meni',
             ],
 
             'expand' => [
-                'label' => 'Vis sidefeltet',
+                'label' => 'Razširi stranski meni',
             ],
 
         ],
@@ -37,15 +37,15 @@ return [
         'theme_switcher' => [
 
             'dark' => [
-                'label' => 'Aktiver mørkt tema',
+                'label' => 'Omogoči temno temo',
             ],
 
             'light' => [
-                'label' => 'Aktiver lyst tema',
+                'label' => 'Omogoči svetlo temo',
             ],
 
             'system' => [
-                'label' => 'Aktiver system tema',
+                'label' => 'Omogoči sistemsko temo',
             ],
 
         ],
@@ -53,11 +53,11 @@ return [
     ],
 
     'avatar' => [
-        'alt' => 'Avatar av :name',
+        'alt' => 'Avatar uporabnika :name',
     ],
 
     'logo' => [
-        'alt' => ':name logo',
+        'alt' => 'Logotip :name',
     ],
 
 ];

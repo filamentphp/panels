@@ -5,7 +5,7 @@ return [
     'actions' => [
 
         'open_documentation' => [
-            'label' => 'เอกสารคู่มือ',
+            'label' => 'Dokumentacija',
         ],
 
         'open_github' => [

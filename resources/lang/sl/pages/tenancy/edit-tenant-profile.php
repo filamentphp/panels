@@ -7,7 +7,7 @@ return [
         'actions' => [
 
             'save' => [
-                'label' => 'บันทึก',
+                'label' => 'Shrani spremembe',
             ],
 
         ],
@@ -17,7 +17,7 @@ return [
     'notifications' => [
 
         'saved' => [
-            'title' => 'บันทึกข้อมูลเรียบร้อย',
+            'title' => 'Shranjeno',
         ],
 
     ],
