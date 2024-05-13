@@ -49,7 +49,7 @@ By default, the sidebar is only collapsible on mobile. You may make it collapsib
 
 You must [publish the configuration](installation#publishing-configuration) in order to access this feature.
 
-In `config/filament.php`, set the `layouts.sidebar.is_collapsible_on_desktop` to `true`:
+In `config/filament.php`, set the `layout.sidebar.is_collapsible_on_desktop` to `true`:
 
 ```php
 'layout' => [
@@ -195,7 +195,7 @@ Filament exposes a configuration option that allows you to change the maximum co
 
 You must [publish the configuration](installation#publishing-configuration) in order to access this feature.
 
-In `config/filament.php`, set the `layouts.max_content_width` to any value between `xl` and `7xl`, or `full` for no max width:
+In `config/filament.php`, set the `layout.max_content_width` to any value between `xl` and `7xl`, or `full` for no max width:
 
 ```php
 'layout' => [
@@ -253,12 +253,12 @@ Filament::pushMeta([
 
 Filament allows you to customize the position of notifications.
 
-In `config/filament.php`, set the `layouts.notifications.alignment` to any value of `left`, `center` or `right` and `layouts.notifications.vertical_alignment` to any value of `top`, `center` or `bottom`:
+In `config/filament.php`, set the `layout.notifications.alignment` to any value of `left`, `center` or `right` and `layout.notifications.vertical_alignment` to any value of `top`, `center` or `bottom`:
 
 ```php
 'layout' => [
     'notifications' => [
-        'vertical_alignment' => 'top'
+        'vertical_alignment' => 'top',
         'alignment' => 'center',
     ],
 ],
