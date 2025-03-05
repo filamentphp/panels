@@ -744,8 +744,6 @@ abstract class Resource
      */
     protected static function applyGlobalSearchAttributeConstraint(Builder $query, string $search, array $searchAttributes, bool &$isFirst): Builder
     {
-        $model = $query->getModel();
-
         $isForcedCaseInsensitive = static::isGlobalSearchForcedCaseInsensitive();
 
         /** @var Connection $databaseConnection */
@@ -757,11 +755,13 @@ abstract class Resource
             $query->when(
                 str($searchAttribute)->contains('.'),
                 function (Builder $query) use ($databaseConnection, $isForcedCaseInsensitive, $searchAttribute, $search, $whereClause): Builder {
-                    return $query->{"{$whereClause}Relation"}(
+                    return $query->{"{$whereClause}Has"}(
                         (string) str($searchAttribute)->beforeLast('.'),
-                        generate_search_column_expression((string) str($searchAttribute)->afterLast('.'), $isForcedCaseInsensitive, $databaseConnection),
-                        'like',
-                        "%{$search}%",
+                        fn (Builder $query) => $query->where(
+                            generate_search_column_expression($query->qualifyColumn((string) str($searchAttribute)->afterLast('.')), $isForcedCaseInsensitive, $databaseConnection),
+                            'like',
+                            "%{$search}%",
+                        ),
                     );
                 },
                 fn (Builder $query) => $query->{$whereClause}(

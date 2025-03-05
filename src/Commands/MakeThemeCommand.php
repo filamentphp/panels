@@ -27,28 +27,32 @@ class MakeThemeCommand extends Command
 
         $isTailwindV4Installed = str_contains($packageJson, '"@tailwindcss/postcss": "^4')
             || str_contains($packageJson, '"@tailwindcss/postcss": "4')
+            || str_contains($packageJson, '"@tailwindcss/vite": "^4')
+            || str_contains($packageJson, '"@tailwindcss/vite": "4')
             || str_contains($packageJson, '"tailwindcss": "^4')
             || str_contains($packageJson, '"tailwindcss": "4');
 
+        $pm = $this->option('pm') ?? 'npm';
+
+        exec("{$pm} -v", $pmVersion, $pmVersionExistCode);
+
+        if ($pmVersionExistCode !== 0) {
+            $this->error('Node.js is not installed. Please install before continuing.');
+
+            return static::FAILURE;
+        }
+
+        $this->info("Using {$pm} v{$pmVersion[0]}");
+
+        $installCommand = match ($pm) {
+            'yarn' => 'yarn add',
+            default => "{$pm} install",
+        };
+
         if (! $isTailwindV4Installed) {
-            $pm = $this->option('pm') ?? 'npm';
-
-            exec("{$pm} -v", $pmVersion, $pmVersionExistCode);
-
-            if ($pmVersionExistCode !== 0) {
-                $this->error('Node.js is not installed. Please install before continuing.');
-
-                return static::FAILURE;
-            }
-
-            $this->info("Using {$pm} v{$pmVersion[0]}");
-
-            $installCommand = match ($pm) {
-                'yarn' => 'yarn add',
-                default => "{$pm} install",
-            };
-
             exec("{$installCommand} tailwindcss@3 @tailwindcss/forms @tailwindcss/typography postcss postcss-nesting autoprefixer --save-dev");
+        } else {
+            exec("{$installCommand} @tailwindcss/forms @tailwindcss/typography --save-dev");
         }
 
         $panel = $this->argument('panel');
@@ -92,7 +96,7 @@ class MakeThemeCommand extends Command
             ->map(fn ($segment) => Str::lower(Str::kebab($segment)))
             ->implode('/');
 
-        $this->copyStubToApp('ThemeCss', $cssFilePath, [
+        $this->copyStubToApp($isTailwindV4Installed ? 'ThemeCssTailwind4' : 'ThemeCss', $cssFilePath, [
             'panel' => $panelId,
         ]);
         $this->copyStubToApp('ThemeTailwindConfig', $tailwindConfigFilePath, [

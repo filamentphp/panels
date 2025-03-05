@@ -27,7 +27,7 @@ return [
 
         'password' => [
             'label' => 'Senha',
-            'validation_attribute' => 'password',
+            'validation_attribute' => 'senha',
         ],
 
         'password_confirmation' => [
