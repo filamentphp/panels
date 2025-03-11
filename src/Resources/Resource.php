@@ -765,7 +765,7 @@ abstract class Resource
                     );
                 },
                 fn (Builder $query) => $query->{$whereClause}(
-                    generate_search_column_expression($searchAttribute, $isForcedCaseInsensitive, $databaseConnection),
+                    generate_search_column_expression($query->qualifyColumn($searchAttribute), $isForcedCaseInsensitive, $databaseConnection),
                     'like',
                     "%{$search}%",
                 ),

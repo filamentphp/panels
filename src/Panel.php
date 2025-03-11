@@ -45,7 +45,7 @@ class Panel extends Component
     use Panel\Concerns\HasUnsavedChangesAlerts;
     use Panel\Concerns\HasUserMenu;
 
-    protected bool $isDefault = false;
+    protected bool | Closure $isDefault = false;
 
     /**
      * @var array<array-key, Closure>
@@ -57,7 +57,7 @@ class Panel extends Component
         return app(static::class);
     }
 
-    public function default(bool $condition = true): static
+    public function default(bool | Closure $condition = true): static
     {
         $this->isDefault = $condition;
 
@@ -116,6 +116,6 @@ class Panel extends Component
 
     public function isDefault(): bool
     {
-        return $this->isDefault;
+        return (bool) $this->evaluate($this->isDefault);
     }
 }
