@@ -86,29 +86,29 @@ To finish installing Tailwind, you must create a new `tailwind.config.js` file i
 In `tailwind.config.js`, register the plugins you installed, and add custom colors used by the form builder:
 
 ```js
-import colors from 'tailwindcss/colors' // [tl! focus:start]
+import colors from 'tailwindcss/colors'
 import forms from '@tailwindcss/forms'
-import typography from '@tailwindcss/typography' // [tl! focus:end]
+import typography from '@tailwindcss/typography'
 
 export default {
     content: [
         './resources/**/*.blade.php',
-        './vendor/filament/**/*.blade.php', // [tl! focus]
+        './vendor/filament/**/*.blade.php',
     ],
     darkMode: 'class',
     theme: {
         extend: {
-            colors: { // [tl! focus:start]
+            colors: {
                 danger: colors.rose,
                 primary: colors.blue,
                 success: colors.green,
                 warning: colors.yellow,
-            }, // [tl! focus:end]
+            },
         },
     },
     plugins: [
-        forms, // [tl! focus:start]
-        typography, // [tl! focus:end]
+        forms,
+        typography,
     ],
 }
 ```
@@ -151,7 +151,7 @@ Or if you're using Laravel Mix instead of Vite, in your `webpack.mix.js` file, r
 const mix = require('laravel-mix')
 
 mix.postCss('resources/css/filament.css', 'public/css', [
-    require('tailwindcss'), // [tl! focus]
+    require('tailwindcss'),
 ])
 ```
 
