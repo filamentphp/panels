@@ -7,7 +7,7 @@
     lang="{{ str_replace('_', '-', app()->getLocale()) }}"
     dir="{{ __('filament-panels::layout.direction') ?? 'ltr' }}"
     @class([
-        'fi min-h-screen',
+        'fi',
         'dark' => filament()->hasDarkModeForced(),
     ])
 >
@@ -40,6 +40,10 @@
                 display: none !important;
             }
 
+            [x-cloak='inline-flex'] {
+                display: inline-flex !important;
+            }
+
             @media (max-width: 1023px) {
                 [x-cloak='-lg'] {
                     display: none !important;
@@ -57,10 +61,14 @@
 
         {{ filament()->getTheme()->getHtml() }}
         {{ filament()->getFontHtml() }}
+        {{ filament()->getMonoFontHtml() }}
+        {{ filament()->getSerifFontHtml() }}
 
         <style>
             :root {
                 --font-family: '{!! filament()->getFontFamily() !!}';
+                --mono-font-family: '{!! filament()->getMonoFontFamily() !!}';
+                --serif-font-family: '{!! filament()->getSerifFontFamily() !!}';
                 --sidebar-width: {{ filament()->getSidebarWidth() }};
                 --collapsed-sidebar-width: {{ filament()->getCollapsedSidebarWidth() }};
                 --default-theme-mode: {{ filament()->getDefaultThemeMode()->value }};
@@ -109,7 +117,6 @@
                 ->class([
                     'fi-body',
                     'fi-panel-' . filament()->getId(),
-                    'min-h-screen bg-gray-50 font-normal text-gray-950 antialiased dark:bg-gray-950 dark:text-white',
                 ]) }}
     >
         {{ \Filament\Support\Facades\FilamentView::renderHook(\Filament\View\PanelsRenderHook::BODY_START, scopes: $livewire->getRenderHookScopes()) }}

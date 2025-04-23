@@ -3,7 +3,7 @@
 namespace Filament;
 
 use Closure;
-use Filament\Actions\MountableAction;
+use Filament\Actions\Action;
 use Filament\Support\Components\Component;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentIcon;
@@ -38,6 +38,7 @@ class Panel extends Component
     use Panel\Concerns\HasRoutes;
     use Panel\Concerns\HasSidebar;
     use Panel\Concerns\HasSpaMode;
+    use Panel\Concerns\HasSubNavigation;
     use Panel\Concerns\HasTenancy;
     use Panel\Concerns\HasTheme;
     use Panel\Concerns\HasTopbar;
@@ -66,6 +67,10 @@ class Panel extends Component
 
     public function register(): void
     {
+        foreach ($this->getResources() as $resource) {
+            $resource::observeTenancyModelCreation($this);
+        }
+
         $this->registerLivewireComponents();
         $this->registerLivewirePersistentMiddleware();
 
@@ -81,6 +86,10 @@ class Panel extends Component
 
     public function boot(): void
     {
+        foreach ($this->getResources() as $resource) {
+            $resource::registerTenancyModelGlobalScope($this);
+        }
+
         $this->registerAssets();
 
         FilamentColor::register($this->getColors());
@@ -93,8 +102,8 @@ class Panel extends Component
         $this->registerRenderHooks();
 
         if ($this->hasDatabaseTransactions()) {
-            MountableAction::configureUsing(
-                fn (MountableAction $action) => $action->databaseTransaction(),
+            Action::configureUsing(
+                fn (Action $action) => $action->databaseTransaction(),
             );
         }
 

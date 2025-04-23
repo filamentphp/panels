@@ -6,12 +6,18 @@
     wire:ignore
     :attributes="
         \Filament\Support\prepare_inherited_attributes($attributes)
-            ->class(['fi-page-sub-navigation-select md:hidden'])
+            ->class(['fi-page-sub-navigation-select'])
     "
 >
-    <x-filament::input.select
-        x-data="{}"
-        x-on:change="window.location.href = $event.target.value"
+    <select
+        x-on:change="
+            if ($event.target.options[$event.target.selectedIndex].dataset.spaMode) {
+                Livewire.navigate($event.target.value)
+            } else {
+                window.location.href = $event.target.value
+            }
+        "
+        class="fi-select-input"
     >
         @foreach ($navigation as $navigationGroup)
             @capture($options)
@@ -19,7 +25,10 @@
                     @foreach ([$navigationItem, ...$navigationItem->getChildItems()] as $navigationItemChild)
                         <option
                             @selected($navigationItemChild->isActive())
-                            value="{{ $navigationItemChild->getUrl() }}"
+                            value="{{ $url = $navigationItemChild->getUrl() }}"
+                            @if (\Filament\Support\Facades\FilamentView::hasSpaMode($url))
+                                data-spa-mode="1"
+                            @endif
                         >
                             @if ($loop->index)
                                 &ensp;&ensp;
@@ -39,5 +48,5 @@
                 {{ $options() }}
             @endif
         @endforeach
-    </x-filament::input.select>
+    </select>
 </x-filament::input.wrapper>
