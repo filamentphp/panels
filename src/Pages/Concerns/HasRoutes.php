@@ -61,7 +61,6 @@ trait HasRoutes
     {
         return [
             ...(static::isEmailVerificationRequired($panel) ? [static::getEmailVerifiedMiddleware($panel)] : []),
-            ...(static::isMultiFactorAuthenticationRequired($panel) ? [static::getMultiFactorAuthenticationRequiredMiddleware($panel)] : []),
             ...(static::isTenantSubscriptionRequired($panel) ? [static::getTenantSubscribedMiddleware($panel)] : []),
             ...Arr::wrap(static::$routeMiddleware),
         ];
@@ -80,19 +79,9 @@ trait HasRoutes
         return $panel->getEmailVerifiedMiddleware();
     }
 
-    public static function getMultiFactorAuthenticationRequiredMiddleware(Panel $panel): string
-    {
-        return $panel->getMultiFactorAuthenticationRequiredMiddleware();
-    }
-
     public static function isEmailVerificationRequired(Panel $panel): bool
     {
         return $panel->isEmailVerificationRequired();
-    }
-
-    public static function isMultiFactorAuthenticationRequired(Panel $panel): bool
-    {
-        return $panel->isMultiFactorAuthenticationRequired();
     }
 
     public static function getTenantSubscribedMiddleware(Panel $panel): string

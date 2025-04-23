@@ -32,7 +32,7 @@ class GlobalSearch extends Component
 
     public function render(): View
     {
-        return view('filament-panels::livewire.global-search', [
+        return view('filament-panels::components.global-search.index', [
             'results' => $this->getResults(),
         ]);
     }

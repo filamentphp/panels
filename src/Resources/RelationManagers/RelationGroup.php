@@ -3,7 +3,6 @@
 namespace Filament\Resources\RelationManagers;
 
 use Closure;
-use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Components\Component;
 use Filament\Support\Concerns\HasIcon;
 use Illuminate\Database\Eloquent\Model;
@@ -21,8 +20,6 @@ class RelationGroup extends Component
     protected ?Model $ownerRecord = null;
 
     protected ?string $pageClass = null;
-
-    protected ?Closure $modifyTabUsing = null;
 
     /**
      * @param  array<class-string<RelationManager> | RelationManagerConfiguration>  $managers
@@ -81,13 +78,6 @@ class RelationGroup extends Component
     public function getLabel(): string
     {
         return $this->evaluate($this->label);
-    }
-
-    public function tab(?Closure $callback): static
-    {
-        $this->modifyTabUsing = $callback;
-
-        return $this;
     }
 
     /**
@@ -173,19 +163,5 @@ class RelationGroup extends Component
             Model::class, $ownerRecord::class => [$ownerRecord],
             default => parent::resolveDefaultClosureDependencyForEvaluationByType($parameterType),
         };
-    }
-
-    public function getTabComponent(): Tab
-    {
-        $tab = Tab::make($this->getLabel())
-            ->badge($this->getBadge())
-            ->badgeColor($this->getBadgeColor())
-            ->badgeTooltip($this->getBadgeTooltip())
-            ->icon($this->getIcon())
-            ->iconPosition($this->getIconPosition());
-
-        return $this->evaluate($this->modifyTabUsing, [
-            'tab' => $tab,
-        ]) ?? $tab;
     }
 }

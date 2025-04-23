@@ -2,45 +2,47 @@
 
 namespace Filament\Resources\Pages;
 
-use BackedEnum;
-use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\ReplicateAction;
+use Filament\Actions\RestoreAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\ComponentContainer;
+use Filament\Forms\Components\Component;
+use Filament\Forms\Form;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Concerns\HasUnsavedDataChangesAlert;
-use Filament\Schemas\Components\Actions;
-use Filament\Schemas\Components\Component;
-use Filament\Schemas\Components\EmbeddedSchema;
-use Filament\Schemas\Components\Form;
-use Filament\Schemas\Components\Group;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Schema;
+use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Support\Exceptions\Halt;
 use Filament\Support\Facades\FilamentIcon;
 use Filament\Support\Facades\FilamentView;
-use Filament\Support\Icons\Heroicon;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Js;
-use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
 /**
- * @property-read Schema $form
+ * @property Form $form
  */
 class EditRecord extends Page
 {
     use CanUseDatabaseTransactions;
-    use Concerns\HasRelationManagers {
-        getContentTabComponent as getBaseContentTabComponent;
+    use Concerns\HasRelationManagers;
+    use Concerns\InteractsWithRecord {
+        configureAction as configureActionRecord;
     }
-    use Concerns\InteractsWithRecord;
     use HasUnsavedDataChangesAlert;
+    use InteractsWithFormActions;
+
+    /**
+     * @var view-string
+     */
+    protected static string $view = 'filament-panels::resources.pages.edit-record';
 
     /**
      * @var array<string, mixed> | null
@@ -49,11 +51,11 @@ class EditRecord extends Page
 
     public ?string $previousUrl = null;
 
-    public static function getNavigationIcon(): string | BackedEnum | Htmlable | null
+    public static function getNavigationIcon(): string | Htmlable | null
     {
         return static::$navigationIcon
             ?? FilamentIcon::resolve('panels::resources.pages.edit-record.navigation-item')
-            ?? Heroicon::OutlinedPencilSquare;
+            ?? 'heroicon-o-pencil-square';
     }
 
     public function getBreadcrumb(): string
@@ -108,14 +110,16 @@ class EditRecord extends Page
     }
 
     /**
-     * @param  array<string>  $statePaths
+     * @param  array<string>  $attributes
      */
-    public function refreshFormData(array $statePaths): void
+    public function refreshFormData(array $attributes): void
     {
-        $this->form->fillPartially(
-            $this->mutateFormDataBeforeFill($this->getRecord()->attributesToArray()),
-            $statePaths,
-        );
+        $data = [
+            ...$this->data,
+            ...Arr::only($this->getRecord()->attributesToArray(), $attributes),
+        ];
+
+        $this->form->fill($data);
     }
 
     /**
@@ -136,7 +140,7 @@ class EditRecord extends Page
 
             $this->callHook('beforeValidate');
 
-            $data = $this->form->getState(afterValidate: function (): void {
+            $data = $this->form->getState(afterValidate: function () {
                 $this->callHook('afterValidate');
 
                 $this->callHook('beforeSave');
@@ -181,10 +185,10 @@ class EditRecord extends Page
 
             $this->callHook('beforeValidate');
 
-            $data = Schema::make($component->getLivewire())
-                ->components([$component])
+            $data = ComponentContainer::make($component->getLivewire())
+                ->schema([$component])
                 ->model($component->getRecord())
-                ->statePath('data')
+                ->statePath($this->getFormStatePath())
                 ->getState();
 
             $this->callHook('afterValidate');
@@ -258,14 +262,62 @@ class EditRecord extends Page
         return $data;
     }
 
-    public function getDefaultActionSchemaResolver(Action $action): ?Closure
+    protected function configureAction(Action $action): void
     {
-        return match (true) {
-            $action instanceof CreateAction => fn (Schema $schema): Schema => static::getResource()::form($schema->columns(2)),
-            $action instanceof EditAction => fn (Schema $schema): Schema => $schema->components([EmbeddedSchema::make('form')]),
-            $action instanceof ViewAction => fn (Schema $schema): Schema => static::getResource()::infolist(static::getResource()::form($schema->columns(2))),
+        $this->configureActionRecord($action);
+
+        match (true) {
+            $action instanceof DeleteAction => $this->configureDeleteAction($action),
+            $action instanceof ForceDeleteAction => $this->configureForceDeleteAction($action),
+            $action instanceof ReplicateAction => $this->configureReplicateAction($action),
+            $action instanceof RestoreAction => $this->configureRestoreAction($action),
+            $action instanceof ViewAction => $this->configureViewAction($action),
             default => null,
         };
+    }
+
+    protected function configureViewAction(ViewAction $action): void
+    {
+        $resource = static::getResource();
+
+        $action
+            ->authorize($resource::canView($this->getRecord()))
+            ->infolist(fn (Infolist $infolist): Infolist => static::getResource()::infolist($infolist->columns(2)))
+            ->form(fn (Form $form): Form => static::getResource()::form($form));
+
+        if ($resource::hasPage('view')) {
+            $action->url(fn (): string => static::getResource()::getUrl('view', ['record' => $this->getRecord()]));
+        }
+    }
+
+    protected function configureForceDeleteAction(ForceDeleteAction $action): void
+    {
+        $resource = static::getResource();
+
+        $action
+            ->authorize($resource::canForceDelete($this->getRecord()))
+            ->successRedirectUrl($resource::getUrl('index'));
+    }
+
+    protected function configureReplicateAction(ReplicateAction $action): void
+    {
+        $action
+            ->authorize(static::getResource()::canReplicate($this->getRecord()));
+    }
+
+    protected function configureRestoreAction(RestoreAction $action): void
+    {
+        $action
+            ->authorize(static::getResource()::canRestore($this->getRecord()));
+    }
+
+    protected function configureDeleteAction(DeleteAction $action): void
+    {
+        $resource = static::getResource();
+
+        $action
+            ->authorize($resource::canDelete($this->getRecord()))
+            ->successRedirectUrl($resource::getUrl('index'));
     }
 
     public function getTitle(): string | Htmlable
@@ -292,12 +344,9 @@ class EditRecord extends Page
 
     protected function getSaveFormAction(): Action
     {
-        $hasFormWrapper = $this->hasFormWrapper();
-
         return Action::make('save')
             ->label(__('filament-panels::resources/pages/edit-record.form.actions.save.label'))
-            ->submit($hasFormWrapper ? $this->getSubmitFormLivewireMethodName() : null)
-            ->action($hasFormWrapper ? null : $this->getSubmitFormLivewireMethodName())
+            ->submit('save')
             ->keyBindings(['mod+s']);
     }
 
@@ -306,145 +355,48 @@ class EditRecord extends Page
         return $this->getSaveFormAction();
     }
 
-    protected function getSubmitFormLivewireMethodName(): string
-    {
-        return 'save';
-    }
-
     protected function getCancelFormAction(): Action
     {
-        $url = $this->previousUrl ?? $this->getResourceUrl();
-
         return Action::make('cancel')
             ->label(__('filament-panels::resources/pages/edit-record.form.actions.cancel.label'))
-            ->alpineClickHandler(
-                FilamentView::hasSpaMode($url)
-                    ? 'document.referrer ? window.history.back() : Livewire.navigate(' . Js::from($url) . ')'
-                    : 'document.referrer ? window.history.back() : (window.location.href = ' . Js::from($url) . ')',
-            )
+            ->alpineClickHandler('document.referrer ? window.history.back() : (window.location.href = ' . Js::from($this->previousUrl ?? static::getResource()::getUrl()) . ')')
             ->color('gray');
     }
 
-    public function defaultForm(Schema $schema): Schema
+    public function form(Form $form): Form
     {
-        return $schema
-            ->columns($this->hasInlineLabels() ? 1 : 2)
-            ->inlineLabel($this->hasInlineLabels())
-            ->model($this->getRecord())
-            ->operation('edit')
-            ->statePath('data');
+        return $form;
     }
 
-    public function form(Schema $schema): Schema
+    /**
+     * @return array<int | string, string | Form>
+     */
+    protected function getForms(): array
     {
-        return static::getResource()::form($schema);
+        return [
+            'form' => $this->form(static::getResource()::form(
+                $this->makeForm()
+                    ->operation('edit')
+                    ->model($this->getRecord())
+                    ->statePath($this->getFormStatePath())
+                    ->columns($this->hasInlineLabels() ? 1 : 2)
+                    ->inlineLabel($this->hasInlineLabels()),
+            )),
+        ];
     }
 
-    public function getContentTabComponent(): Tab
+    public function getFormStatePath(): ?string
     {
-        return $this->getBaseContentTabComponent()
-            ->schema([
-                $this->getFormContentComponent(),
-            ]);
+        return 'data';
     }
 
     protected function getRedirectUrl(): ?string
     {
-        try {
-            $this->authorizeAccess();
-
-            return null;
-        } catch (AuthorizationException | HttpExceptionInterface) {
-            // Do nothing.
-        }
-
-        $resource = static::getResource();
-
-        if ($resource::hasPage('view') && $resource::canView($this->getRecord())) {
-            return $this->getResourceUrl('view', $this->getRedirectUrlParameters());
-        }
-
-        return $this->getResourceUrl(parameters: $this->getRedirectUrlParameters());
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function getRedirectUrlParameters(): array
-    {
-        return [];
+        return null;
     }
 
     public static function shouldRegisterNavigation(array $parameters = []): bool
     {
         return parent::shouldRegisterNavigation($parameters) && static::getResource()::canEdit($parameters['record']);
-    }
-
-    public function content(Schema $schema): Schema
-    {
-        if ($this->hasCombinedRelationManagerTabsWithContent()) {
-            return $schema
-                ->components([
-                    $this->getRelationManagersContentComponent(),
-                ]);
-        }
-
-        return $schema
-            ->components([
-                $this->getFormContentComponent(),
-                $this->getRelationManagersContentComponent(),
-            ]);
-    }
-
-    public function getFormContentComponent(): Component
-    {
-        if (! $this->hasFormWrapper()) {
-            return Group::make([
-                EmbeddedSchema::make('form'),
-                $this->getFormActionsContentComponent(),
-            ]);
-        }
-
-        return Form::make([EmbeddedSchema::make('form')])
-            ->id('form')
-            ->livewireSubmitHandler($this->getSubmitFormLivewireMethodName())
-            ->footer([
-                $this->getFormActionsContentComponent(),
-            ]);
-    }
-
-    public function getFormActionsContentComponent(): Component
-    {
-        return Actions::make($this->getFormActions())
-            ->alignment($this->getFormActionsAlignment())
-            ->fullWidth($this->hasFullWidthFormActions())
-            ->sticky($this->areFormActionsSticky());
-    }
-
-    public function hasFormWrapper(): bool
-    {
-        return true;
-    }
-
-    /**
-     * @return array<string>
-     */
-    public function getPageClasses(): array
-    {
-        return [
-            'fi-resource-edit-record-page',
-            'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug()),
-            "fi-resource-record-{$this->getRecord()->getKey()}",
-        ];
-    }
-
-    protected function hasFullWidthFormActions(): bool
-    {
-        return false;
-    }
-
-    public function getDefaultTestingSchemaName(): ?string
-    {
-        return 'form';
     }
 }

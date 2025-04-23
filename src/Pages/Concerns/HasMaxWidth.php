@@ -2,13 +2,13 @@
 
 namespace Filament\Pages\Concerns;
 
-use Filament\Support\Enums\Width;
+use Filament\Support\Enums\MaxWidth;
 
 trait HasMaxWidth
 {
-    protected Width | string | null $maxWidth = null;
+    protected ?string $maxWidth = null;
 
-    public function getMaxWidth(): Width | string | null
+    public function getMaxWidth(): MaxWidth | string | null
     {
         return $this->maxWidth;
     }

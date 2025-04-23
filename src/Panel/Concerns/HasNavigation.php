@@ -3,12 +3,10 @@
 namespace Filament\Panel\Concerns;
 
 use Closure;
-use Exception;
 use Filament\Navigation\NavigationBuilder;
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
 use Filament\Navigation\NavigationManager;
-use UnitEnum;
 
 trait HasNavigation
 {
@@ -45,28 +43,14 @@ trait HasNavigation
     }
 
     /**
-     * @param  array<string | int, NavigationGroup | string> | class-string<UnitEnum>  $groups
+     * @param  array<string | int, NavigationGroup | string>  $groups
      */
-    public function navigationGroups(array | string $groups): static
+    public function navigationGroups(array $groups): static
     {
         if (isset($this->navigationManager)) {
             $this->navigationManager->navigationGroups($groups);
 
             return $this;
-        }
-
-        if (is_string($groups)) {
-            throw_unless(enum_exists($groups), new Exception("Enum class [{$groups}] does not exist for navigation groups."));
-
-            $groups = array_reduce(
-                $groups::cases(),
-                function (array $carry, UnitEnum $case): array {
-                    $carry[$case->name] = NavigationGroup::fromEnum($case);
-
-                    return $carry;
-                },
-                initial: [],
-            );
         }
 
         $this->navigationGroups = [

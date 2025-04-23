@@ -16,12 +16,10 @@
 <li
     x-data="{ label: @js($subNavigation ? "sub_navigation_{$label}" : $label) }"
     data-group-label="{{ $subNavigation ? "sub_navigation_{$label}" : $label }}"
-    x-bind:class="{ 'fi-collapsed': $store.sidebar.groupIsCollapsed(label) }"
     {{
         $attributes->class([
-            'fi-sidebar-group',
+            'fi-sidebar-group flex flex-col gap-y-1',
             'fi-active' => $active,
-            'fi-collapsible' => $collapsible,
         ])
     }}
 >
@@ -29,33 +27,41 @@
         <div
             @if ($collapsible)
                 x-on:click="$store.sidebar.toggleCollapsedGroup(label)"
-                role="button"
             @endif
             @if ($sidebarCollapsible)
                 x-show="$store.sidebar.isOpen"
-                x-transition:enter="fi-transition-enter"
-                x-transition:enter-start="fi-transition-enter-start"
-                x-transition:enter-end="fi-transition-enter-end"
+                x-transition:enter="delay-100 lg:transition"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
             @endif
-            class="fi-sidebar-group-btn"
+            @class([
+                'fi-sidebar-group-button flex items-center gap-x-3 px-2 py-2',
+                'cursor-pointer' => $collapsible,
+            ])
         >
             @if ($icon)
-                {{ \Filament\Support\generate_icon_html($icon, size: \Filament\Support\Enums\IconSize::Large) }}
+                <x-filament::icon
+                    :icon="$icon"
+                    class="fi-sidebar-group-icon h-6 w-6 text-gray-400 dark:text-gray-500"
+                />
             @endif
 
-            <span class="fi-sidebar-group-label">
+            <span
+                class="fi-sidebar-group-label flex-1 text-sm font-medium leading-6 text-gray-500 dark:text-gray-400"
+            >
                 {{ $label }}
             </span>
 
             @if ($collapsible)
                 <x-filament::icon-button
                     color="gray"
-                    :icon="\Filament\Support\Icons\Heroicon::ChevronUp"
+                    icon="heroicon-m-chevron-up"
                     icon-alias="panels::sidebar.group.collapse-button"
                     :label="$label"
                     x-bind:aria-expanded="! $store.sidebar.groupIsCollapsed(label)"
                     x-on:click.stop="$store.sidebar.toggleCollapsedGroup(label)"
-                    class="fi-sidebar-group-collapse-btn"
+                    class="fi-sidebar-group-collapse-button"
+                    x-bind:class="{ '-rotate-180': $store.sidebar.groupIsCollapsed(label) }"
                 />
             @endif
         </div>
@@ -80,9 +86,16 @@
                               }
                     "
                     x-tooltip.html="tooltip"
-                    class="fi-sidebar-group-dropdown-trigger-button"
+                    class="relative flex flex-1 items-center justify-center gap-x-3 rounded-lg px-2 py-2 outline-none transition duration-75 hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
                 >
-                    {{ \Filament\Support\generate_icon_html($icon, size: \Filament\Support\Enums\IconSize::Large) }}
+                    <x-filament::icon
+                        :icon="$icon"
+                        @class([
+                            'h-6 w-6',
+                            'text-gray-400 dark:text-gray-500' => ! $active,
+                            'text-primary-600 dark:text-primary-400' => $active,
+                        ])
+                    />
                 </button>
             </x-slot>
 
@@ -125,23 +138,17 @@
                     @foreach ($list as $item)
                         @php
                             $itemIsActive = $item->isActive();
-                            $itemBadge = $item->getBadge();
-                            $itemBadgeColor = $item->getBadgeColor();
-                            $itemBadgeTooltip = $item->getBadgeTooltip();
-                            $itemUrl = $item->getUrl();
-                            $itemIcon = $itemIsActive ? ($item->getActiveIcon() ?? $item->getIcon()) : $item->getIcon();
-                            $shouldItemOpenUrlInNewTab = $item->shouldOpenUrlInNewTab();
                         @endphp
 
                         <x-filament::dropdown.list.item
-                            :badge="$itemBadge"
-                            :badge-color="$itemBadgeColor"
-                            :badge-tooltip="$itemBadgeTooltip"
+                            :badge="$item->getBadge()"
+                            :badge-color="$item->getBadgeColor()"
+                            :badge-tooltip="$item->getBadgeTooltip()"
                             :color="$itemIsActive ? 'primary' : 'gray'"
-                            :href="$itemUrl"
-                            :icon="$itemIcon"
+                            :href="$item->getUrl()"
+                            :icon="$itemIsActive ? ($item->getActiveIcon() ?? $item->getIcon()) : $item->getIcon()"
                             tag="a"
-                            :target="$shouldItemOpenUrlInNewTab ? '_blank' : null"
+                            :target="$item->shouldOpenUrlInNewTab() ? '_blank' : null"
                         >
                             {{ $item->getLabel() }}
                         </x-filament::dropdown.list.item>
@@ -161,24 +168,16 @@
             x-collapse.duration.200ms
         @endif
         @if ($sidebarCollapsible)
-            x-transition:enter="fi-transition-enter"
-            x-transition:enter-start="fi-transition-enter-start"
-            x-transition:enter-end="fi-transition-enter-end"
+            x-transition:enter="delay-100 lg:transition"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
         @endif
-        class="fi-sidebar-group-items"
+        class="fi-sidebar-group-items flex flex-col gap-y-1"
     >
         @foreach ($items as $item)
             @php
-                $isItemActive = $item->isActive();
-                $isItemChildItemsActive = $item->isChildItemsActive();
-                $itemActiveIcon = $item->getActiveIcon();
-                $itemBadge = $item->getBadge();
-                $itemBadgeColor = $item->getBadgeColor();
-                $itemBadgeTooltip = $item->getBadgeTooltip();
-                $itemChildItems = $item->getChildItems();
                 $itemIcon = $item->getIcon();
-                $shouldItemOpenUrlInNewTab = $item->shouldOpenUrlInNewTab();
-                $itemUrl = $item->getUrl();
+                $itemActiveIcon = $item->getActiveIcon();
 
                 if ($icon) {
                     if ($hasDropdown || (blank($itemIcon) && blank($itemActiveIcon))) {
@@ -191,20 +190,20 @@
             @endphp
 
             <x-filament-panels::sidebar.item
-                :active="$isItemActive"
-                :active-child-items="$isItemChildItemsActive"
+                :active="$item->isActive()"
+                :active-child-items="$item->isChildItemsActive()"
                 :active-icon="$itemActiveIcon"
-                :badge="$itemBadge"
-                :badge-color="$itemBadgeColor"
-                :badge-tooltip="$itemBadgeTooltip"
-                :child-items="$itemChildItems"
+                :badge="$item->getBadge()"
+                :badge-color="$item->getBadgeColor()"
+                :badge-tooltip="$item->getBadgeTooltip()"
+                :child-items="$item->getChildItems()"
                 :first="$loop->first"
                 :grouped="filled($label)"
                 :icon="$itemIcon"
                 :last="$loop->last"
-                :should-open-url-in-new-tab="$shouldItemOpenUrlInNewTab"
+                :should-open-url-in-new-tab="$item->shouldOpenUrlInNewTab()"
                 :sidebar-collapsible="$sidebarCollapsible"
-                :url="$itemUrl"
+                :url="$item->getUrl()"
             >
                 {{ $item->getLabel() }}
 

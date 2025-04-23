@@ -2,12 +2,10 @@
 
 namespace Filament\Navigation;
 
-use Exception;
 use Filament\Facades\Filament;
 use Filament\Panel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use UnitEnum;
 
 class NavigationManager
 {
@@ -27,7 +25,7 @@ class NavigationManager
 
     public function __construct()
     {
-        $this->panel = Filament::getCurrentOrDefaultPanel();
+        $this->panel = Filament::getCurrentPanel();
 
         $this->navigationGroups = array_map(
             fn (NavigationGroup | string $group): NavigationGroup | string => $group instanceof NavigationGroup ? (clone $group) : $group,
@@ -57,22 +55,14 @@ class NavigationManager
         return collect($this->getNavigationItems())
             ->filter(fn (NavigationItem $item): bool => $item->isVisible())
             ->sortBy(fn (NavigationItem $item): int => $item->getSort())
-            ->groupBy(function (NavigationItem $item): string {
-                $group = $item->getGroup();
-
-                if ($group instanceof UnitEnum) {
-                    return $group->name;
-                }
-
-                return $group ?? '';
-            })
+            ->groupBy(fn (NavigationItem $item): string => $item->getGroup() ?? '')
             ->map(function (Collection $items, string $groupIndex) use ($groups): NavigationGroup {
                 $parentItems = $items->groupBy(fn (NavigationItem $item): string => $item->getParentItem() ?? '');
 
                 $items = $parentItems->get('', collect())
                     ->keyBy(fn (NavigationItem $item): string => $item->getLabel());
 
-                $parentItems->except([''])->each(function (Collection $parentItemItems, string $parentItemLabel) use ($items): void {
+                $parentItems->except([''])->each(function (Collection $parentItemItems, string $parentItemLabel) use ($items) {
                     if (! $items->has($parentItemLabel)) {
                         return;
                     }
@@ -155,24 +145,10 @@ class NavigationManager
     }
 
     /**
-     * @param  array<string | int, NavigationGroup | string> | class-string<UnitEnum>  $groups
+     * @param  array<string | int, NavigationGroup | string>  $groups
      */
-    public function navigationGroups(array | string $groups): static
+    public function navigationGroups(array $groups): static
     {
-        if (is_string($groups)) {
-            throw_unless(enum_exists($groups), new Exception("Enum class [{$groups}] does not exist for navigation groups."));
-
-            $groups = array_reduce(
-                $groups::cases(),
-                function (array $carry, UnitEnum $case): array {
-                    $carry[$case->name] = NavigationGroup::fromEnum($case);
-
-                    return $carry;
-                },
-                initial: [],
-            );
-        }
-
         $this->navigationGroups = [
             ...$this->navigationGroups,
             ...$groups,

@@ -13,23 +13,42 @@
     $tag = $url ? 'a' : 'button';
 @endphp
 
-<li @class([
-    'fi-topbar-item',
-    'fi-active' => $active,
-])>
+<li
+    @class([
+        'fi-topbar-item',
+        // @deprecated `fi-topbar-item-active` has been replaced by `fi-active`.
+        'fi-active fi-topbar-item-active' => $active,
+    ])
+>
     <{{ $tag }}
         @if ($url)
             {{ \Filament\Support\generate_href_html($url, $shouldOpenUrlInNewTab) }}
         @else
             type="button"
         @endif
-        class="fi-topbar-item-btn"
+        @class([
+            'fi-topbar-item-button flex items-center justify-center gap-x-2 rounded-lg px-3 py-2 outline-none transition duration-75 hover:bg-gray-50 focus-visible:bg-gray-50 dark:hover:bg-white/5 dark:focus-visible:bg-white/5',
+            'bg-gray-50 dark:bg-white/5' => $active,
+        ])
     >
         @if ($icon || $activeIcon)
-            {{ \Filament\Support\generate_icon_html(($active && $activeIcon) ? $activeIcon : $icon, attributes: (new \Illuminate\View\ComponentAttributeBag)->class(['fi-topbar-item-icon'])) }}
+            <x-filament::icon
+                :icon="($active && $activeIcon) ? $activeIcon : $icon"
+                @class([
+                    'fi-topbar-item-icon h-5 w-5',
+                    'text-gray-400 dark:text-gray-500' => ! $active,
+                    'text-primary-600 dark:text-primary-400' => $active,
+                ])
+            />
         @endif
 
-        <span class="fi-topbar-item-label">
+        <span
+            @class([
+                'fi-topbar-item-label text-sm font-medium',
+                'text-gray-700 dark:text-gray-200' => ! $active,
+                'text-primary-600 dark:text-primary-400' => $active,
+            ])
+        >
             {{ $slot }}
         </span>
 
@@ -44,7 +63,15 @@
         @endif
 
         @if (! $url)
-            {{ \Filament\Support\generate_icon_html(\Filament\Support\Icons\Heroicon::ChevronDown, alias: 'panels::topbar.group.toggle-button', attributes: (new \Illuminate\View\ComponentAttributeBag)->class(['fi-topbar-group-toggle-icon'])) }}
+            <x-filament::icon
+                icon="heroicon-m-chevron-down"
+                icon-alias="panels::topbar.group.toggle-button"
+                @class([
+                    'fi-topbar-group-toggle-icon h-5 w-5',
+                    'text-gray-400 dark:text-gray-500' => ! $active,
+                    'text-primary-600 dark:text-primary-400' => $active,
+                ])
+            />
         @endif
     </{{ $tag }}>
 </li>

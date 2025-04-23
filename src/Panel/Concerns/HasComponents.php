@@ -3,13 +3,11 @@
 namespace Filament\Panel\Concerns;
 
 use Closure;
-use Filament\Auth\Pages\EditProfile;
 use Filament\Clusters\Cluster;
+use Filament\Livewire\DatabaseNotifications;
 use Filament\Livewire\GlobalSearch;
 use Filament\Livewire\Notifications;
-use Filament\Livewire\Sidebar;
-use Filament\Livewire\SimpleUserMenu;
-use Filament\Livewire\Topbar;
+use Filament\Pages\Auth\EditProfile;
 use Filament\Pages\Page;
 use Filament\Resources\Pages\Page as ResourcePage;
 use Filament\Resources\RelationManagers\RelationGroup;
@@ -48,7 +46,7 @@ trait HasComponents
     protected array $pageNamespaces = [];
 
     /**
-     * @var array<class-string<Cluster>>
+     * @var array<class-string>
      */
     protected array $clusters = [];
 
@@ -144,9 +142,6 @@ trait HasComponents
         return $this;
     }
 
-    /**
-     * @param  class-string<Model>|Model  $model
-     */
     public function getModelResource(string | Model $model): ?string
     {
         if ($model instanceof Model) {
@@ -222,7 +217,10 @@ trait HasComponents
      */
     public function getPageDirectories(): array
     {
-        return $this->pageDirectories;
+        return [
+            ...array_map(fn (string $fileName): string => ((string) str($fileName)->beforeLast('.php')) . DIRECTORY_SEPARATOR . 'Pages', array_keys($this->clusters)),
+            ...$this->pageDirectories,
+        ];
     }
 
     /**
@@ -230,7 +228,10 @@ trait HasComponents
      */
     public function getPageNamespaces(): array
     {
-        return $this->pageNamespaces;
+        return [
+            ...array_map(fn (string $namespace): string => "{$namespace}\Pages", array_values($this->clusters)),
+            ...$this->pageNamespaces,
+        ];
     }
 
     public function discoverClusters(string $in, string $for): static
@@ -244,7 +245,7 @@ trait HasComponents
 
         $this->discoverComponents(
             Cluster::class,
-            $this->clusters, /** @phpstan-ignore assign.propertyType */
+            $this->clusters,
             directory: $in,
             namespace: $for,
         );
@@ -262,14 +263,6 @@ trait HasComponents
         );
 
         return $this;
-    }
-
-    /**
-     * @return array<class-string<Cluster>>
-     */
-    public function getClusters(): array
-    {
-        return $this->clusters;
     }
 
     /**
@@ -312,7 +305,10 @@ trait HasComponents
      */
     public function getResourceDirectories(): array
     {
-        return $this->resourceDirectories;
+        return [
+            ...array_map(fn (string $fileName): string => ((string) str($fileName)->beforeLast('.php')) . DIRECTORY_SEPARATOR . 'Resources', array_keys($this->clusters)),
+            ...$this->resourceDirectories,
+        ];
     }
 
     /**
@@ -320,7 +316,10 @@ trait HasComponents
      */
     public function getResourceNamespaces(): array
     {
-        return $this->resourceNamespaces;
+        return [
+            ...array_map(fn (string $namespace): string => "{$namespace}\Resources", array_values($this->clusters)),
+            ...$this->resourceNamespaces,
+        ];
     }
 
     public function discoverWidgets(string $in, string $for): static
@@ -334,7 +333,7 @@ trait HasComponents
 
         $this->discoverComponents(
             Widget::class,
-            $this->widgets, /** @phpstan-ignore assign.propertyType */
+            $this->widgets,
             directory: $in,
             namespace: $for,
         );
@@ -448,7 +447,7 @@ trait HasComponents
                 $this->queueLivewireComponentForRegistration($class);
             }
 
-            if (! is_subclass_of($class, $baseClass)) { /** @phpstan-ignore function.alreadyNarrowedType */
+            if (! is_subclass_of($class, $baseClass)) {
                 continue;
             }
 
@@ -459,7 +458,7 @@ trait HasComponents
                 continue;
             }
 
-            $register[$file->getRealPath()] = $class; /** @phpstan-ignore parameterByRef.type */
+            $register[$file->getRealPath()] = $class;
             $this->registerToCluster($class);
         }
     }
@@ -483,24 +482,17 @@ trait HasComponents
     protected function registerLivewireComponents(): void
     {
         if (! $this->hasCachedComponents()) {
-            $this->queueLivewireComponentForRegistration($this->getDatabaseNotificationsLivewireComponent());
+            $this->queueLivewireComponentForRegistration(DatabaseNotifications::class);
             $this->queueLivewireComponentForRegistration(EditProfile::class);
             $this->queueLivewireComponentForRegistration(GlobalSearch::class);
             $this->queueLivewireComponentForRegistration(Notifications::class);
-            $this->queueLivewireComponentForRegistration(Sidebar::class);
-            $this->queueLivewireComponentForRegistration(SimpleUserMenu::class);
-            $this->queueLivewireComponentForRegistration(Topbar::class);
 
-            if ($this->hasEmailVerification() && is_subclass_of($emailVerificationPromptRouteAction = $this->getEmailVerificationPromptRouteAction(), Component::class)) {
-                $this->queueLivewireComponentForRegistration($emailVerificationPromptRouteAction);
+            if ($this->hasEmailVerification() && is_subclass_of($emailVerificationRouteAction = $this->getEmailVerificationPromptRouteAction(), Component::class)) {
+                $this->queueLivewireComponentForRegistration($emailVerificationRouteAction);
             }
 
             if ($this->hasLogin() && is_subclass_of($loginRouteAction = $this->getLoginRouteAction(), Component::class)) {
                 $this->queueLivewireComponentForRegistration($loginRouteAction);
-            }
-
-            if ($this->isMultiFactorAuthenticationRequired() && is_subclass_of($setUpRequiredMultiFactorAuthenticationRouteAction = $this->getSetUpRequiredMultiFactorAuthenticationRouteAction(), Component::class)) {
-                $this->queueLivewireComponentForRegistration($setUpRequiredMultiFactorAuthenticationRouteAction);
             }
 
             if ($this->hasPasswordReset()) {

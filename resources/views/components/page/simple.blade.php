@@ -3,24 +3,18 @@
     'subheading' => null,
 ])
 
-@php
-    $heading ??= $this->getHeading();
-    $subheading ??= $this->getSubHeading();
-    $hasLogo = $this->hasLogo();
-@endphp
-
 <div {{ $attributes->class(['fi-simple-page']) }}>
     {{ \Filament\Support\Facades\FilamentView::renderHook(\Filament\View\PanelsRenderHook::SIMPLE_PAGE_START, scopes: $this->getRenderHookScopes()) }}
 
-    <div class="fi-simple-page-content">
+    <section class="grid auto-cols-fr gap-y-6">
         <x-filament-panels::header.simple
-            :heading="$heading"
-            :logo="$hasLogo"
-            :subheading="$subheading"
+            :heading="$heading ??= $this->getHeading()"
+            :logo="$this->hasLogo()"
+            :subheading="$subheading ??= $this->getSubHeading()"
         />
 
         {{ $slot }}
-    </div>
+    </section>
 
     @if (! $this instanceof \Filament\Tables\Contracts\HasTable)
         <x-filament-actions::modals />

@@ -2,14 +2,8 @@
 
 namespace Filament\Pages;
 
-use BackedEnum;
 use Filament\Facades\Filament;
-use Filament\Schemas\Components\Component;
-use Filament\Schemas\Components\EmbeddedSchema;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Schema;
 use Filament\Support\Facades\FilamentIcon;
-use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\Widget;
 use Filament\Widgets\WidgetConfiguration;
 use Illuminate\Contracts\Support\Htmlable;
@@ -20,6 +14,11 @@ class Dashboard extends Page
 
     protected static ?int $navigationSort = -2;
 
+    /**
+     * @var view-string
+     */
+    protected static string $view = 'filament-panels::pages.dashboard';
+
     public static function getNavigationLabel(): string
     {
         return static::$navigationLabel ??
@@ -27,11 +26,11 @@ class Dashboard extends Page
             __('filament-panels::pages/dashboard.title');
     }
 
-    public static function getNavigationIcon(): string | BackedEnum | Htmlable | null
+    public static function getNavigationIcon(): string | Htmlable | null
     {
         return static::$navigationIcon
             ?? FilamentIcon::resolve('panels::pages.dashboard.navigation-item')
-            ?? (Filament::hasTopNavigation() ? Heroicon::Home : Heroicon::OutlinedHome);
+            ?? (Filament::hasTopNavigation() ? 'heroicon-m-home' : 'heroicon-o-home');
     }
 
     public static function getRoutePath(): string
@@ -48,8 +47,6 @@ class Dashboard extends Page
     }
 
     /**
-     * @deprecated Use `getWidgetsSchemaComponents($this->getWidgets())` to transform widgets into schema components instead, which also filters their visibility.
-     *
      * @return array<class-string<Widget> | WidgetConfiguration>
      */
     public function getVisibleWidgets(): array
@@ -58,9 +55,9 @@ class Dashboard extends Page
     }
 
     /**
-     * @return int | array<string, ?int>
+     * @return int | string | array<string, int | string | null>
      */
-    public function getColumns(): int | array
+    public function getColumns(): int | string | array
     {
         return 2;
     }
@@ -68,25 +65,5 @@ class Dashboard extends Page
     public function getTitle(): string | Htmlable
     {
         return static::$title ?? __('filament-panels::pages/dashboard.title');
-    }
-
-    public function content(Schema $schema): Schema
-    {
-        return $schema
-            ->components([
-                ...(method_exists($this, 'getFiltersForm') ? [$this->getFiltersFormContentComponent()] : []),
-                $this->getWidgetsContentComponent(),
-            ]);
-    }
-
-    public function getFiltersFormContentComponent(): Component
-    {
-        return EmbeddedSchema::make('filtersForm');
-    }
-
-    public function getWidgetsContentComponent(): Component
-    {
-        return Grid::make($this->getColumns())
-            ->schema($this->getWidgetsSchemaComponents($this->getWidgets()));
     }
 }

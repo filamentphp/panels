@@ -4,7 +4,7 @@ namespace Filament\Pages\Dashboard\Concerns;
 
 use Livewire\Attributes\Url;
 
-trait HasFilters /** @phpstan-ignore trait.unused */
+trait HasFilters
 {
     /**
      * @var array<string, mixed> | null

@@ -2,8 +2,10 @@
 
 namespace Filament\Pages\Concerns;
 
+use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use InvalidArgumentException;
 
 trait InteractsWithHeaderActions
 {
@@ -12,17 +14,22 @@ trait InteractsWithHeaderActions
      */
     protected array $cachedHeaderActions = [];
 
-    public function cacheInteractsWithHeaderActions(): void
+    public function bootedInteractsWithHeaderActions(): void
     {
-        $actions = $this->getHeaderActions();
+        $this->cacheHeaderActions();
+    }
+
+    protected function cacheHeaderActions(): void
+    {
+        /** @var array<string, Action | ActionGroup> */
+        $actions = Action::configureUsing(
+            Closure::fromCallable([$this, 'configureAction']),
+            fn (): array => $this->getHeaderActions(),
+        );
 
         foreach ($actions as $action) {
             if ($action instanceof ActionGroup) {
                 $action->livewire($this);
-
-                if (! $action->getDropdownPlacement()) {
-                    $action->dropdownPlacement('bottom-end');
-                }
 
                 /** @var array<string, Action> $flatActions */
                 $flatActions = $action->getFlatActions();
@@ -31,6 +38,10 @@ trait InteractsWithHeaderActions
                 $this->cachedHeaderActions[] = $action;
 
                 continue;
+            }
+
+            if (! $action instanceof Action) {
+                throw new InvalidArgumentException('Header actions must be an instance of ' . Action::class . ', or ' . ActionGroup::class . '.');
             }
 
             $this->cacheAction($action);

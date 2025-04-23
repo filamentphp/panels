@@ -2,175 +2,148 @@
 
 namespace Filament\Commands;
 
+use Filament\Facades\Filament;
+use Filament\Panel;
 use Filament\Support\Commands\Concerns\CanManipulateFiles;
-use Filament\Support\Commands\Concerns\HasPanel;
-use Filament\Support\Commands\Exceptions\FailureCommandOutput;
-use Filament\Support\Commands\Exceptions\SuccessCommandOutput;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 
-#[AsCommand(name: 'make:filament-theme', aliases: [
-    'filament:make-theme',
-    'filament:theme',
-])]
+use function Laravel\Prompts\select;
+
+#[AsCommand(name: 'make:filament-theme')]
 class MakeThemeCommand extends Command
 {
     use CanManipulateFiles;
-    use HasPanel;
 
     protected $description = 'Create a new Filament panel theme';
 
-    protected $name = 'make:filament-theme';
-
-    protected string $pm;
-
-    /**
-     * @var array<string>
-     */
-    protected $aliases = [
-        'filament:make-theme',
-        'filament:theme',
-    ];
-
-    /**
-     * @return array<InputArgument>
-     */
-    protected function getArguments(): array
-    {
-        return [
-            new InputArgument(
-                name: 'panel',
-                mode: InputArgument::OPTIONAL,
-                description: 'The ID of the panel to create the theme for',
-            ),
-        ];
-    }
-
-    /**
-     * @return array<InputOption>
-     */
-    protected function getOptions(): array
-    {
-        return [
-            new InputOption(
-                name: 'panel',
-                shortcut: null,
-                mode: InputOption::VALUE_REQUIRED,
-                description: 'The panel to create the resource in',
-            ),
-            new InputOption(
-                name: 'pm',
-                mode: InputOption::VALUE_REQUIRED,
-                description: 'The package manager to use (npm, yarn)',
-            ),
-            new InputOption(
-                name: 'force',
-                shortcut: 'F',
-                mode: InputOption::VALUE_NONE,
-                description: 'Overwrite the contents of the files if they already exist',
-            ),
-        ];
-    }
+    protected $signature = 'make:filament-theme {panel?} {--pm=} {--F|force}';
 
     public function handle(): int
     {
-        try {
-            $this->configurePanel(question: 'Which panel would you like to create this theme for?');
-            $this->configurePackageManager();
+        $packageJson = file_get_contents(base_path('package.json')) ?: '';
 
-            $this->installDependencies();
-            $this->createThemeSourceFiles();
+        $isTailwindV4Installed = str_contains($packageJson, '"@tailwindcss/postcss": "^4')
+            || str_contains($packageJson, '"@tailwindcss/postcss": "4')
+            || str_contains($packageJson, '"@tailwindcss/vite": "^4')
+            || str_contains($packageJson, '"@tailwindcss/vite": "4')
+            || str_contains($packageJson, '"tailwindcss": "^4')
+            || str_contains($packageJson, '"tailwindcss": "4');
 
-            $this->abortIfNotVite();
-        } catch (FailureCommandOutput) {
-            return static::FAILURE;
-        } catch (SuccessCommandOutput) {
-            return static::SUCCESS;
-        }
+        $pm = $this->option('pm') ?? 'npm';
 
-        $this->components->warn('Action is required to complete the theme setup:');
-        $this->components->bulletList([
-            "First, add a new item to the `input` array of `vite.config.js`: `resources/css/filament/{$this->panel->getId()}/theme.css`.",
-            "Next, register the theme in the {$this->panel->getId()} panel provider using `->viteTheme('resources/css/filament/{$this->panel->getId()}/theme.css')`",
-            "Finally, run `{$this->pm} run build` to compile the theme.",
-        ]);
-
-        return static::SUCCESS;
-    }
-
-    protected function configurePackageManager(): void
-    {
-        $this->pm = $this->option('pm') ?? 'npm';
-
-        exec("{$this->pm} -v", $pmVersion, $pmVersionExistCode);
+        exec("{$pm} -v", $pmVersion, $pmVersionExistCode);
 
         if ($pmVersionExistCode !== 0) {
             $this->error('Node.js is not installed. Please install before continuing.');
 
-            throw new FailureCommandOutput;
+            return static::FAILURE;
         }
 
-        $this->info("Using {$this->pm} v{$pmVersion[0]}");
-    }
+        $this->info("Using {$pm} v{$pmVersion[0]}");
 
-    protected function installDependencies(): void
-    {
-        $installCommand = match ($this->pm) {
+        $installCommand = match ($pm) {
             'yarn' => 'yarn add',
-            default => "{$this->pm} install",
+            default => "{$pm} install",
         };
 
-        exec("{$installCommand} tailwindcss@latest @tailwindcss/vite --save-dev");
+        if (! $isTailwindV4Installed) {
+            exec("{$installCommand} tailwindcss@3 @tailwindcss/forms @tailwindcss/typography postcss postcss-nesting autoprefixer --save-dev");
+        } else {
+            exec("{$installCommand} @tailwindcss/forms @tailwindcss/typography --save-dev");
+        }
 
-        $this->components->info('Dependencies installed successfully.');
-    }
+        $panel = $this->argument('panel');
 
-    protected function createThemeSourceFiles(): void
-    {
-        $cssFilePath = resource_path("css/filament/{$this->panel->getId()}/theme.css");
+        if ($panel) {
+            $panel = Filament::getPanel($panel, isStrict: false);
+        }
+
+        if (! $panel) {
+            $panels = Filament::getPanels();
+
+            /** @var Panel $panel */
+            $panel = (count($panels) > 1) ? $panels[select(
+                label: 'Which panel would you like to create this for?',
+                options: array_map(
+                    fn (Panel $panel): string => $panel->getId(),
+                    $panels,
+                ),
+                default: Filament::getDefaultPanel()->getId(),
+            )] : Arr::first($panels);
+        }
+
+        $panelId = $panel->getId();
+
+        $cssFilePath = resource_path("css/filament/{$panelId}/theme.css");
+        $tailwindConfigFilePath = resource_path("css/filament/{$panelId}/tailwind.config.js");
 
         if (! $this->option('force') && $this->checkForCollision([
             $cssFilePath,
+            $tailwindConfigFilePath,
         ])) {
-            throw new FailureCommandOutput;
+            return static::INVALID;
         }
 
-        $classDirectory = (string) str(Arr::first($this->panel->getPageDirectories()))
+        $classPathPrefix = (string) str(Arr::first($panel->getPageDirectories()))
             ->afterLast('Filament/')
             ->beforeLast('Pages');
 
-        $viewDirectory = str($classDirectory)
+        $viewPathPrefix = str($classPathPrefix)
             ->explode('/')
             ->map(fn ($segment) => Str::lower(Str::kebab($segment)))
             ->implode('/');
 
-        $this->copyStubToApp('ThemeCss', $cssFilePath, [
-            'classDirectory' => filled($classDirectory) ? "/{$classDirectory}" : '',
-            'panel' => $this->panel->getId(),
-            'viewDirectory' => filled($viewDirectory) ? "/{$viewDirectory}" : '',
+        $this->copyStubToApp($isTailwindV4Installed ? 'ThemeCssTailwind4' : 'ThemeCss', $cssFilePath, [
+            'panel' => $panelId,
+        ]);
+        $this->copyStubToApp('ThemeTailwindConfig', $tailwindConfigFilePath, [
+            'classPathPrefix' => $classPathPrefix,
+            'viewPathPrefix' => $viewPathPrefix,
         ]);
 
-        $this->components->info("Filament theme [resources/css/filament/{$this->panel->getId()}/theme.css] created successfully.");
-    }
+        $this->components->info("Filament theme [resources/css/filament/{$panelId}/theme.css] and [resources/css/filament/{$panelId}/tailwind.config.js] created successfully.");
 
-    protected function abortIfNotVite(): void
-    {
-        if (glob(base_path('vite.config.*s'))) {
-            return;
+        if ($isTailwindV4Installed) {
+            $this->components->warn('Action is required to complete the theme setup:');
+            $this->components->bulletList([
+                'It looks like you have Tailwind v4 installed. Filament uses Tailwind v3. You should downgrade your project and re-run this command with `--force`, or use the following command to compile the theme with the Tailwind v3 CLI:',
+                "npx tailwindcss@3 --input ./resources/css/filament/{$panelId}/theme.css --output ./public/css/filament/{$panelId}/theme.css --config ./resources/css/filament/{$panelId}/tailwind.config.js --minify",
+                "Make sure to register the theme in the {$panelId} panel provider using `->theme(asset('css/filament/{$panelId}/theme.css'))`",
+            ]);
+
+            return static::SUCCESS;
+        }
+
+        if (empty(glob(base_path('vite.config.*s')))) {
+            $this->components->warn('Action is required to complete the theme setup:');
+            $this->components->bulletList([
+                "It looks like you don't have Vite installed. Please use your asset bundling system of choice to compile `resources/css/filament/{$panelId}/theme.css` into `public/css/filament/{$panelId}/theme.css`.",
+                "If you're not currently using a bundler, we recommend using Vite. Alternatively, you can use the Tailwind CLI with the following command:",
+                "npx tailwindcss@3 --input ./resources/css/filament/{$panelId}/theme.css --output ./public/css/filament/{$panelId}/theme.css --config ./resources/css/filament/{$panelId}/tailwind.config.js --minify",
+                "Make sure to register the theme in the {$panelId} panel provider using `->theme(asset('css/filament/{$panelId}/theme.css'))`",
+            ]);
+
+            return static::SUCCESS;
+        }
+
+        $postcssConfigPath = base_path('postcss.config.js');
+
+        if (! file_exists($postcssConfigPath)) {
+            $this->copyStubToApp('ThemePostcssConfig', $postcssConfigPath);
+
+            $this->components->info('Filament theme [postcss.config.js] created successfully.');
         }
 
         $this->components->warn('Action is required to complete the theme setup:');
         $this->components->bulletList([
-            "It looks like you don't have Vite installed. Please use your asset bundling system of choice to compile `resources/css/filament/{$this->panel->getId()}/theme.css` into `public/css/filament/{$this->panel->getId()}/theme.css`.",
-            "If you're not currently using a bundler, we recommend using Vite. Alternatively, you can use the Tailwind CLI with the following command:",
-            "npx @tailwindcss/cli --input ./resources/css/filament/{$this->panel->getId()}/theme.css --output ./public/css/filament/{$this->panel->getId()}/theme.css --config ./resources/css/filament/{$this->panel->getId()}/tailwind.config.js --minify",
-            "Make sure to register the theme in the {$this->panel->getId()} panel provider using `->theme(asset('css/filament/{$this->panel->getId()}/theme.css'))`",
+            "First, add a new item to the `input` array of `vite.config.js`: `resources/css/filament/{$panelId}/theme.css`.",
+            "Next, register the theme in the {$panelId} panel provider using `->viteTheme('resources/css/filament/{$panelId}/theme.css')`",
+            "Finally, run `{$pm} run build` to compile the theme.",
         ]);
 
-        throw new SuccessCommandOutput;
+        return static::SUCCESS;
     }
 }

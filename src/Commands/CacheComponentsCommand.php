@@ -11,7 +11,7 @@ class CacheComponentsCommand extends Command
 {
     protected $description = 'Cache all components';
 
-    protected $name = 'filament:cache-components';
+    protected $signature = 'filament:cache-components';
 
     public function handle(): int
     {

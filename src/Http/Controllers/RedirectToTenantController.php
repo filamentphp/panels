@@ -10,7 +10,7 @@ class RedirectToTenantController
 {
     public function __invoke(): RedirectResponse
     {
-        $panel = Filament::getCurrentOrDefaultPanel();
+        $panel = Filament::getCurrentPanel();
         $tenant = Filament::getUserDefaultTenant(Filament::auth()->user());
 
         if (! $tenant) {

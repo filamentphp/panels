@@ -3,10 +3,7 @@
 namespace Filament\Resources\Pages\Concerns;
 
 use Filament\Actions\Action;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ForceDeleteAction;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Livewire\Attributes\Locked;
@@ -23,23 +20,10 @@ trait InteractsWithRecord
 
     protected function resolveRecord(int | string $key): Model
     {
-        $this->mountParentRecord();
-
-        $parentRecord = $this->getParentRecord();
-        $modifyQuery = null;
-
-        if ($parentRecord) {
-            $modifyQuery = fn (Builder $query) => static::getResource()::scopeEloquentQueryToParent($query, $parentRecord);
-        }
-
-        $record = static::getResource()::resolveRecordRouteBinding($key, $modifyQuery);
+        $record = static::getResource()::resolveRecordRouteBinding($key);
 
         if ($record === null) {
             throw (new ModelNotFoundException)->setModel($this->getModel(), [$key]);
-        }
-
-        if ($parentRecord) {
-            $record->setRelation(static::getResource()::getParentResourceRegistration()->getInverseRelationshipName(), $parentRecord);
         }
 
         return $record;
@@ -48,11 +32,6 @@ trait InteractsWithRecord
     public function getRecord(): Model
     {
         return $this->record;
-    }
-
-    public function hasRecord(): bool
-    {
-        return filled($this->record);
     }
 
     public function getRecordTitle(): string | Htmlable
@@ -71,19 +50,22 @@ trait InteractsWithRecord
      */
     public function getBreadcrumbs(): array
     {
-        $breadcrumbs = $this->getResourceBreadcrumbs();
-
         $resource = static::getResource();
+
+        $breadcrumbs = [
+            $resource::getUrl() => $resource::getBreadcrumb(),
+        ];
+
         $record = $this->getRecord();
 
         if ($record->exists && $resource::hasRecordTitle()) {
             if ($resource::hasPage('view') && $resource::canView($record)) {
                 $breadcrumbs[
-                    $this->getResourceUrl('view')
+                    $resource::getUrl('view', ['record' => $record])
                 ] = $this->getRecordTitle();
             } elseif ($resource::hasPage('edit') && $resource::canEdit($record)) {
                 $breadcrumbs[
-                    $this->getResourceUrl('edit')
+                    $resource::getUrl('edit', ['record' => $record])
                 ] = $this->getRecordTitle();
             } else {
                 $breadcrumbs[] = $this->getRecordTitle();
@@ -91,6 +73,10 @@ trait InteractsWithRecord
         }
 
         $breadcrumbs[] = $this->getBreadcrumb();
+
+        if (filled($cluster = static::getCluster())) {
+            return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
+        }
 
         return $breadcrumbs;
     }
@@ -131,29 +117,15 @@ trait InteractsWithRecord
         ];
     }
 
-    /**
-     * @return Model|class-string<Model>|null
-     */
-    protected function getMountedActionSchemaModel(): Model | string | null
+    protected function getMountedActionFormModel(): Model | string | null
     {
         return $this->getRecord();
     }
 
-    public function getDefaultActionRecord(Action $action): ?Model
+    protected function configureAction(Action $action): void
     {
-        return $this->hasRecord() ? $this->getRecord() : null;
-    }
-
-    public function getDefaultActionRecordTitle(Action $action): ?string
-    {
-        return $this->getRecordTitle();
-    }
-
-    public function getDefaultActionSuccessRedirectUrl(Action $action): ?string
-    {
-        return match (true) {
-            $action instanceof DeleteAction, $action instanceof ForceDeleteAction => $this->getResourceUrl(),
-            default => null,
-        };
+        $action
+            ->record($this->getRecord())
+            ->recordTitle($this->getRecordTitle());
     }
 }

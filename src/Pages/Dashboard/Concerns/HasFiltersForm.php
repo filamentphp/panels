@@ -2,38 +2,37 @@
 
 namespace Filament\Pages\Dashboard\Concerns;
 
-use Filament\Schemas\Schema;
+use Filament\Forms\Form;
 
-trait HasFiltersForm /** @phpstan-ignore trait.unused */
+trait HasFiltersForm
 {
     use HasFilters;
 
-    public function bootedHasFiltersForm(): void
+    protected function getHasFiltersForms(): array
     {
-        $this->cacheSchema('filtersForm', $this->getFiltersForm());
+        return [
+            'filtersForm' => $this->getFiltersForm(),
+        ];
     }
 
-    public function filtersForm(Schema $schema): Schema
+    public function filtersForm(Form $form): Form
     {
-        return $schema;
+        return $form;
     }
 
-    public function getFiltersForm(): Schema
+    public function getFiltersForm(): Form
     {
-        if ((! $this->isCachingSchemas) && $this->hasCachedSchema('filtersForm')) {
-            return $this->getSchema('filtersForm');
+        if ((! $this->isCachingForms) && $this->hasCachedForm('filtersForm')) {
+            return $this->getForm('filtersForm');
         }
 
-        $schema = $this->makeSchema()
+        return $this->filtersForm($this->makeForm()
             ->columns([
                 'md' => 2,
                 'xl' => 3,
                 '2xl' => 4,
             ])
-            ->extraAttributes(['wire:partial' => 'table-filters-form'])
-            ->live()
-            ->statePath('filters');
-
-        return $this->filtersForm($schema);
+            ->statePath('filters')
+            ->live());
     }
 }

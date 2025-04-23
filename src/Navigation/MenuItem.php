@@ -2,21 +2,18 @@
 
 namespace Filament\Navigation;
 
-use BackedEnum;
 use Closure;
-use Filament\Actions\Action;
 use Filament\Support\Components\Component;
-use Illuminate\Support\Str;
 use Laravel\SerializableClosure\Serializers\Native;
 
-/**
- * @deprecated Use `Filament\Actions\Action` instead.
- */
 class MenuItem extends Component
 {
-    protected string | Closure | null $color = null;
+    /**
+     * @var string | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | Closure | null
+     */
+    protected string | array | Closure | null $color = null;
 
-    protected string | BackedEnum | Closure | null $icon = null;
+    protected string | Closure | null $icon = null;
 
     protected string | Closure | null $label = null;
 
@@ -42,14 +39,17 @@ class MenuItem extends Component
         return $static;
     }
 
-    public function color(string | Closure | null $color): static
+    /**
+     * @param  string | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | Closure | null  $color
+     */
+    public function color(string | array | Closure | null $color): static
     {
         $this->color = $color;
 
         return $this;
     }
 
-    public function icon(string | BackedEnum | Closure | null $icon): static
+    public function icon(string | Closure | null $icon): static
     {
         $this->icon = $icon;
 
@@ -120,12 +120,15 @@ class MenuItem extends Component
         return ! $this->evaluate($this->isVisible);
     }
 
-    public function getColor(): ?string
+    /**
+     * @return string | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | null
+     */
+    public function getColor(): string | array | null
     {
         return $this->evaluate($this->color);
     }
 
-    public function getIcon(): string | BackedEnum | null
+    public function getIcon(): ?string
     {
         return $this->evaluate($this->icon);
     }
@@ -142,7 +145,7 @@ class MenuItem extends Component
 
     public function getSort(): int
     {
-        return $this->evaluate($this->sort) ?? 0;
+        return $this->evaluate($this->sort) ?? -1;
     }
 
     public function getUrl(): ?string
@@ -153,20 +156,5 @@ class MenuItem extends Component
     public function shouldOpenUrlInNewTab(): bool
     {
         return (bool) $this->evaluate($this->shouldOpenUrlInNewTab);
-    }
-
-    public function toAction(?Action $action = null): Action
-    {
-        $label = $this->getLabel();
-        $postAction = $this->getPostAction();
-
-        return ($action ?? Action::make(Str::slug(Str::transliterate($label, strict: true))))
-            ->color($this->getColor())
-            ->icon($this->getIcon())
-            ->label($label)
-            ->postToUrl(filled($postAction))
-            ->sort($this->getSort())
-            ->visible($this->isVisible())
-            ->url($this->getUrl() ?? $postAction, $this->shouldOpenUrlInNewTab());
     }
 }

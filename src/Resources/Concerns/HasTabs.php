@@ -2,9 +2,7 @@
 
 namespace Filament\Resources\Concerns;
 
-use Filament\Schemas\Components\Component;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
 trait HasTabs
@@ -38,9 +36,7 @@ trait HasTabs
      */
     public function getCachedTabs(): array
     {
-        return $this->cachedTabs ??= collect($this->getTabs())
-            ->map(fn (Tab $tab, string | int $key): Tab => $tab->hasCustomLabel() ? $tab : $tab->label($this->generateTabLabel($key)))
-            ->all();
+        return $this->cachedTabs ??= $this->getTabs();
     }
 
     public function getDefaultActiveTab(): string | int | null
@@ -73,16 +69,5 @@ trait HasTabs
         }
 
         return $tabs[$this->activeTab]->modifyQuery($query);
-    }
-
-    public function getTabsContentComponent(): Component
-    {
-        $tabs = $this->getCachedTabs();
-
-        return Tabs::make()
-            ->livewireProperty('activeTab')
-            ->contained(false)
-            ->tabs($tabs)
-            ->hidden(empty($tabs));
     }
 }

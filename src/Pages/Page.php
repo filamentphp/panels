@@ -2,28 +2,16 @@
 
 namespace Filament\Pages;
 
-use BackedEnum;
-use Filament\Actions\Action;
-use Filament\Actions\ActionGroup;
 use Filament\Clusters\Cluster;
 use Filament\Facades\Filament;
 use Filament\Navigation\NavigationItem;
 use Filament\Panel;
-use Filament\Schemas\Components\Component;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Livewire;
-use Filament\Schemas\Components\RenderHook;
-use Filament\Schemas\Schema;
-use Filament\View\PanelsRenderHook;
 use Filament\Widgets\Widget;
 use Filament\Widgets\WidgetConfiguration;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Route;
-use UnitEnum;
-
-use function Filament\Support\original_request;
 
 abstract class Page extends BasePage
 {
@@ -34,30 +22,26 @@ abstract class Page extends BasePage
 
     protected static string $layout;
 
-    /**
-     * @var class-string<Cluster> | null
-     */
+    /** @var class-string<Cluster> | null */
     protected static ?string $cluster = null;
 
     protected static bool $isDiscovered = true;
 
-    protected static string | UnitEnum | null $navigationGroup = null;
+    protected static ?string $navigationGroup = null;
 
     protected static ?string $navigationBadgeTooltip = null;
 
     protected static ?string $navigationParentItem = null;
 
-    protected static string | BackedEnum | null $navigationIcon = null;
+    protected static ?string $navigationIcon = null;
 
-    protected static string | BackedEnum | null $activeNavigationIcon = null;
+    protected static ?string $activeNavigationIcon = null;
 
     protected static ?string $navigationLabel = null;
 
     protected static ?int $navigationSort = null;
 
     protected static bool $shouldRegisterNavigation = true;
-
-    protected string $view = 'filament-panels::pages.page';
 
     public function getLayout(): string
     {
@@ -103,7 +87,7 @@ abstract class Page extends BasePage
             return;
         }
 
-        Filament::getCurrentOrDefaultPanel()
+        Filament::getCurrentPanel()
             ->navigationItems(static::getNavigationItems());
     }
 
@@ -118,7 +102,7 @@ abstract class Page extends BasePage
                 ->parentItem(static::getNavigationParentItem())
                 ->icon(static::getNavigationIcon())
                 ->activeIcon(static::getActiveNavigationIcon())
-                ->isActiveWhen(fn (): bool => original_request()->routeIs(static::getNavigationItemActiveRoutePattern()))
+                ->isActiveWhen(fn (): bool => request()->routeIs(static::getNavigationItemActiveRoutePattern()))
                 ->sort(static::getNavigationSort())
                 ->badge(static::getNavigationBadge(), color: static::getNavigationBadgeColor())
                 ->badgeTooltip(static::getNavigationBadgeTooltip())
@@ -133,7 +117,7 @@ abstract class Page extends BasePage
 
     public static function getRouteName(?string $panel = null): string
     {
-        $panel = $panel ? Filament::getPanel($panel) : Filament::getCurrentOrDefaultPanel();
+        $panel = $panel ? Filament::getPanel($panel) : Filament::getCurrentPanel();
 
         $routeName = 'pages.' . static::getRelativeRouteName();
         $routeName = static::prependClusterRouteBaseName($routeName);
@@ -153,7 +137,7 @@ abstract class Page extends BasePage
         return [];
     }
 
-    public static function getNavigationGroup(): string | UnitEnum | null
+    public static function getNavigationGroup(): ?string
     {
         return static::$navigationGroup;
     }
@@ -163,12 +147,12 @@ abstract class Page extends BasePage
         return static::$navigationParentItem;
     }
 
-    public static function getActiveNavigationIcon(): string | BackedEnum | Htmlable | null
+    public static function getActiveNavigationIcon(): string | Htmlable | null
     {
         return static::$activeNavigationIcon ?? static::getNavigationIcon();
     }
 
-    public static function getNavigationIcon(): string | BackedEnum | Htmlable | null
+    public static function getNavigationIcon(): string | Htmlable | null
     {
         return static::$navigationIcon;
     }
@@ -186,7 +170,10 @@ abstract class Page extends BasePage
         return null;
     }
 
-    public static function getNavigationBadgeColor(): ?string
+    /**
+     * @return string | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | null
+     */
+    public static function getNavigationBadgeColor(): string | array | null
     {
         return null;
     }
@@ -225,8 +212,6 @@ abstract class Page extends BasePage
     }
 
     /**
-     * @deprecated Use `getWidgetsSchemaComponents($this->getHeaderWidgets())` to transform widgets into schema components instead, which also filters their visibility.
-     *
      * @return array<class-string<Widget> | WidgetConfiguration>
      */
     public function getVisibleHeaderWidgets(): array
@@ -235,9 +220,9 @@ abstract class Page extends BasePage
     }
 
     /**
-     * @return int | array<string, ?int>
+     * @return int | string | array<string, int | string | null>
      */
-    public function getHeaderWidgetsColumns(): int | array
+    public function getHeaderWidgetsColumns(): int | string | array
     {
         return 2;
     }
@@ -251,8 +236,6 @@ abstract class Page extends BasePage
     }
 
     /**
-     * @deprecated Use `getWidgetsSchemaComponents($this->getFooterWidgets())` to transform widgets into schema components instead, which also filters their visibility.
-     *
      * @return array<class-string<Widget> | WidgetConfiguration>
      */
     public function getVisibleFooterWidgets(): array
@@ -261,8 +244,6 @@ abstract class Page extends BasePage
     }
 
     /**
-     * @deprecated Use `getWidgetsSchemaComponents()` to transform widgets into schema components instead, which also filters their visibility.
-     *
      * @param  array<class-string<Widget> | WidgetConfiguration>  $widgets
      * @return array<class-string<Widget> | WidgetConfiguration>
      */
@@ -285,9 +266,9 @@ abstract class Page extends BasePage
     }
 
     /**
-     * @return int | array<string, ?int>
+     * @return int | string | array<string, int | string | null>
      */
-    public function getFooterWidgetsColumns(): int | array
+    public function getFooterWidgetsColumns(): int | string | array
     {
         return 2;
     }
@@ -334,72 +315,5 @@ abstract class Page extends BasePage
         }
 
         return $name;
-    }
-
-    public function content(Schema $schema): Schema
-    {
-        return $schema;
-    }
-
-    /**
-     * @return array<string>
-     */
-    public function getPageClasses(): array
-    {
-        return [];
-    }
-
-    /**
-     * @param  array<string | WidgetConfiguration>  $widgets
-     * @param  array<string, mixed>  $data
-     * @return array<Component | Action | ActionGroup>
-     */
-    public function getWidgetsSchemaComponents(array $widgets, array $data = []): array
-    {
-        return collect($widgets)
-            ->values()
-            ->filter(fn (string | WidgetConfiguration $widget): bool => $this->normalizeWidgetClass($widget)::canView())
-            ->map(fn (string | WidgetConfiguration $widget, int $widgetKey): Livewire => Livewire::make(
-                $widgetClass = $this->normalizeWidgetClass($widget),
-                [
-                    ...$this->getWidgetData(),
-                    ...$data,
-                    ...(($widget instanceof WidgetConfiguration) ? [
-                        ...$widget->widget::getDefaultProperties(),
-                        ...$widget->getProperties(),
-                    ] : $widget::getDefaultProperties()),
-                    ...(property_exists($this, 'filters') ? ['pageFilters' => $this->filters] : []),
-                ],
-            )->key("{$widgetClass}-{$widgetKey}")->liberatedFromContainerGrid())
-            ->all();
-    }
-
-    public function headerWidgets(Schema $schema): Schema
-    {
-        return $schema
-            ->components([
-                RenderHook::make(PanelsRenderHook::PAGE_HEADER_WIDGETS_BEFORE),
-                Grid::make($this->getHeaderWidgetsColumns())
-                    ->schema($widgets = $this->getWidgetsSchemaComponents($this->getHeaderWidgets())),
-                RenderHook::make(PanelsRenderHook::PAGE_HEADER_WIDGETS_AFTER),
-            ])
-            ->hidden(empty($widgets));
-    }
-
-    public function footerWidgets(Schema $schema): Schema
-    {
-        return $schema
-            ->components([
-                RenderHook::make(PanelsRenderHook::PAGE_FOOTER_WIDGETS_BEFORE),
-                Grid::make($this->getFooterWidgetsColumns())
-                    ->schema($widgets = $this->getWidgetsSchemaComponents($this->getFooterWidgets())),
-                RenderHook::make(PanelsRenderHook::PAGE_FOOTER_WIDGETS_AFTER),
-            ])
-            ->hidden(empty($widgets));
-    }
-
-    public function getDefaultTestingSchemaName(): ?string
-    {
-        return 'content';
     }
 }

@@ -12,7 +12,7 @@ class IdentifyTenant
 {
     public function handle(Request $request, Closure $next): mixed
     {
-        $panel = Filament::getCurrentOrDefaultPanel();
+        $panel = Filament::getCurrentPanel();
 
         if (! $panel->hasTenancy()) {
             return $next($request);

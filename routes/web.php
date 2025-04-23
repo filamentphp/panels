@@ -1,17 +1,15 @@
 <?php
 
-use Filament\Auth\Http\Controllers\BlockEmailChangeVerificationController;
-use Filament\Auth\Http\Controllers\EmailChangeVerificationController;
-use Filament\Auth\Http\Controllers\EmailVerificationController;
-use Filament\Auth\Http\Controllers\LogoutController;
 use Filament\Facades\Filament;
+use Filament\Http\Controllers\Auth\EmailVerificationController;
+use Filament\Http\Controllers\Auth\LogoutController;
 use Filament\Http\Controllers\RedirectToHomeController;
 use Filament\Http\Controllers\RedirectToTenantController;
 use Filament\Panel;
 use Illuminate\Support\Facades\Route;
 
 Route::name('filament.')
-    ->group(function (): void {
+    ->group(function () {
         foreach (Filament::getPanels() as $panel) {
             /** @var Panel $panel */
             $panelId = $panel->getId();
@@ -26,12 +24,12 @@ Route::name('filament.')
                     ->middleware($panel->getMiddleware())
                     ->name("{$panelId}." . ((filled($domain) && (count($domains) > 1)) ? "{$domain}." : ''))
                     ->prefix($panel->getPath())
-                    ->group(function () use ($panel, $hasTenancy, $tenantDomain, $tenantRoutePrefix, $tenantSlugAttribute): void {
+                    ->group(function () use ($panel, $hasTenancy, $tenantDomain, $tenantRoutePrefix, $tenantSlugAttribute) {
                         foreach ($panel->getRoutes() as $routes) {
                             $routes($panel);
                         }
 
-                        Route::name('auth.')->group(function () use ($panel): void {
+                        Route::name('auth.')->group(function () use ($panel) {
                             if ($panel->hasLogin()) {
                                 Route::get($panel->getLoginRouteSlug(), $panel->getLoginRouteAction())
                                     ->name('login');
@@ -40,7 +38,7 @@ Route::name('filament.')
                             if ($panel->hasPasswordReset()) {
                                 Route::name('password-reset.')
                                     ->prefix($panel->getResetPasswordRoutePrefix())
-                                    ->group(function () use ($panel): void {
+                                    ->group(function () use ($panel) {
                                         Route::get($panel->getRequestPasswordResetRouteSlug(), $panel->getRequestPasswordResetRouteAction())
                                             ->name('request');
                                         Route::get($panel->getResetPasswordRouteSlug(), $panel->getResetPasswordRouteAction())
@@ -73,37 +71,12 @@ Route::name('filament.')
                                 if ($panel->hasEmailVerification()) {
                                     Route::name('auth.email-verification.')
                                         ->prefix($panel->getEmailVerificationRoutePrefix())
-                                        ->group(function () use ($panel): void {
+                                        ->group(function () use ($panel) {
                                             Route::get($panel->getEmailVerificationPromptRouteSlug(), $panel->getEmailVerificationPromptRouteAction())
                                                 ->name('prompt');
                                             Route::get($panel->getEmailVerificationRouteSlug('/{id}/{hash}'), EmailVerificationController::class)
                                                 ->middleware(['signed', 'throttle:6,1'])
                                                 ->name('verify');
-                                        });
-                                }
-
-                                if ($panel->hasEmailChangeVerification()) {
-                                    Route::name('auth.email-change-verification.')
-                                        ->prefix($panel->getEmailChangeVerificationRoutePrefix())
-                                        ->group(function () use ($panel): void {
-                                            Route::get($panel->getEmailChangeVerificationRouteSlug('/{id}/{email}'), EmailChangeVerificationController::class)
-                                                ->middleware(['signed', 'throttle:6,1'])
-                                                ->name('verify');
-
-                                            Route::get($panel->getEmailChangeVerificationRouteSlug('/{id}/{email}/block'), BlockEmailChangeVerificationController::class)
-                                                ->middleware(['signed', 'throttle:6,1'])
-                                                ->name('block-verification');
-                                        });
-                                }
-
-                                if ($panel->hasMultiFactorAuthentication()) {
-                                    Route::name('auth.multi-factor-authentication.')
-                                        ->prefix($panel->getMultiFactorAuthenticationRoutePrefix())
-                                        ->group(function () use ($panel): void {
-                                            if ($panel->isMultiFactorAuthenticationRequired()) {
-                                                Route::get($panel->getSetUpRequiredMultiFactorAuthenticationRouteSlug(), $panel->getSetUpRequiredMultiFactorAuthenticationRouteAction())
-                                                    ->name('set-up-required');
-                                            }
                                         });
                                 }
 

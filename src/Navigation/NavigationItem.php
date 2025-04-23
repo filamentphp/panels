@@ -2,31 +2,32 @@
 
 namespace Filament\Navigation;
 
-use BackedEnum;
 use Closure;
 use Exception;
 use Filament\Support\Components\Component;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Htmlable;
-use UnitEnum;
 
 class NavigationItem extends Component
 {
-    protected string | UnitEnum | Closure | null $group = null;
+    protected string | Closure | null $group = null;
 
     protected string | Closure | null $parentItem = null;
 
     protected bool | Closure | null $isActive = null;
 
-    protected string | BackedEnum | Htmlable | Closure | null $icon = null;
+    protected string | Htmlable | Closure | null $icon = null;
 
-    protected string | BackedEnum | Htmlable | Closure | null $activeIcon = null;
+    protected string | Htmlable | Closure | null $activeIcon = null;
 
     protected string | Closure $label;
 
     protected string | Closure | null $badge = null;
 
-    protected string | Closure | null $badgeColor = null;
+    /**
+     * @var string | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | Closure | null
+     */
+    protected string | array | Closure | null $badgeColor = null;
 
     protected string | Closure | null $badgeTooltip = null;
 
@@ -61,7 +62,7 @@ class NavigationItem extends Component
     }
 
     /**
-     * @param  string | array<int | string, string | int> | Closure | null  $color
+     * @param  string | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | Closure | null  $color
      */
     public function badge(string | Closure | null $badge, string | array | Closure | null $color = null): static
     {
@@ -71,7 +72,7 @@ class NavigationItem extends Component
         return $this;
     }
 
-    public function group(string | UnitEnum | Closure | null $group): static
+    public function group(string | Closure | null $group): static
     {
         $this->group = $group;
 
@@ -85,7 +86,7 @@ class NavigationItem extends Component
         return $this;
     }
 
-    public function icon(string | BackedEnum | Htmlable | Closure | null $icon): static
+    public function icon(string | Htmlable | Closure | null $icon): static
     {
         $this->icon = $icon;
 
@@ -113,7 +114,7 @@ class NavigationItem extends Component
         return $this;
     }
 
-    public function activeIcon(string | BackedEnum | Htmlable | Closure | null $activeIcon): static
+    public function activeIcon(string | Htmlable | Closure | null $activeIcon): static
     {
         $this->activeIcon = $activeIcon;
 
@@ -161,7 +162,10 @@ class NavigationItem extends Component
         return $this->evaluate($this->badge);
     }
 
-    public function getBadgeColor(): ?string
+    /**
+     * @return string | array{50: string, 100: string, 200: string, 300: string, 400: string, 500: string, 600: string, 700: string, 800: string, 900: string, 950: string} | null
+     */
+    public function getBadgeColor(): string | array | null
     {
         return $this->evaluate($this->badgeColor);
     }
@@ -171,7 +175,7 @@ class NavigationItem extends Component
         return $this->evaluate($this->badgeTooltip);
     }
 
-    public function getGroup(): string | UnitEnum | null
+    public function getGroup(): ?string
     {
         return $this->evaluate($this->group);
     }
@@ -181,7 +185,7 @@ class NavigationItem extends Component
         return $this->evaluate($this->parentItem);
     }
 
-    public function getIcon(): string | BackedEnum | Htmlable | null
+    public function getIcon(): string | Htmlable | null
     {
         $icon = $this->evaluate($this->icon);
 
@@ -206,7 +210,7 @@ class NavigationItem extends Component
         return ! $this->evaluate($this->isVisible);
     }
 
-    public function getActiveIcon(): string | BackedEnum | Htmlable | null
+    public function getActiveIcon(): string | Htmlable | null
     {
         return $this->evaluate($this->activeIcon);
     }

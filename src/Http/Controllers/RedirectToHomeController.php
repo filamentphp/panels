@@ -9,7 +9,7 @@ class RedirectToHomeController
 {
     public function __invoke(): RedirectResponse
     {
-        $panel = Filament::getCurrentOrDefaultPanel();
+        $panel = Filament::getCurrentPanel();
 
         $url = $panel->getUrl(Filament::getTenant());
 

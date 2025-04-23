@@ -2,16 +2,11 @@
 
 namespace Filament\Navigation;
 
-use BackedEnum;
 use Closure;
-use Filament\Navigation\Concerns\HasExtraSidebarAttributes;
-use Filament\Navigation\Concerns\HasExtraTopbarAttributes;
 use Filament\Support\Components\Component;
-use Filament\Support\Contracts\Collapsible;
-use Filament\Support\Contracts\HasIcon;
-use Filament\Support\Contracts\HasLabel;
+use Filament\Support\Concerns\HasExtraSidebarAttributes;
+use Filament\Support\Concerns\HasExtraTopbarAttributes;
 use Illuminate\Contracts\Support\Arrayable;
-use UnitEnum;
 
 class NavigationGroup extends Component
 {
@@ -22,7 +17,7 @@ class NavigationGroup extends Component
 
     protected bool | Closure | null $isCollapsible = null;
 
-    protected string | BackedEnum | Closure | null $icon = null;
+    protected string | Closure | null $icon = null;
 
     /**
      * @var array<NavigationItem> | Arrayable
@@ -60,7 +55,7 @@ class NavigationGroup extends Component
         return $this;
     }
 
-    public function icon(string | BackedEnum | Closure | null $icon): static
+    public function icon(string | Closure | null $icon): static
     {
         $this->icon = $icon;
 
@@ -84,7 +79,7 @@ class NavigationGroup extends Component
         return $this;
     }
 
-    public function getIcon(): string | BackedEnum | null
+    public function getIcon(): ?string
     {
         return $this->evaluate($this->icon);
     }
@@ -123,27 +118,5 @@ class NavigationGroup extends Component
         }
 
         return false;
-    }
-
-    public static function fromEnum(UnitEnum $case): static
-    {
-        $group = static::make();
-
-        if ($case instanceof HasLabel) {
-            $group->label($case->getLabel());
-        } else {
-            $group->label($case->name);
-        }
-
-        if ($case instanceof HasIcon) {
-            $group->icon($case->getIcon());
-        }
-
-        if ($case instanceof Collapsible) {
-            $group->collapsible($case->isCollapsible());
-            $group->collapsed($case->isCollapsed());
-        }
-
-        return $group;
     }
 }
