@@ -28,7 +28,7 @@ class FilterAction extends Action
 
         $this->icon(FilamentIcon::resolve('panels::pages.dashboard.actions.filter') ?? Heroicon::Funnel);
 
-        $this->color('gray');
+        $this->defaultColor('gray');
 
         $this->fillForm(function (Component $livewire): ?array {
             if (! property_exists($livewire, 'filters')) {

@@ -149,9 +149,9 @@ class MakeThemeCommand extends Command
             ->implode('/');
 
         $this->copyStubToApp('ThemeCss', $cssFilePath, [
-            'classDirectory' => filled($classDirectory) ? "/{$classDirectory}" : '',
+            'classDirectory' => filled($classDirectory) ? $classDirectory : '',
             'panel' => $this->panel->getId(),
-            'viewDirectory' => filled($viewDirectory) ? "/{$viewDirectory}" : '',
+            'viewDirectory' => filled($viewDirectory) ? $viewDirectory : '',
         ]);
 
         $this->components->info("Filament theme [resources/css/filament/{$this->panel->getId()}/theme.css] created successfully.");

@@ -14,7 +14,10 @@ class RelationGroup extends Component
 
     protected string | Closure | null $badge = null;
 
-    protected string | Closure | null $badgeColor = null;
+    /**
+     * @var string | array<string> | Closure | null
+     */
+    protected string | array | Closure | null $badgeColor = null;
 
     protected string | Closure | null $badgeTooltip = null;
 
@@ -64,7 +67,10 @@ class RelationGroup extends Component
         return $this;
     }
 
-    public function badgeColor(string | Closure | null $color): static
+    /**
+     * @param  string | array<string> | Closure | null  $color
+     */
+    public function badgeColor(string | array | Closure | null $color): static
     {
         $this->badgeColor = $color;
 
@@ -126,7 +132,10 @@ class RelationGroup extends Component
         return $this->evaluate($this->badge);
     }
 
-    public function getBadgeColor(): ?string
+    /**
+     * @return string | array<string> | null
+     */
+    public function getBadgeColor(): string | array | null
     {
         return $this->evaluate($this->badgeColor);
     }

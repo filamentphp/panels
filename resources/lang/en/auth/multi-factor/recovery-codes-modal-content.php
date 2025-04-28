@@ -4,7 +4,7 @@ return [
 
     'actions' => [
 
-        'You can also',
+        'Click to',
 
         'copy' => [
             'label' => 'copy',

@@ -141,7 +141,10 @@ trait HasNavigation
         return static::$navigationBadgeTooltip;
     }
 
-    public static function getNavigationBadgeColor(): ?string
+    /**
+     * @return string | array<string> | null
+     */
+    public static function getNavigationBadgeColor(): string | array | null
     {
         return null;
     }

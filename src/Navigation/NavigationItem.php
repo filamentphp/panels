@@ -26,7 +26,10 @@ class NavigationItem extends Component
 
     protected string | Closure | null $badge = null;
 
-    protected string | Closure | null $badgeColor = null;
+    /**
+     * @var string | array<string> | Closure | null
+     */
+    protected string | array | Closure | null $badgeColor = null;
 
     protected string | Closure | null $badgeTooltip = null;
 
@@ -161,7 +164,10 @@ class NavigationItem extends Component
         return $this->evaluate($this->badge);
     }
 
-    public function getBadgeColor(): ?string
+    /**
+     * @return string | array<string> | null
+     */
+    public function getBadgeColor(): string | array | null
     {
         return $this->evaluate($this->badgeColor);
     }
