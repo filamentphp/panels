@@ -98,9 +98,9 @@ trait HasAuth
     protected bool | Closure $arePasswordsRevealable = true;
 
     /**
-     * @var array<MultiFactorAuthenticationProvider>
+     * @var array<MultiFactorAuthenticationProvider> | MultiFactorAuthenticationProvider | Closure
      */
-    protected array $multiFactorAuthenticationProviders = [];
+    protected array | MultiFactorAuthenticationProvider | Closure $multiFactorAuthenticationProviders = [];
 
     protected bool | Closure $isAuthorizationStrict = false;
 
@@ -660,14 +660,12 @@ trait HasAuth
     }
 
     /**
-     * @param  array<MultiFactorAuthenticationProvider>  $providers
+     * @param  array<MultiFactorAuthenticationProvider> | MultiFactorAuthenticationProvider | Closure  $providers
      * @param  string | Closure | array<class-string, string> | null  $setUpRequiredAction
      */
-    public function multiFactorAuthentication(array | MultiFactorAuthenticationProvider $providers, string | Closure | array | null $setUpRequiredAction = SetUpRequiredMultiFactorAuthentication::class, bool | Closure $isRequired = false): static
+    public function multiFactorAuthentication(array | MultiFactorAuthenticationProvider | Closure $providers, string | Closure | array | null $setUpRequiredAction = SetUpRequiredMultiFactorAuthentication::class, bool | Closure $isRequired = false): static
     {
-        $this->multiFactorAuthenticationProviders = Collection::wrap($providers)
-            ->mapWithKeys(fn (MultiFactorAuthenticationProvider $provider): array => [$provider->getId() => $provider])
-            ->all();
+        $this->multiFactorAuthenticationProviders = $providers;
         $this->setUpRequiredMultiFactorAuthenticationRouteAction = $setUpRequiredAction;
         $this->requiresMultiFactorAuthentication($isRequired);
 
@@ -679,7 +677,15 @@ trait HasAuth
      */
     public function getMultiFactorAuthenticationProviders(): array
     {
-        return $this->multiFactorAuthenticationProviders;
+        $providers = $this->evaluate($this->multiFactorAuthenticationProviders);
+
+        if (empty($providers)) {
+            return [];
+        }
+
+        return Collection::wrap($providers)
+            ->mapWithKeys(fn (MultiFactorAuthenticationProvider $provider): array => [$provider->getId() => $provider])
+            ->all();
     }
 
     public function strictAuthorization(bool | Closure $condition = true): static

@@ -1,6 +1,6 @@
 <?php
 
-namespace Filament\Auth\MultiFactor\EmailCode;
+namespace Filament\Auth\MultiFactor\Email;
 
 use Closure;
 use Exception;
@@ -8,10 +8,10 @@ use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Auth\MultiFactor\Contracts\HasBeforeChallengeHook;
 use Filament\Auth\MultiFactor\Contracts\MultiFactorAuthenticationProvider;
-use Filament\Auth\MultiFactor\EmailCode\Actions\DisableEmailCodeAuthenticationAction;
-use Filament\Auth\MultiFactor\EmailCode\Actions\SetUpEmailCodeAuthenticationAction;
-use Filament\Auth\MultiFactor\EmailCode\Contracts\HasEmailCodeAuthentication;
-use Filament\Auth\MultiFactor\EmailCode\Notifications\VerifyEmailCodeAuthentication;
+use Filament\Auth\MultiFactor\Email\Actions\DisableEmailAuthenticationAction;
+use Filament\Auth\MultiFactor\Email\Actions\SetUpEmailAuthenticationAction;
+use Filament\Auth\MultiFactor\Email\Contracts\HasEmailAuthentication;
+use Filament\Auth\MultiFactor\Email\Notifications\VerifyEmailAuthentication;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\OneTimeCodeInput;
 use Filament\Notifications\Notification;
@@ -22,14 +22,14 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\RateLimiter;
 use PragmaRX\Google2FAQRCode\Google2FA;
 
-class EmailCodeAuthentication implements HasBeforeChallengeHook, MultiFactorAuthenticationProvider
+class EmailAuthentication implements HasBeforeChallengeHook, MultiFactorAuthenticationProvider
 {
     /**
      * 8 keys (respectively 4 minutes) past and future
      */
     protected int $codeWindow = 8;
 
-    protected string $codeNotification = VerifyEmailCodeAuthentication::class;
+    protected string $codeNotification = VerifyEmailAuthentication::class;
 
     public function __construct(
         protected Google2FA $google2FA,
@@ -47,19 +47,19 @@ class EmailCodeAuthentication implements HasBeforeChallengeHook, MultiFactorAuth
 
     public function getLoginFormLabel(): string
     {
-        return __('filament-panels::auth/multi-factor/email-code/provider.login_form.label');
+        return __('filament-panels::auth/multi-factor/email/provider.login_form.label');
     }
 
     public function isEnabled(Authenticatable $user): bool
     {
-        if (! ($user instanceof HasEmailCodeAuthentication)) {
-            throw new Exception('The user model must implement the [' . HasEmailCodeAuthentication::class . '] interface to use email code authentication.');
+        if (! ($user instanceof HasEmailAuthentication)) {
+            throw new Exception('The user model must implement the [' . HasEmailAuthentication::class . '] interface to use email authentication.');
         }
 
-        return $user->hasEmailCodeAuthentication();
+        return $user->hasEmailAuthentication();
     }
 
-    public function sendCode(HasEmailCodeAuthentication $user, ?string $secret = null): void
+    public function sendCode(HasEmailAuthentication $user, ?string $secret = null): void
     {
         if (! method_exists($user, 'notify')) {
             $userClass = $user::class;
@@ -67,7 +67,7 @@ class EmailCodeAuthentication implements HasBeforeChallengeHook, MultiFactorAuth
             throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
         }
 
-        $rateLimitingKey = 'filament_email_code_authentication.' . md5($secret ?? $this->getSecret($user));
+        $rateLimitingKey = 'filament_email_authentication.' . md5($secret ?? $this->getSecret($user));
 
         if (RateLimiter::tooManyAttempts($rateLimitingKey, maxAttempts: 1)) {
             return;
@@ -81,25 +81,25 @@ class EmailCodeAuthentication implements HasBeforeChallengeHook, MultiFactorAuth
         ]));
     }
 
-    public function getCurrentCode(HasEmailCodeAuthentication $user, ?string $secret = null): string
+    public function getCurrentCode(HasEmailAuthentication $user, ?string $secret = null): string
     {
         return $this->google2FA->getCurrentOtp($secret ?? $this->getSecret($user));
     }
 
-    public function getSecret(HasEmailCodeAuthentication $user): string
+    public function getSecret(HasEmailAuthentication $user): string
     {
-        $secret = $user->getEmailCodeAuthenticationSecret();
+        $secret = $user->getEmailAuthenticationSecret();
 
         if (blank($secret)) {
-            throw new Exception('The user does not have an email code authentication secret.');
+            throw new Exception('The user does not have an email authentication secret.');
         }
 
         return $secret;
     }
 
-    public function saveSecret(HasEmailCodeAuthentication $user, ?string $secret): void
+    public function saveSecret(HasEmailAuthentication $user, ?string $secret): void
     {
-        $user->saveEmailCodeAuthenticationSecret($secret);
+        $user->saveEmailAuthenticationSecret($secret);
     }
 
     public function generateSecret(): string
@@ -109,7 +109,7 @@ class EmailCodeAuthentication implements HasBeforeChallengeHook, MultiFactorAuth
 
     public function verifyCode(string $code, ?string $secret = null): bool
     {
-        /** @var HasEmailCodeAuthentication $user */
+        /** @var HasEmailAuthentication $user */
         $user = Filament::auth()->user();
 
         return $this->google2FA->verifyKey($secret ?? $this->getSecret($user), $code, $this->getCodeWindow());
@@ -124,13 +124,13 @@ class EmailCodeAuthentication implements HasBeforeChallengeHook, MultiFactorAuth
 
         return [
             Actions::make($this->getActions())
-                ->label(__('filament-panels::auth/multi-factor/email-code/provider.management_schema.actions.label'))
-                ->belowContent(__('filament-panels::auth/multi-factor/email-code/provider.management_schema.actions.below_content'))
+                ->label(__('filament-panels::auth/multi-factor/email/provider.management_schema.actions.label'))
+                ->belowContent(__('filament-panels::auth/multi-factor/email/provider.management_schema.actions.below_content'))
                 ->afterLabel(fn (): Text => $this->isEnabled($user)
-                    ? Text::make(__('filament-panels::auth/multi-factor/email-code/provider.management_schema.actions.messages.enabled'))
+                    ? Text::make(__('filament-panels::auth/multi-factor/email/provider.management_schema.actions.messages.enabled'))
                         ->badge()
                         ->color('success')
-                    : Text::make(__('filament-panels::auth/multi-factor/email-code/provider.management_schema.actions.messages.disabled'))
+                    : Text::make(__('filament-panels::auth/multi-factor/email/provider.management_schema.actions.messages.disabled'))
                         ->badge()),
         ];
     }
@@ -143,9 +143,9 @@ class EmailCodeAuthentication implements HasBeforeChallengeHook, MultiFactorAuth
         $user = Filament::auth()->user();
 
         return [
-            SetUpEmailCodeAuthenticationAction::make($this)
+            SetUpEmailAuthenticationAction::make($this)
                 ->hidden(fn (): bool => $this->isEnabled($user)),
-            DisableEmailCodeAuthenticationAction::make($this)
+            DisableEmailAuthenticationAction::make($this)
                 ->visible(fn (): bool => $this->isEnabled($user)),
         ];
     }
@@ -164,30 +164,30 @@ class EmailCodeAuthentication implements HasBeforeChallengeHook, MultiFactorAuth
 
     public function beforeChallenge(Authenticatable $user): void
     {
-        if (! ($user instanceof HasEmailCodeAuthentication)) {
-            throw new Exception('The user model must implement the [' . HasEmailCodeAuthentication::class . '] interface to use email code authentication.');
+        if (! ($user instanceof HasEmailAuthentication)) {
+            throw new Exception('The user model must implement the [' . HasEmailAuthentication::class . '] interface to use email authentication.');
         }
 
         $this->sendCode($user);
     }
 
     /**
-     * @param  Authenticatable&HasEmailCodeAuthentication  $user
+     * @param  Authenticatable&HasEmailAuthentication  $user
      */
     public function getChallengeFormComponents(Authenticatable $user): array
     {
         return [
             OneTimeCodeInput::make('code')
-                ->label(__('filament-panels::auth/multi-factor/email-code/provider.login_form.code.label'))
+                ->label(__('filament-panels::auth/multi-factor/email/provider.login_form.code.label'))
                 ->validationAttribute('code')
                 ->belowContent(Action::make('resend')
-                    ->label(__('filament-panels::auth/multi-factor/email-code/provider.login_form.code.actions.resend.label'))
+                    ->label(__('filament-panels::auth/multi-factor/email/provider.login_form.code.actions.resend.label'))
                     ->link()
                     ->action(function () use ($user): void {
                         $this->sendCode($user);
 
                         Notification::make()
-                            ->title(__('filament-panels::auth/multi-factor/email-code/provider.login_form.code.actions.resend.notifications.resent.title'))
+                            ->title(__('filament-panels::auth/multi-factor/email/provider.login_form.code.actions.resend.notifications.resent.title'))
                             ->success()
                             ->send();
                     }))
@@ -198,7 +198,7 @@ class EmailCodeAuthentication implements HasBeforeChallengeHook, MultiFactorAuth
                             return;
                         }
 
-                        $fail(__('filament-panels::auth/multi-factor/email-code/provider.login_form.code.messages.invalid'));
+                        $fail(__('filament-panels::auth/multi-factor/email/provider.login_form.code.messages.invalid'));
                     };
                 }),
         ];

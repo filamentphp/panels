@@ -1,17 +1,17 @@
 <?php
 
-namespace Filament\Auth\MultiFactor\GoogleTwoFactor;
+namespace Filament\Auth\MultiFactor\App;
 
 use Closure;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Auth\MultiFactor\App\Actions\DisableAppAuthenticationAction;
+use Filament\Auth\MultiFactor\App\Actions\RegenerateAppAuthenticationRecoveryCodesAction;
+use Filament\Auth\MultiFactor\App\Actions\SetUpAppAuthenticationAction;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
 use Filament\Auth\MultiFactor\Contracts\MultiFactorAuthenticationProvider;
-use Filament\Auth\MultiFactor\GoogleTwoFactor\Actions\DisableGoogleTwoFactorAuthenticationAction;
-use Filament\Auth\MultiFactor\GoogleTwoFactor\Actions\RegenerateGoogleTwoFactorAuthenticationRecoveryCodesAction;
-use Filament\Auth\MultiFactor\GoogleTwoFactor\Actions\SetUpGoogleTwoFactorAuthenticationAction;
-use Filament\Auth\MultiFactor\GoogleTwoFactor\Contracts\HasGoogleTwoFactorAuthentication;
-use Filament\Auth\MultiFactor\GoogleTwoFactor\Contracts\HasGoogleTwoFactorAuthenticationRecovery;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\OneTimeCodeInput;
 use Filament\Forms\Components\TextInput;
@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use PragmaRX\Google2FAQRCode\Google2FA;
 
-class GoogleTwoFactorAuthentication implements MultiFactorAuthenticationProvider
+class AppAuthentication implements MultiFactorAuthenticationProvider
 {
     protected bool $isRecoverable = false;
 
@@ -52,53 +52,53 @@ class GoogleTwoFactorAuthentication implements MultiFactorAuthenticationProvider
 
     public function getId(): string
     {
-        return 'google_two_factor';
+        return 'app';
     }
 
     public function getLoginFormLabel(): string
     {
-        return __('filament-panels::auth/multi-factor/google-two-factor/provider.login_form.label');
+        return __('filament-panels::auth/multi-factor/app/provider.login_form.label');
     }
 
     public function isEnabled(Authenticatable $user): bool
     {
-        if (! ($user instanceof HasGoogleTwoFactorAuthentication)) {
-            throw new Exception('The user model must implement the [' . HasGoogleTwoFactorAuthentication::class . '] interface to use email code authentication.');
+        if (! ($user instanceof HasAppAuthentication)) {
+            throw new Exception('The user model must implement the [' . HasAppAuthentication::class . '] interface to use app authentication.');
         }
 
-        return $user->hasGoogleTwoFactorAuthentication();
+        return $user->hasAppAuthentication();
     }
 
-    public function getHolderName(HasGoogleTwoFactorAuthentication $user): string
+    public function getHolderName(HasAppAuthentication $user): string
     {
-        return $user->getGoogleTwoFactorAuthenticationHolderName();
+        return $user->getAppAuthenticationHolderName();
     }
 
-    public function getSecret(HasGoogleTwoFactorAuthentication $user): string
+    public function getSecret(HasAppAuthentication $user): string
     {
-        $secret = $user->getGoogleTwoFactorAuthenticationSecret();
+        $secret = $user->getAppAuthenticationSecret();
 
         if (blank($secret)) {
-            throw new Exception('The user does not have a Google two-factor authentication secret.');
+            throw new Exception('The user does not have a app authentication secret.');
         }
 
         return $secret;
     }
 
-    public function saveSecret(HasGoogleTwoFactorAuthentication $user, ?string $secret): void
+    public function saveSecret(HasAppAuthentication $user, ?string $secret): void
     {
-        $user->saveGoogleTwoFactorAuthenticationSecret($secret);
+        $user->saveAppAuthenticationSecret($secret);
     }
 
     /**
      * @return array<string>
      */
-    public function getRecoveryCodes(HasGoogleTwoFactorAuthenticationRecovery $user): array
+    public function getRecoveryCodes(HasAppAuthenticationRecovery $user): array
     {
-        $codes = $user->getGoogleTwoFactorAuthenticationRecoveryCodes();
+        $codes = $user->getAppAuthenticationRecoveryCodes();
 
         if (blank($codes)) {
-            throw new Exception('The user does not have any Google two-factor authentication recovery codes.');
+            throw new Exception('The user does not have any app authentication recovery codes.');
         }
 
         return $codes;
@@ -107,15 +107,15 @@ class GoogleTwoFactorAuthentication implements MultiFactorAuthenticationProvider
     /**
      * @param  array<string> | null  $codes
      */
-    public function saveRecoveryCodes(HasGoogleTwoFactorAuthenticationRecovery $user, ?array $codes): void
+    public function saveRecoveryCodes(HasAppAuthenticationRecovery $user, ?array $codes): void
     {
         if (! is_array($codes)) {
-            $user->saveGoogleTwoFactorAuthenticationRecoveryCodes(null);
+            $user->saveAppAuthenticationRecoveryCodes(null);
 
             return;
         }
 
-        $user->saveGoogleTwoFactorAuthenticationRecoveryCodes(array_map(
+        $user->saveAppAuthenticationRecoveryCodes(array_map(
             fn (string $code): string => Hash::make($code),
             $codes,
         ));
@@ -126,14 +126,14 @@ class GoogleTwoFactorAuthentication implements MultiFactorAuthenticationProvider
         return $this->google2FA->generateSecretKey();
     }
 
-    public function getCurrentCode(HasGoogleTwoFactorAuthentication $user, ?string $secret = null): string
+    public function getCurrentCode(HasAppAuthentication $user, ?string $secret = null): string
     {
         return $this->google2FA->getCurrentOtp($secret ?? $this->getSecret($user));
     }
 
     public function generateQrCodeDataUri(string $secret): string
     {
-        /** @var HasGoogleTwoFactorAuthentication $user */
+        /** @var HasAppAuthentication $user */
         $user = Filament::auth()->user();
 
         return $this->google2FA->getQRCodeInline(
@@ -153,13 +153,13 @@ class GoogleTwoFactorAuthentication implements MultiFactorAuthenticationProvider
 
     public function verifyCode(string $code, ?string $secret = null): bool
     {
-        /** @var HasGoogleTwoFactorAuthentication $user */
+        /** @var HasAppAuthentication $user */
         $user = Filament::auth()->user();
 
         return $this->google2FA->verifyKey($secret ?? $this->getSecret($user), $code, $this->getCodeWindow());
     }
 
-    public function verifyRecoveryCode(string $recoveryCode, ?HasGoogleTwoFactorAuthenticationRecovery $user = null): bool
+    public function verifyRecoveryCode(string $recoveryCode, ?HasAppAuthenticationRecovery $user = null): bool
     {
         $user ??= Filament::auth()->user();
 
@@ -181,13 +181,13 @@ class GoogleTwoFactorAuthentication implements MultiFactorAuthenticationProvider
 
         return [
             Actions::make($this->getActions())
-                ->label(__('filament-panels::auth/multi-factor/google-two-factor/provider.management_schema.actions.label'))
-                ->belowContent(__('filament-panels::auth/multi-factor/google-two-factor/provider.management_schema.actions.below_content'))
+                ->label(__('filament-panels::auth/multi-factor/app/provider.management_schema.actions.label'))
+                ->belowContent(__('filament-panels::auth/multi-factor/app/provider.management_schema.actions.below_content'))
                 ->afterLabel(fn (): Text => $this->isEnabled($user)
-                    ? Text::make(__('filament-panels::auth/multi-factor/google-two-factor/provider.management_schema.actions.messages.enabled'))
+                    ? Text::make(__('filament-panels::auth/multi-factor/app/provider.management_schema.actions.messages.enabled'))
                         ->badge()
                         ->color('success')
-                    : Text::make(__('filament-panels::auth/multi-factor/google-two-factor/provider.management_schema.actions.messages.disabled'))
+                    : Text::make(__('filament-panels::auth/multi-factor/app/provider.management_schema.actions.messages.disabled'))
                         ->badge()),
         ];
     }
@@ -200,11 +200,11 @@ class GoogleTwoFactorAuthentication implements MultiFactorAuthenticationProvider
         $user = Filament::auth()->user();
 
         return [
-            SetUpGoogleTwoFactorAuthenticationAction::make($this)
+            SetUpAppAuthenticationAction::make($this)
                 ->hidden(fn (): bool => $this->isEnabled($user)),
-            RegenerateGoogleTwoFactorAuthenticationRecoveryCodesAction::make($this)
+            RegenerateAppAuthenticationRecoveryCodesAction::make($this)
                 ->visible(fn (): bool => $this->isEnabled($user) && $this->isRecoverable() && $this->canRegenerateRecoveryCodes()),
-            DisableGoogleTwoFactorAuthenticationAction::make($this)
+            DisableAppAuthenticationAction::make($this)
                 ->visible(fn (): bool => $this->isEnabled($user)),
         ];
     }
@@ -270,7 +270,7 @@ class GoogleTwoFactorAuthentication implements MultiFactorAuthenticationProvider
     }
 
     /**
-     * @param  Authenticatable&HasGoogleTwoFactorAuthentication&HasGoogleTwoFactorAuthenticationRecovery  $user
+     * @param  Authenticatable&HasAppAuthentication&HasAppAuthenticationRecovery  $user
      */
     public function getChallengeFormComponents(Authenticatable $user): array
     {
@@ -278,13 +278,13 @@ class GoogleTwoFactorAuthentication implements MultiFactorAuthenticationProvider
 
         return [
             OneTimeCodeInput::make('code')
-                ->label(__('filament-panels::auth/multi-factor/google-two-factor/provider.login_form.code.label'))
+                ->label(__('filament-panels::auth/multi-factor/app/provider.login_form.code.label'))
                 ->belowContent(fn (Get $get): Action => Action::make('useRecoveryCode')
-                    ->label(__('filament-panels::auth/multi-factor/google-two-factor/provider.login_form.code.actions.use_recovery_code.label'))
+                    ->label(__('filament-panels::auth/multi-factor/app/provider.login_form.code.actions.use_recovery_code.label'))
                     ->link()
                     ->action(fn (Set $set) => $set('useRecoveryCode', true))
                     ->visible(fn (): bool => $isRecoverable && (! $get('useRecoveryCode'))))
-                ->validationAttribute(__('filament-panels::auth/multi-factor/google-two-factor/provider.login_form.code.validation_attribute'))
+                ->validationAttribute(__('filament-panels::auth/multi-factor/app/provider.login_form.code.validation_attribute'))
                 ->required(fn (Get $get): bool => (! $isRecoverable) || blank($get('recoveryCode')))
                 ->rule(function () use ($user): Closure {
                     return function (string $attribute, $value, Closure $fail) use ($user): void {
@@ -292,12 +292,12 @@ class GoogleTwoFactorAuthentication implements MultiFactorAuthenticationProvider
                             return;
                         }
 
-                        $fail(__('filament-panels::auth/multi-factor/google-two-factor/provider.login_form.code.messages.invalid'));
+                        $fail(__('filament-panels::auth/multi-factor/app/provider.login_form.code.messages.invalid'));
                     };
                 }),
             TextInput::make('recoveryCode')
-                ->label(__('filament-panels::auth/multi-factor/google-two-factor/provider.login_form.recovery_code.label'))
-                ->validationAttribute(__('filament-panels::auth/multi-factor/google-two-factor/provider.login_form.recovery_code.validation_attribute'))
+                ->label(__('filament-panels::auth/multi-factor/app/provider.login_form.recovery_code.label'))
+                ->validationAttribute(__('filament-panels::auth/multi-factor/app/provider.login_form.recovery_code.validation_attribute'))
                 ->password()
                 ->revealable(Filament::arePasswordsRevealable())
                 ->rule(function () use ($user): Closure {
@@ -310,7 +310,7 @@ class GoogleTwoFactorAuthentication implements MultiFactorAuthenticationProvider
                             return;
                         }
 
-                        $fail(__('filament-panels::auth/multi-factor/google-two-factor/provider.login_form.recovery_code.messages.invalid'));
+                        $fail(__('filament-panels::auth/multi-factor/app/provider.login_form.recovery_code.messages.invalid'));
                     };
                 })
                 ->visible(fn (Get $get): bool => $isRecoverable && $get('useRecoveryCode'))

@@ -1,13 +1,13 @@
 <?php
 
-namespace Filament\Auth\MultiFactor\GoogleTwoFactor\Actions;
+namespace Filament\Auth\MultiFactor\App\Actions;
 
 use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Auth\MultiFactor\GoogleTwoFactor\Contracts\HasGoogleTwoFactorAuthentication;
-use Filament\Auth\MultiFactor\GoogleTwoFactor\Contracts\HasGoogleTwoFactorAuthenticationRecovery;
-use Filament\Auth\MultiFactor\GoogleTwoFactor\GoogleTwoFactorAuthentication;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\OneTimeCodeInput;
 use Filament\Notifications\Notification;
@@ -31,75 +31,77 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Js;
 
-class SetUpGoogleTwoFactorAuthenticationAction
+class SetUpAppAuthenticationAction
 {
-    public static function make(GoogleTwoFactorAuthentication $googleTwoFactorAuthentication): Action
+    public static function make(AppAuthentication $appAuthentication): Action
     {
-        return Action::make('setUpGoogleTwoFactorAuthentication')
-            ->label(__('filament-panels::auth/multi-factor/google-two-factor/actions/set-up.label'))
+        return Action::make('setUpAppAuthentication')
+            ->label(__('filament-panels::auth/multi-factor/app/actions/set-up.label'))
             ->color('primary')
             ->icon(Heroicon::LockClosed)
             ->link()
-            ->mountUsing(function (HasActions $livewire, $action) use ($googleTwoFactorAuthentication): void {
+            ->mountUsing(function (HasActions $livewire, $action) use ($appAuthentication): void {
                 $livewire->mergeMountedActionArguments([
                     'encrypted' => encrypt([
-                        'secret' => $googleTwoFactorAuthentication->generateSecret(),
-                        ...($googleTwoFactorAuthentication->isRecoverable()
-                            ? ['recoveryCodes' => $googleTwoFactorAuthentication->generateRecoveryCodes()]
+                        'secret' => $appAuthentication->generateSecret(),
+                        ...($appAuthentication->isRecoverable()
+                            ? ['recoveryCodes' => $appAuthentication->generateRecoveryCodes()]
                             : []),
                         'userId' => Filament::auth()->id(),
                     ]),
                 ]);
             })
             ->modalWidth(Width::Large)
+            ->closeModalByClickingAway(false)
+            ->closeModalByEscaping(false)
             ->modalIcon(Heroicon::OutlinedLockClosed)
             ->modalIconColor('primary')
-            ->modalHeading(__('filament-panels::auth/multi-factor/google-two-factor/actions/set-up.modal.heading'))
-            ->modalDescription(new HtmlString(Blade::render(__('filament-panels::auth/multi-factor/google-two-factor/actions/set-up.modal.description'))))
+            ->modalHeading(__('filament-panels::auth/multi-factor/app/actions/set-up.modal.heading'))
+            ->modalDescription(new HtmlString(Blade::render(__('filament-panels::auth/multi-factor/app/actions/set-up.modal.description'))))
             ->modifyWizardUsing(fn (Wizard $wizard) => $wizard->hiddenHeader())
             ->steps(fn (Action $action): array => [
                 Step::make('app')
                     ->schema([
                         Group::make([
-                            Text::make(__('filament-panels::auth/multi-factor/google-two-factor/actions/set-up.modal.content.qr_code.instruction'))
+                            Text::make(__('filament-panels::auth/multi-factor/app/actions/set-up.modal.content.qr_code.instruction'))
                                 ->color('neutral'),
                             Image::make(
-                                url: fn (): string => $googleTwoFactorAuthentication->generateQrCodeDataUri(decrypt($action->getArguments()['encrypted'])['secret']),
-                                alt: __('filament-panels::auth/multi-factor/google-two-factor/actions/set-up.modal.content.qr_code.alt'),
+                                url: fn (): string => $appAuthentication->generateQrCodeDataUri(decrypt($action->getArguments()['encrypted'])['secret']),
+                                alt: __('filament-panels::auth/multi-factor/app/actions/set-up.modal.content.qr_code.alt'),
                             )
                                 ->imageHeight('12rem')
                                 ->alignCenter(),
                             Flex::make([
-                                Text::make(__('filament-panels::auth/multi-factor/google-two-factor/actions/set-up.modal.content.text_code.instruction'))
+                                Text::make(__('filament-panels::auth/multi-factor/app/actions/set-up.modal.content.text_code.instruction'))
                                     ->color('neutral')
                                     ->grow(false),
                                 Text::make(fn (): string => decrypt($action->getArguments()['encrypted'])['secret'])
                                     ->fontFamily(FontFamily::Mono)
                                     ->color('neutral')
                                     ->copyable()
-                                    ->copyMessage(__('filament-panels::auth/multi-factor/google-two-factor/actions/set-up.modal.content.text_code.messages.copied'))
+                                    ->copyMessage(__('filament-panels::auth/multi-factor/app/actions/set-up.modal.content.text_code.messages.copied'))
                                     ->grow(false),
                             ])->from('sm'),
                         ])
                             ->dense(),
                         OneTimeCodeInput::make('code')
-                            ->label(__('filament-panels::auth/multi-factor/google-two-factor/actions/set-up.modal.form.code.label'))
-                            ->belowContent(__('filament-panels::auth/multi-factor/google-two-factor/actions/set-up.modal.form.code.below_content'))
-                            ->validationAttribute(__('filament-panels::auth/multi-factor/google-two-factor/actions/set-up.modal.form.code.validation_attribute'))
+                            ->label(__('filament-panels::auth/multi-factor/app/actions/set-up.modal.form.code.label'))
+                            ->belowContent(__('filament-panels::auth/multi-factor/app/actions/set-up.modal.form.code.below_content'))
+                            ->validationAttribute(__('filament-panels::auth/multi-factor/app/actions/set-up.modal.form.code.validation_attribute'))
                             ->required()
-                            ->rule(function () use ($action, $googleTwoFactorAuthentication): Closure {
-                                return function (string $attribute, $value, Closure $fail) use ($action, $googleTwoFactorAuthentication): void {
-                                    if ($googleTwoFactorAuthentication->verifyCode($value, decrypt($action->getArguments()['encrypted'])['secret'])) {
+                            ->rule(function () use ($action, $appAuthentication): Closure {
+                                return function (string $attribute, $value, Closure $fail) use ($action, $appAuthentication): void {
+                                    if ($appAuthentication->verifyCode($value, decrypt($action->getArguments()['encrypted'])['secret'])) {
                                         return;
                                     }
 
-                                    $fail(__('filament-panels::auth/multi-factor/google-two-factor/actions/set-up.modal.form.code.messages.invalid'));
+                                    $fail(__('filament-panels::auth/multi-factor/app/actions/set-up.modal.form.code.messages.invalid'));
                                 };
                             }),
                     ]),
                 Step::make('recovery')
                     ->schema([
-                        Text::make(__('filament-panels::auth/multi-factor/google-two-factor/actions/set-up.modal.content.recovery_codes.instruction'))
+                        Text::make(__('filament-panels::auth/multi-factor/app/actions/set-up.modal.content.recovery_codes.instruction'))
                             ->weight(FontWeight::Bold)
                             ->color('neutral'),
                         UnorderedList::make(fn (): array => array_map(
@@ -140,12 +142,12 @@ class SetUpGoogleTwoFactorAuthenticationAction
                             );
                         }),
                     ])
-                    ->visible($googleTwoFactorAuthentication->isRecoverable()),
+                    ->visible($appAuthentication->isRecoverable()),
             ])
             ->modalSubmitAction(fn (Action $action) => $action
-                ->label(__('filament-panels::auth/multi-factor/google-two-factor/actions/set-up.modal.actions.submit.label')))
-            ->action(function (array $arguments) use ($googleTwoFactorAuthentication): void {
-                /** @var Authenticatable&HasGoogleTwoFactorAuthentication&HasGoogleTwoFactorAuthenticationRecovery $user */
+                ->label(__('filament-panels::auth/multi-factor/app/actions/set-up.modal.actions.submit.label')))
+            ->action(function (array $arguments) use ($appAuthentication): void {
+                /** @var Authenticatable&HasAppAuthentication&HasAppAuthenticationRecovery $user */
                 $user = Filament::auth()->user();
 
                 $encrypted = decrypt($arguments['encrypted']);
@@ -156,16 +158,16 @@ class SetUpGoogleTwoFactorAuthenticationAction
                     return;
                 }
 
-                DB::transaction(function () use ($googleTwoFactorAuthentication, $encrypted, $user): void {
-                    $googleTwoFactorAuthentication->saveSecret($user, $encrypted['secret']);
+                DB::transaction(function () use ($appAuthentication, $encrypted, $user): void {
+                    $appAuthentication->saveSecret($user, $encrypted['secret']);
 
-                    if ($googleTwoFactorAuthentication->isRecoverable()) {
-                        $googleTwoFactorAuthentication->saveRecoveryCodes($user, $encrypted['recoveryCodes']);
+                    if ($appAuthentication->isRecoverable()) {
+                        $appAuthentication->saveRecoveryCodes($user, $encrypted['recoveryCodes']);
                     }
                 });
 
                 Notification::make()
-                    ->title(__('filament-panels::auth/multi-factor/google-two-factor/actions/set-up.notifications.enabled.title'))
+                    ->title(__('filament-panels::auth/multi-factor/app/actions/set-up.notifications.enabled.title'))
                     ->success()
                     ->icon(Heroicon::OutlinedLockClosed)
                     ->send();

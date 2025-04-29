@@ -1,12 +1,12 @@
 <?php
 
-namespace Filament\Auth\MultiFactor\GoogleTwoFactor\Actions;
+namespace Filament\Auth\MultiFactor\App\Actions;
 
 use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Auth\MultiFactor\GoogleTwoFactor\Contracts\HasGoogleTwoFactorAuthenticationRecovery;
-use Filament\Auth\MultiFactor\GoogleTwoFactor\GoogleTwoFactorAuthentication;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\OneTimeCodeInput;
 use Filament\Forms\Components\TextInput;
@@ -22,73 +22,71 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Js;
 
-class RegenerateGoogleTwoFactorAuthenticationRecoveryCodesAction
+class RegenerateAppAuthenticationRecoveryCodesAction
 {
-    public static function make(GoogleTwoFactorAuthentication $googleTwoFactorAuthentication): Action
+    public static function make(AppAuthentication $appAuthentication): Action
     {
-        return Action::make('regenerateGoogleTwoFactorAuthenticationRecoveryCodes')
-            ->label(__('filament-panels::auth/multi-factor/google-two-factor/actions/regenerate-recovery-codes.label'))
+        return Action::make('regenerateAppAuthenticationRecoveryCodes')
+            ->label(__('filament-panels::auth/multi-factor/app/actions/regenerate-recovery-codes.label'))
             ->color('gray')
             ->icon(Heroicon::ArrowPath)
             ->link()
             ->modalWidth(Width::Large)
             ->modalIcon(Heroicon::OutlinedArrowPath)
             ->modalIconColor('primary')
-            ->modalHeading(__('filament-panels::auth/multi-factor/google-two-factor/actions/regenerate-recovery-codes.modal.heading'))
-            ->modalDescription(__('filament-panels::auth/multi-factor/google-two-factor/actions/regenerate-recovery-codes.modal.description'))
+            ->modalHeading(__('filament-panels::auth/multi-factor/app/actions/regenerate-recovery-codes.modal.heading'))
+            ->modalDescription(__('filament-panels::auth/multi-factor/app/actions/regenerate-recovery-codes.modal.description'))
             ->schema([
                 OneTimeCodeInput::make('code')
-                    ->label(__('filament-panels::auth/multi-factor/google-two-factor/actions/regenerate-recovery-codes.modal.form.code.label'))
-                    ->validationAttribute(__('filament-panels::auth/multi-factor/google-two-factor/actions/regenerate-recovery-codes.modal.form.code.validation_attribute'))
+                    ->label(__('filament-panels::auth/multi-factor/app/actions/regenerate-recovery-codes.modal.form.code.label'))
+                    ->validationAttribute(__('filament-panels::auth/multi-factor/app/actions/regenerate-recovery-codes.modal.form.code.validation_attribute'))
                     ->requiredWithout('password')
-                    ->rule(function () use ($googleTwoFactorAuthentication): Closure {
-                        return function (string $attribute, $value, Closure $fail) use ($googleTwoFactorAuthentication): void {
-                            if ($googleTwoFactorAuthentication->verifyCode($value)) {
+                    ->rule(function () use ($appAuthentication): Closure {
+                        return function (string $attribute, $value, Closure $fail) use ($appAuthentication): void {
+                            if ($appAuthentication->verifyCode($value)) {
                                 return;
                             }
 
-                            $fail(__('filament-panels::auth/multi-factor/google-two-factor/actions/regenerate-recovery-codes.modal.form.code.messages.invalid'));
+                            $fail(__('filament-panels::auth/multi-factor/app/actions/regenerate-recovery-codes.modal.form.code.messages.invalid'));
                         };
                     }),
                 TextInput::make('password')
-                    ->label(__('filament-panels::auth/multi-factor/google-two-factor/actions/regenerate-recovery-codes.modal.form.password.label'))
-                    ->validationAttribute(__('filament-panels::auth/multi-factor/google-two-factor/actions/regenerate-recovery-codes.modal.form.password.validation_attribute'))
+                    ->label(__('filament-panels::auth/multi-factor/app/actions/regenerate-recovery-codes.modal.form.password.label'))
+                    ->validationAttribute(__('filament-panels::auth/multi-factor/app/actions/regenerate-recovery-codes.modal.form.password.validation_attribute'))
                     ->currentPassword(guard: Filament::getAuthGuard())
                     ->password()
                     ->revealable(filament()->arePasswordsRevealable())
                     ->dehydrated(false),
             ])
             ->modalSubmitAction(fn (Action $action) => $action
-                ->label(__('filament-panels::auth/multi-factor/google-two-factor/actions/regenerate-recovery-codes.modal.actions.submit.label'))
+                ->label(__('filament-panels::auth/multi-factor/app/actions/regenerate-recovery-codes.modal.actions.submit.label'))
                 ->color('danger'))
-            ->action(function (Action $action, HasActions $livewire) use ($googleTwoFactorAuthentication): void {
-                $recoveryCodes = $googleTwoFactorAuthentication->generateRecoveryCodes();
+            ->action(function (Action $action, HasActions $livewire) use ($appAuthentication): void {
+                $recoveryCodes = $appAuthentication->generateRecoveryCodes();
 
-                /** @var HasGoogleTwoFactorAuthenticationRecovery $user */
+                /** @var HasAppAuthenticationRecovery $user */
                 $user = Filament::auth()->user();
 
-                $googleTwoFactorAuthentication->saveRecoveryCodes($user, $recoveryCodes);
+                $appAuthentication->saveRecoveryCodes($user, $recoveryCodes);
 
                 $livewire->mountAction('showNewRecoveryCodes', arguments: [
                     'recoveryCodes' => $recoveryCodes,
                 ]);
 
                 Notification::make()
-                    ->title(__('filament-panels::auth/multi-factor/google-two-factor/actions/regenerate-recovery-codes.notifications.regenerated.title'))
+                    ->title(__('filament-panels::auth/multi-factor/app/actions/regenerate-recovery-codes.notifications.regenerated.title'))
                     ->success()
                     ->icon(Heroicon::OutlinedArrowPath)
                     ->send();
             })
             ->registerModalActions([
                 Action::make('showNewRecoveryCodes')
-                    ->modalHeading(__('filament-panels::auth/multi-factor/google-two-factor/actions/regenerate-recovery-codes.show_new_recovery_codes.modal.heading'))
-                    ->modalDescription(__('filament-panels::auth/multi-factor/google-two-factor/actions/regenerate-recovery-codes.show_new_recovery_codes.modal.description'))
+                    ->modalHeading(__('filament-panels::auth/multi-factor/app/actions/regenerate-recovery-codes.show_new_recovery_codes.modal.heading'))
+                    ->modalDescription(__('filament-panels::auth/multi-factor/app/actions/regenerate-recovery-codes.show_new_recovery_codes.modal.description'))
                     ->schema(fn (array $arguments) => [
                         Group::make([
                             UnorderedList::make(fn (): array => array_map(
                                 fn (string $recoveryCode): Component => Text::make($recoveryCode)
-                                    ->copyable()
-                                    ->copyMessage(__('filament-panels::auth/multi-factor/recovery-codes-modal-content.messages.copied'))
                                     ->fontFamily(FontFamily::Mono)
                                     ->size('xs')
                                     ->color('neutral'),
@@ -128,7 +126,7 @@ class RegenerateGoogleTwoFactorAuthenticationRecoveryCodesAction
                     ->closeModalByEscaping(false)
                     ->modalCloseButton(false)
                     ->modalSubmitAction(fn (Action $action) => $action
-                        ->label(__('filament-panels::auth/multi-factor/google-two-factor/actions/regenerate-recovery-codes.show_new_recovery_codes.modal.actions.submit.label'))
+                        ->label(__('filament-panels::auth/multi-factor/app/actions/regenerate-recovery-codes.show_new_recovery_codes.modal.actions.submit.label'))
                         ->color('danger'))
                     ->modalCancelAction(false)
                     ->cancelParentActions(),
