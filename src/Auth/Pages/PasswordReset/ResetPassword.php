@@ -75,7 +75,7 @@ class ResetPassword extends SimplePage
         $data['token'] = $this->token;
 
         $status = Password::broker(Filament::getAuthPasswordBroker())->reset(
-            $data,
+            $this->getCredentialsFromFormData($data),
             function (CanResetPassword | Model | Authenticatable $user) use ($data): void {
                 $user->forceFill([
                     'password' => Hash::make($data['password']),
@@ -214,5 +214,14 @@ class ResetPassword extends SimplePage
     public function getDefaultTestingSchemaName(): ?string
     {
         return 'form';
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function getCredentialsFromFormData(array $data): array
+    {
+        return $data;
     }
 }

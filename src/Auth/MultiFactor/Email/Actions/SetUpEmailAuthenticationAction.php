@@ -4,7 +4,6 @@ namespace Filament\Auth\MultiFactor\Email\Actions;
 
 use Closure;
 use Filament\Actions\Action;
-use Filament\Actions\Contracts\HasActions;
 use Filament\Auth\MultiFactor\Email\Contracts\HasEmailAuthentication;
 use Filament\Auth\MultiFactor\Email\EmailAuthentication;
 use Filament\Facades\Filament;
@@ -24,35 +23,28 @@ class SetUpEmailAuthenticationAction
             ->color('primary')
             ->icon(Heroicon::LockClosed)
             ->link()
-            ->mountUsing(function (HasActions $livewire) use ($emailAuthentication): void {
-                $livewire->mergeMountedActionArguments([
-                    'encrypted' => encrypt([
-                        'secret' => $secret = $emailAuthentication->generateSecret(),
-                        'userId' => Filament::auth()->id(),
-                    ]),
-                ]);
-
+            ->mountUsing(function () use ($emailAuthentication): void {
                 /** @var HasEmailAuthentication $user */
                 $user = Filament::auth()->user();
 
-                $emailAuthentication->sendCode($user, $secret);
+                $emailAuthentication->sendCode($user);
             })
             ->modalWidth(Width::Large)
             ->modalIcon(Heroicon::OutlinedLockClosed)
             ->modalIconColor('primary')
             ->modalHeading(__('filament-panels::auth/multi-factor/email/actions/set-up.modal.heading'))
             ->modalDescription(__('filament-panels::auth/multi-factor/email/actions/set-up.modal.description'))
-            ->schema(fn (array $arguments): array => [
+            ->schema([
                 OneTimeCodeInput::make('code')
                     ->label(__('filament-panels::auth/multi-factor/email/actions/set-up.modal.form.code.label'))
                     ->belowContent(Action::make('resend')
                         ->label(__('filament-panels::auth/multi-factor/email/actions/set-up.modal.form.code.actions.resend.label'))
                         ->link()
-                        ->action(function () use ($arguments, $emailAuthentication): void {
+                        ->action(function () use ($emailAuthentication): void {
                             /** @var HasEmailAuthentication $user */
                             $user = Filament::auth()->user();
 
-                            $emailAuthentication->sendCode($user, decrypt($arguments['encrypted'])['secret']);
+                            $emailAuthentication->sendCode($user);
 
                             Notification::make()
                                 ->title(__('filament-panels::auth/multi-factor/email/actions/set-up.modal.form.code.actions.resend.notifications.resent.title'))
@@ -61,9 +53,9 @@ class SetUpEmailAuthenticationAction
                         }))
                     ->validationAttribute(__('filament-panels::auth/multi-factor/email/actions/set-up.modal.form.code.validation_attribute'))
                     ->required()
-                    ->rule(function () use ($arguments, $emailAuthentication): Closure {
-                        return function (string $attribute, $value, Closure $fail) use ($arguments, $emailAuthentication): void {
-                            if ($emailAuthentication->verifyCode($value, decrypt($arguments['encrypted'])['secret'])) {
+                    ->rule(function () use ($emailAuthentication): Closure {
+                        return function (string $attribute, $value, Closure $fail) use ($emailAuthentication): void {
+                            if ($emailAuthentication->verifyCode($value)) {
                                 return;
                             }
 
@@ -73,20 +65,12 @@ class SetUpEmailAuthenticationAction
             ])
             ->modalSubmitAction(fn (Action $action) => $action
                 ->label(__('filament-panels::auth/multi-factor/email/actions/set-up.modal.actions.submit.label')))
-            ->action(function (array $arguments) use ($emailAuthentication): void {
+            ->action(function (): void {
                 /** @var Authenticatable&HasEmailAuthentication $user */
                 $user = Filament::auth()->user();
 
-                $encrypted = decrypt($arguments['encrypted']);
-
-                if ($user->getAuthIdentifier() !== $encrypted['userId']) {
-                    // Avoid encrypted arguments being passed between users by verifying that the authenticated
-                    // user is the same as the user that the encrypted arguments were issued for.
-                    return;
-                }
-
-                DB::transaction(function () use ($emailAuthentication, $encrypted, $user): void {
-                    $emailAuthentication->saveSecret($user, $encrypted['secret']);
+                DB::transaction(function () use ($user): void {
+                    $user->toggleEmailAuthentication(true);
                 });
 
                 Notification::make()

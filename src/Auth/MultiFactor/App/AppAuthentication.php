@@ -66,7 +66,7 @@ class AppAuthentication implements MultiFactorAuthenticationProvider
             throw new Exception('The user model must implement the [' . HasAppAuthentication::class . '] interface to use app authentication.');
         }
 
-        return $user->hasAppAuthentication();
+        return filled($user->getAppAuthenticationSecret());
     }
 
     public function getHolderName(HasAppAuthentication $user): string

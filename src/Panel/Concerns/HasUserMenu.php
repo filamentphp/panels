@@ -12,10 +12,19 @@ use Illuminate\Support\Collection;
 
 trait HasUserMenu
 {
+    protected bool | Closure $hasUserMenu = true;
+
     /**
      * @var array<Action | Closure | MenuItem>
      */
     protected array $userMenuItems = [];
+
+    public function userMenu(bool | Closure $condition = true): static
+    {
+        $this->hasUserMenu = $condition;
+
+        return $this;
+    }
 
     /**
      * @param  array<Action | Closure | MenuItem>  $items
@@ -28,6 +37,11 @@ trait HasUserMenu
         ];
 
         return $this;
+    }
+
+    public function hasUserMenu(): bool
+    {
+        return (bool) $this->evaluate($this->hasUserMenu);
     }
 
     protected function getUserProfileMenuItem(Action | Closure | MenuItem | null $item = null): Action

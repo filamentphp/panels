@@ -203,9 +203,9 @@
 
         <div
             @if ($hasTenancy)
-                x-persist="topbar.end.tenant-{{ filament()->getTenant()?->getKey() }}"
+                x-persist="topbar.end.panel-{{ filament()->getId() }}.tenant-{{ filament()->getTenant()?->getKey() }}"
             @else
-                x-persist="topbar.end"
+                x-persist="topbar.end.panel-{{ filament()->getId() }}"
             @endif
             class="fi-topbar-end"
         >
@@ -224,7 +224,9 @@
                     ])
                 @endif
 
-                <x-filament-panels::user-menu />
+                @if (filament()->hasUserMenu())
+                    <x-filament-panels::user-menu />
+                @endif
             @endif
         </div>
 

@@ -63,12 +63,12 @@ class DisableEmailAuthenticationAction
             ])
             ->modalSubmitAction(fn (Action $action) => $action
                 ->label(__('filament-panels::auth/multi-factor/email/actions/disable.modal.actions.submit.label')))
-            ->action(function () use ($emailAuthentication): void {
+            ->action(function (): void {
                 /** @var HasEmailAuthentication $user */
                 $user = Filament::auth()->user();
 
-                DB::transaction(function () use ($emailAuthentication, $user): void {
-                    $emailAuthentication->saveSecret($user, null);
+                DB::transaction(function () use ($user): void {
+                    $user->toggleEmailAuthentication(false);
                 });
 
                 Notification::make()

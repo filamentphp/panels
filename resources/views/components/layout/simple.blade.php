@@ -26,7 +26,9 @@
                     ])
                 @endif
 
-                @livewire(Filament\Livewire\SimpleUserMenu::class)
+                @if (filament()->hasUserMenu())
+                    @livewire(Filament\Livewire\SimpleUserMenu::class)
+                @endif
             </div>
         @endif
 

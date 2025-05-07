@@ -133,6 +133,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool hasTenantMenu()
  * @method static bool hasTenantProfile()
  * @method static bool hasTenantRegistration()
+ * @method static bool hasTopbar()
+ * @method static bool hasUserMenu()
  * @method static bool hasTopNavigation()
  * @method static bool hasUnsavedChangesAlerts()
  * @method static bool isAuthorizationStrict()

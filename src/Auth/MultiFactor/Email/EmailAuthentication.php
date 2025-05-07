@@ -19,21 +19,17 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Text;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
-use PragmaRX\Google2FAQRCode\Google2FA;
 
 class EmailAuthentication implements HasBeforeChallengeHook, MultiFactorAuthenticationProvider
 {
-    /**
-     * 8 keys (respectively 4 minutes) past and future
-     */
-    protected int $codeWindow = 8;
+    protected int $codeExpiryMinutes = 4;
 
     protected string $codeNotification = VerifyEmailAuthentication::class;
 
-    public function __construct(
-        protected Google2FA $google2FA,
-    ) {}
+    protected ?Closure $generateCodesUsing = null;
 
     public static function make(): static
     {
@@ -59,60 +55,77 @@ class EmailAuthentication implements HasBeforeChallengeHook, MultiFactorAuthenti
         return $user->hasEmailAuthentication();
     }
 
-    public function sendCode(HasEmailAuthentication $user, ?string $secret = null): void
+    public function sendCode(HasEmailAuthentication $user): void
     {
+        if (! ($user instanceof Model)) {
+            throw new Exception('The [' . $user::class . '] class must be an instance of [' . Model::class . '] to use email authentication.');
+        }
+
         if (! method_exists($user, 'notify')) {
             $userClass = $user::class;
 
             throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
         }
 
-        $rateLimitingKey = 'filament_email_authentication.' . md5($secret ?? $this->getSecret($user));
+        $rateLimitingKey = "filament_email_authentication.{$user->getKey()}";
 
-        if (RateLimiter::tooManyAttempts($rateLimitingKey, maxAttempts: 1)) {
+        if (RateLimiter::tooManyAttempts($rateLimitingKey, maxAttempts: 2)) {
             return;
         }
 
         RateLimiter::hit($rateLimitingKey);
 
+        $code = $this->generateCode();
+        $codeExpiryMinutes = $this->getCodeExpiryMinutes();
+
+        session()->put('filament_email_authentication_code', Hash::make($code));
+        session()->put('filament_email_authentication_code_expires_at', now()->addMinutes($codeExpiryMinutes));
+
         $user->notify(app($this->getCodeNotification(), [
-            'code' => $this->getCurrentCode($user, $secret),
-            'codeWindow' => $this->getCodeWindow(),
+            'code' => $code,
+            'codeExpiryMinutes' => $codeExpiryMinutes,
         ]));
     }
 
-    public function getCurrentCode(HasEmailAuthentication $user, ?string $secret = null): string
+    public function enableEmailAuthentication(HasEmailAuthentication $user): void
     {
-        return $this->google2FA->getCurrentOtp($secret ?? $this->getSecret($user));
+        $user->toggleEmailAuthentication(true);
     }
 
-    public function getSecret(HasEmailAuthentication $user): string
+    public function generateCodesUsing(?Closure $callback): static
     {
-        $secret = $user->getEmailAuthenticationSecret();
+        $this->generateCodesUsing = $callback;
 
-        if (blank($secret)) {
-            throw new Exception('The user does not have an email authentication secret.');
+        return $this;
+    }
+
+    public function generateCode(): string
+    {
+        if ($this->generateCodesUsing) {
+            return ($this->generateCodesUsing)();
         }
 
-        return $secret;
+        return str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
     }
 
-    public function saveSecret(HasEmailAuthentication $user, ?string $secret): void
+    public function verifyCode(string $code): bool
     {
-        $user->saveEmailAuthenticationSecret($secret);
-    }
+        $codeHash = session('filament_email_authentication_code');
+        $codeExpiresAt = session('filament_email_authentication_code_expires_at');
 
-    public function generateSecret(): string
-    {
-        return $this->google2FA->generateSecretKey();
-    }
+        if (
+            blank($codeHash)
+            || blank($codeExpiresAt)
+            || (! Hash::check($code, $codeHash))
+            || now()->greaterThan($codeExpiresAt)
+        ) {
+            return false;
+        }
 
-    public function verifyCode(string $code, ?string $secret = null): bool
-    {
-        /** @var HasEmailAuthentication $user */
-        $user = Filament::auth()->user();
+        session()->forget('filament_email_authentication_code');
+        session()->forget('filament_email_authentication_code_expires_at');
 
-        return $this->google2FA->verifyKey($secret ?? $this->getSecret($user), $code, $this->getCodeWindow());
+        return true;
     }
 
     /**
@@ -150,16 +163,16 @@ class EmailAuthentication implements HasBeforeChallengeHook, MultiFactorAuthenti
         ];
     }
 
-    public function codeWindow(int $window): static
+    public function codeExpiryMinutes(int $minutes): static
     {
-        $this->codeWindow = $window;
+        $this->codeExpiryMinutes = $minutes;
 
         return $this;
     }
 
-    public function getCodeWindow(): int
+    public function getCodeExpiryMinutes(): int
     {
-        return $this->codeWindow;
+        return $this->codeExpiryMinutes;
     }
 
     public function beforeChallenge(Authenticatable $user): void
@@ -192,9 +205,9 @@ class EmailAuthentication implements HasBeforeChallengeHook, MultiFactorAuthenti
                             ->send();
                     }))
                 ->required()
-                ->rule(function () use ($user): Closure {
-                    return function (string $attribute, $value, Closure $fail) use ($user): void {
-                        if ($this->verifyCode($value, $this->getSecret($user))) {
+                ->rule(function (): Closure {
+                    return function (string $attribute, $value, Closure $fail): void {
+                        if ($this->verifyCode($value)) {
                             return;
                         }
 
