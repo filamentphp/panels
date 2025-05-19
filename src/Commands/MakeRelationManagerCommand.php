@@ -132,7 +132,7 @@ class MakeRelationManagerCommand extends Command
             new InputArgument(
                 name: 'recordTitleAttribute',
                 mode: InputArgument::OPTIONAL,
-                description: 'The title attribute, used to uniquely identify each record in the table',
+                description: 'The title attribute, used to label each record in the UI',
             ),
         ];
     }
@@ -163,19 +163,19 @@ class MakeRelationManagerCommand extends Command
                 name: 'form-schema',
                 shortcut: null,
                 mode: InputOption::VALUE_REQUIRED,
-                description: 'The fully qualified class name of the form schema class to use',
+                description: 'The fully-qualified class name of the form schema class to use',
             ),
             new InputOption(
                 name: 'generate',
                 shortcut: 'G',
                 mode: InputOption::VALUE_NONE,
-                description: 'Generate the form schema and table columns based on the attributes of the model',
+                description: 'Generate the form schema and table columns from the current database columns',
             ),
             new InputOption(
                 name: 'infolist-schema',
                 shortcut: null,
                 mode: InputOption::VALUE_REQUIRED,
-                description: 'The fully qualified class name of the infolist schema class to use',
+                description: 'The fully-qualified class name of the infolist schema class to use',
             ),
             new InputOption(
                 name: 'panel',
@@ -187,19 +187,19 @@ class MakeRelationManagerCommand extends Command
                 name: 'record-title-attribute',
                 shortcut: null,
                 mode: InputOption::VALUE_REQUIRED,
-                description: 'The title attribute, used to uniquely identify each record in the table',
+                description: 'The title attribute, used to label each record in the UI',
             ),
             new InputOption(
                 name: 'related-model',
                 shortcut: null,
                 mode: InputOption::VALUE_REQUIRED,
-                description: 'The fully qualified class name of the related model',
+                description: 'The fully-qualified class name of the related model',
             ),
             new InputOption(
                 name: 'related-resource',
                 shortcut: null,
                 mode: InputOption::VALUE_REQUIRED,
-                description: 'The fully qualified class name of the related resource',
+                description: 'The fully-qualified class name of the related resource',
             ),
             new InputOption(
                 name: 'soft-deletes',
@@ -211,7 +211,7 @@ class MakeRelationManagerCommand extends Command
                 name: 'table',
                 shortcut: null,
                 mode: InputOption::VALUE_REQUIRED,
-                description: 'The fully qualified class name of the table class to use',
+                description: 'The fully-qualified class name of the table class to use',
             ),
             new InputOption(
                 name: 'view',
@@ -271,7 +271,7 @@ class MakeRelationManagerCommand extends Command
                     $this->configureRecordTitleAttributeIfNotAlready();
 
                     $this->configureIsGeneratedIfNotAlready(
-                        question: 'Would you like to generate the table columns based on the attributes of the model?',
+                        question: 'Should the table columns be generated from the current database columns?',
                     );
 
                     if ($this->isGenerated) {
@@ -392,8 +392,8 @@ class MakeRelationManagerCommand extends Command
         $this->formSchemaFqn = filled($formSchema) && class_exists($formSchema)
             ? $formSchema
             : $this->askForSchema(
-                intialQuestion: 'Would you like to use an existing form schema class instead of defining the form on this relation manager?',
-                question: 'Which form schema class would you like to use? Please provide the fully qualified class name.',
+                intialQuestion: 'Would you like to use an existing form schema class?',
+                question: 'Which form schema class would you like to use?',
                 questionPlaceholder: 'App\\Filament\\Resources\\Users\\Schemas\\UserForm',
             );
     }
@@ -401,7 +401,7 @@ class MakeRelationManagerCommand extends Command
     protected function configureIsGeneratedIfNotAlready(?string $question = null): void
     {
         $this->isGenerated ??= $this->option('generate') || confirm(
-            label: $question ?? 'Would you like to generate the form schema and table columns based on the attributes of the model?',
+            label: $question ?? 'Should the configuration be generated from the current database columns?',
             default: false,
         );
     }
@@ -421,8 +421,16 @@ class MakeRelationManagerCommand extends Command
 
     protected function configureRecordTitleAttributeIfNotAlready(): void
     {
-        $this->recordTitleAttribute ??= $this->option('record-title-attribute') ?? $this->argument('recordTitleAttribute') ?? text(
-            label: 'What is the title attribute?',
+        $this->recordTitleAttribute ??= $this->option('record-title-attribute') ?? $this->argument('recordTitleAttribute');
+
+        if (filled($this->recordTitleAttribute)) {
+            return;
+        }
+
+        info('The "title attribute" is used to label each record in the UI.');
+
+        $this->recordTitleAttribute = text(
+            label: 'What is the title attribute for this model?',
             placeholder: 'name',
             required: true,
         );
@@ -431,7 +439,7 @@ class MakeRelationManagerCommand extends Command
     protected function configureHasViewOperation(): void
     {
         $this->hasViewOperation = $this->option('view') || confirm(
-            label: 'Would you like to generate an infolist and view modal for the relation manager?',
+            label: 'Should there be a read-only "view" modal on the relation manager?',
             default: false,
         );
     }
@@ -447,8 +455,8 @@ class MakeRelationManagerCommand extends Command
         $this->infolistSchemaFqn = filled($infolistSchema) && class_exists($infolistSchema)
             ? $infolistSchema
             : $this->askForSchema(
-                intialQuestion: 'Would you like to use an existing infolist schema class instead of defining the infolist on this page?',
-                question: 'Which infolist schema class would you like to use? Please provide the fully qualified class name.',
+                intialQuestion: 'Would you like to use an existing infolist schema class?',
+                question: 'Which infolist schema class would you like to use?',
                 questionPlaceholder: 'App\\Filament\\Resources\\Users\\Schemas\\UserInfolist',
             );
     }
@@ -464,8 +472,8 @@ class MakeRelationManagerCommand extends Command
         $this->tableFqn = filled($table) && class_exists($table)
             ? $table
             : $this->askForSchema(
-                intialQuestion: 'Would you like to use an existing table class instead of defining the table on this page?',
-                question: 'Which table class would you like to use? Please provide the fully qualified class name.',
+                intialQuestion: 'Would you like to use an existing table class?',
+                question: 'Which table class would you like to use?',
                 questionPlaceholder: 'App\\Filament\\Resources\\Users\\Tables\\UsersTable',
             );
     }

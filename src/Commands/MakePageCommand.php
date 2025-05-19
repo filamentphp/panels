@@ -43,6 +43,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
 use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\info;
 use function Laravel\Prompts\search;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
@@ -423,12 +424,14 @@ class MakePageCommand extends Command
             throw new FailureCommandOutput;
         }
 
+        info('Most pages in a resource, such as the default Edit or View pages, have a record ID in their URL.');
+
         $this->writeFile($path, app(ResourceCustomPageClassGenerator::class, [
             'fqn' => $this->fqn,
             'resourceFqn' => $this->resourceFqn,
             'view' => $this->view,
             'hasRecord' => confirm(
-                label: 'Does the page relate to a specific record in the resource? This is similar to the default Edit or View page of a resource, which have the record ID in the URL.',
+                label: 'Does this new page relate to a specific record in the resource like this?',
                 default: false,
             ),
         ]));
@@ -534,7 +537,7 @@ class MakePageCommand extends Command
         if (blank($relatedResourceFqn)) {
             $askForIsGeneratedIfNotAlready = function (?string $question = null) use (&$isGenerated): bool {
                 return $isGenerated ??= confirm(
-                    label: $question ?? 'Would you like to generate the page based on the attributes of the model?',
+                    label: $question ?? 'Should the page be generated from the current database columns?',
                     default: false,
                 );
             };
@@ -558,8 +561,14 @@ class MakePageCommand extends Command
             };
 
             $askForRecordTitleAttributeIfNotAlready = function () use (&$recordTitleAttribute): string {
-                return $recordTitleAttribute ??= text(
-                    label: 'What is the title attribute? This is the attribute that will be used to uniquely identify each record in the table.',
+                if (filled($recordTitleAttribute)) {
+                    return $recordTitleAttribute;
+                }
+
+                info('The "title attribute" is used to label each record in the UI.');
+
+                return $recordTitleAttribute = text(
+                    label: 'What is the title attribute for this model?',
                     placeholder: 'name',
                     required: true,
                 );
@@ -567,8 +576,8 @@ class MakePageCommand extends Command
 
             if (! $this->hasFileGenerationFlag(FileGenerationFlag::EMBEDDED_PANEL_RESOURCE_SCHEMAS)) {
                 $formSchemaFqn = $this->askForSchema(
-                    intialQuestion: 'Would you like to use an existing form schema class instead of defining the form on this page?',
-                    question: 'Which form schema class would you like to use? Please provide the fully qualified class name.',
+                    intialQuestion: 'Should an existing form schema class be used?',
+                    question: 'Which form schema class would you like to use?',
                     questionPlaceholder: 'App\\Filament\\Resources\\Users\\Schemas\\UserForm',
                 );
             }
@@ -580,15 +589,15 @@ class MakePageCommand extends Command
             }
 
             if (confirm(
-                'Would you like to generate an infolist and view modal for the table?',
+                'Would you like to generate a read-only view modal for the table?',
                 default: false,
             )) {
                 $hasViewOperation = true;
 
                 if (! $this->hasFileGenerationFlag(FileGenerationFlag::EMBEDDED_PANEL_RESOURCE_SCHEMAS)) {
                     $infolistSchemaFqn = $this->askForSchema(
-                        intialQuestion: 'Would you like to use an existing infolist schema class instead of defining the infolist on this page?',
-                        question: 'Which infolist schema class would you like to use? Please provide the fully qualified class name.',
+                        intialQuestion: 'Would you like to use an existing infolist schema class?',
+                        question: 'Which infolist schema class would you like to use?',
                         questionPlaceholder: 'App\\Filament\\Resources\\Users\\Schemas\\UserInfolist',
                     );
                 }
@@ -604,8 +613,8 @@ class MakePageCommand extends Command
                     : $askForRecordTitleAttributeIfNotAlready();
             } else {
                 $tableFqn = $this->askForSchema(
-                    intialQuestion: 'Would you like to use an existing table class instead of defining the table on this page?',
-                    question: 'Which table class would you like to use? Please provide the fully qualified class name.',
+                    intialQuestion: 'Would you like to use an existing table class?',
+                    question: 'Which table class would you like to use?',
                     questionPlaceholder: 'App\\Filament\\Resources\\Users\\Tables\\UsersTable',
                 );
             }
@@ -614,7 +623,7 @@ class MakePageCommand extends Command
                 $askForRecordTitleAttributeIfNotAlready();
 
                 $askForIsGeneratedIfNotAlready(
-                    question: 'Would you like to generate the table columns based on the attributes of the model?',
+                    question: 'Should the table columns be generated from the current database columns?',
                 ) && $askForRelatedModelFqnIfNotAlready();
 
                 $isSoftDeletable = (filled($relatedModelFqn) && static::$shouldCheckModelsForSoftDeletes && class_exists($relatedModelFqn))

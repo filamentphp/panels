@@ -3,8 +3,8 @@
 namespace Filament\Commands\FileGenerators\Resources;
 
 use Filament\Commands\FileGenerators\Resources\Concerns\CanGenerateResourceForms;
+use Filament\Commands\FileGenerators\Resources\Concerns\CanGenerateResourceInfolists;
 use Filament\Commands\FileGenerators\Resources\Concerns\CanGenerateResourceTables;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Support\Commands\Concerns\CanReadModelSchemas;
@@ -25,6 +25,7 @@ use Nette\PhpGenerator\Property;
 class RelationManagerClassGenerator extends ClassGenerator
 {
     use CanGenerateResourceForms;
+    use CanGenerateResourceInfolists;
     use CanGenerateResourceTables;
     use CanReadModelSchemas;
 
@@ -169,20 +170,11 @@ class RelationManagerClassGenerator extends ClassGenerator
 
         $infolistSchemaFqn = $this->getInfolistSchemaFqn();
 
-        if (filled($infolistSchemaFqn)) {
-            $methodBody = <<<PHP
+        $methodBody = filled($infolistSchemaFqn)
+            ? <<<PHP
                 return {$this->simplifyFqn($infolistSchemaFqn)}::configure(\$schema);
-                PHP;
-        } else {
-            $this->importUnlessPartial(TextEntry::class);
-
-            $methodBody = new Literal(<<<PHP
-                return \$schema
-                    ->components([
-                        {$this->simplifyFqn(TextEntry::class)}::make(?),
-                    ]);
-                PHP, [$this->getRecordTitleAttribute()]);
-        }
+                PHP
+            : $this->generateInfolistMethodBody($this->getRelatedModelFqn(), exceptColumns: Arr::wrap($this->getForeignKeyColumnToNotGenerate()));
 
         $method = $class->addMethod('infolist')
             ->setPublic()

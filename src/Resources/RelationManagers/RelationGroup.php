@@ -5,12 +5,16 @@ namespace Filament\Resources\RelationManagers;
 use Closure;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Components\Component;
+use Filament\Support\Concerns\HasBadgeTooltip;
 use Filament\Support\Concerns\HasIcon;
+use Filament\Support\Concerns\HasIconPosition;
 use Illuminate\Database\Eloquent\Model;
 
 class RelationGroup extends Component
 {
+    use HasBadgeTooltip;
     use HasIcon;
+    use HasIconPosition;
 
     protected string | Closure | null $badge = null;
 
@@ -18,8 +22,6 @@ class RelationGroup extends Component
      * @var string | array<string> | Closure | null
      */
     protected string | array | Closure | null $badgeColor = null;
-
-    protected string | Closure | null $badgeTooltip = null;
 
     protected ?Model $ownerRecord = null;
 
@@ -73,13 +75,6 @@ class RelationGroup extends Component
     public function badgeColor(string | array | Closure | null $color): static
     {
         $this->badgeColor = $color;
-
-        return $this;
-    }
-
-    public function badgeTooltip(string | Closure | null $tooltip): static
-    {
-        $this->badgeTooltip = $tooltip;
 
         return $this;
     }
@@ -138,11 +133,6 @@ class RelationGroup extends Component
     public function getBadgeColor(): string | array | null
     {
         return $this->evaluate($this->badgeColor);
-    }
-
-    public function getBadgeTooltip(): ?string
-    {
-        return $this->evaluate($this->badgeTooltip);
     }
 
     public function getOwnerRecord(): ?Model

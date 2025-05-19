@@ -6,12 +6,15 @@ use BackedEnum;
 use Closure;
 use Exception;
 use Filament\Support\Components\Component;
+use Filament\Support\Concerns\HasBadgeTooltip;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Htmlable;
 use UnitEnum;
 
 class NavigationItem extends Component
 {
+    use HasBadgeTooltip;
+
     protected string | UnitEnum | Closure | null $group = null;
 
     protected string | Closure | null $parentItem = null;
@@ -30,8 +33,6 @@ class NavigationItem extends Component
      * @var string | array<string> | Closure | null
      */
     protected string | array | Closure | null $badgeColor = null;
-
-    protected string | Closure | null $badgeTooltip = null;
 
     protected bool | Closure $shouldOpenUrlInNewTab = false;
 
@@ -91,13 +92,6 @@ class NavigationItem extends Component
     public function icon(string | BackedEnum | Htmlable | Closure | null $icon): static
     {
         $this->icon = $icon;
-
-        return $this;
-    }
-
-    public function badgeTooltip(string | Closure | null $tooltip): static
-    {
-        $this->badgeTooltip = $tooltip;
 
         return $this;
     }
@@ -170,11 +164,6 @@ class NavigationItem extends Component
     public function getBadgeColor(): string | array | null
     {
         return $this->evaluate($this->badgeColor);
-    }
-
-    public function getBadgeTooltip(): ?string
-    {
-        return $this->evaluate($this->badgeTooltip);
     }
 
     public function getGroup(): string | UnitEnum | null

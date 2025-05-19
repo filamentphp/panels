@@ -158,7 +158,7 @@ class MakeResourceCommand extends Command
                 name: 'generate',
                 shortcut: 'G',
                 mode: InputOption::VALUE_NONE,
-                description: 'Generate the form schema and table columns based on the attributes of the model',
+                description: 'Generate the form schema and table columns from the current database columns',
             ),
             new InputOption(
                 name: 'migration',
@@ -414,8 +414,8 @@ class MakeResourceCommand extends Command
     {
         $this->hasViewOperation = $this->option('view') || confirm(
             label: $this->isSimple
-                ? 'Would you like to generate an infolist and view modal for the resource?'
-                : 'Would you like to generate an infolist and view page for the resource?',
+                ? 'Would you like to generate a read-only view modal for the resource?'
+                : 'Would you like to generate a read-only view page for the resource?',
             default: false,
         );
     }
@@ -423,7 +423,7 @@ class MakeResourceCommand extends Command
     protected function configureIsGenerated(): void
     {
         $this->isGenerated = $this->option('generate') || confirm(
-            label: 'Would you like to generate the form schema and table columns based on the attributes of the model?',
+            label: 'Should the configuration be generated from the current database columns?',
             default: false,
         );
     }

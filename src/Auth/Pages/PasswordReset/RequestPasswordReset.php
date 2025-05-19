@@ -10,6 +10,7 @@ use Filament\Actions\ActionGroup;
 use Filament\Auth\Notifications\ResetPassword as ResetPasswordNotification;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
+use Filament\Models\Contracts\FilamentUser;
 use Filament\Notifications\Notification;
 use Filament\Pages\SimplePage;
 use Filament\Schemas\Components\Actions;
@@ -21,6 +22,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Facades\FilamentIcon;
 use Filament\Support\Icons\Heroicon;
 use Filament\View\PanelsRenderHook;
+use Illuminate\Auth\Events\PasswordResetLinkSent;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Password;
@@ -62,6 +64,13 @@ class RequestPasswordReset extends SimplePage
         $status = Password::broker(Filament::getAuthPasswordBroker())->sendResetLink(
             $this->getCredentialsFromFormData($data),
             function (CanResetPassword $user, string $token): void {
+                if (
+                    ($user instanceof FilamentUser) &&
+                    (! $user->canAccessPanel(Filament::getCurrentOrDefaultPanel()))
+                ) {
+                    return;
+                }
+
                 if (! method_exists($user, 'notify')) {
                     $userClass = $user::class;
 
@@ -72,6 +81,10 @@ class RequestPasswordReset extends SimplePage
                 $notification->url = Filament::getResetPasswordUrl($token, $user);
 
                 $user->notify($notification);
+
+                if (class_exists(PasswordResetLinkSent::class)) {
+                    event(new PasswordResetLinkSent($user));
+                }
             },
         );
 
@@ -117,6 +130,7 @@ class RequestPasswordReset extends SimplePage
     {
         return Notification::make()
             ->title(__($status))
+            ->body(($status === Password::RESET_LINK_SENT) ? __('filament-panels::pages/auth/password-reset/request-password-reset.notifications.sent.body') : null)
             ->success();
     }
 
