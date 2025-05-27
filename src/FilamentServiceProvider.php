@@ -48,6 +48,8 @@ class FilamentServiceProvider extends PackageServiceProvider
             return new FilamentManager;
         });
 
+        $this->app->alias('filament', FilamentManager::class);
+
         $this->app->singleton(PanelRegistry::class, function (): PanelRegistry {
             return new PanelRegistry;
         });
