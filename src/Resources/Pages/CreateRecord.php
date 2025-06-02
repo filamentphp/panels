@@ -4,6 +4,7 @@ namespace Filament\Resources\Pages;
 
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Concerns\HasUnsavedDataChangesAlert;
@@ -286,6 +287,17 @@ class CreateRecord extends Page
     protected function getRedirectUrl(): string
     {
         $resource = static::getResource();
+
+        if (
+            filled($defaultRedirect = Filament::getResourceCreatePageRedirect()) &&
+            $resource::hasPage($defaultRedirect) &&
+            (
+                (($defaultRedirect !== 'view') || $resource::canView($this->getRecord())) &&
+                (($defaultRedirect !== 'edit') || $resource::canEdit($this->getRecord()))
+            )
+        ) {
+            return $this->getResourceUrl($defaultRedirect, $this->getRedirectUrlParameters());
+        }
 
         if ($resource::hasPage('view') && $resource::canView($this->getRecord())) {
             return $this->getResourceUrl('view', $this->getRedirectUrlParameters());

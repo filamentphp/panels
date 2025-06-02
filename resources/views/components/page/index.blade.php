@@ -144,5 +144,28 @@
         @endif
     @endif
 
+    @if ((! app()->hasDebugModeEnabled()) && $this->hasErrorNotifications())
+        @script
+            <script>
+                const errorNotifications = @js($this->getErrorNotifications())
+
+                Livewire.hook('request', ({ fail }) => {
+                    fail(({ status, preventDefault }) => {
+                        preventDefault()
+
+                        const errorNotification =
+                            errorNotifications[status] ?? errorNotifications['']
+
+                        new FilamentNotification()
+                            .title(errorNotification.title)
+                            .body(errorNotification.body)
+                            .danger()
+                            .send()
+                    })
+                })
+            </script>
+        @endscript
+    @endif
+
     <x-filament-panels::unsaved-action-changes-alert />
 </div>

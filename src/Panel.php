@@ -24,6 +24,7 @@ class Panel extends Component
     use Panel\Concerns\HasComponents;
     use Panel\Concerns\HasDarkMode;
     use Panel\Concerns\HasDatabaseTransactions;
+    use Panel\Concerns\HasErrorNotifications;
     use Panel\Concerns\HasFavicon;
     use Panel\Concerns\HasFont;
     use Panel\Concerns\HasGlobalSearch;

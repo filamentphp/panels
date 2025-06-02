@@ -8,7 +8,7 @@
     }
 
     &.fi-active {
-        & .fi-sidebar-group-dropdown-trigger-button {
+        & .fi-sidebar-group-dropdown-trigger-btn {
             & .fi-icon {
                 @apply text-primary-600 dark:text-primary-400;
             }
@@ -28,7 +28,7 @@
     @apply flex-1 text-sm leading-6 font-medium text-gray-500 dark:text-gray-400;
 }
 
-.fi-sidebar-group-dropdown-trigger-button {
+.fi-sidebar-group-dropdown-trigger-btn {
     @apply relative flex flex-1 items-center justify-center gap-x-3 rounded-lg px-2 py-2 outline-hidden transition duration-75 hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-white/5 dark:focus-visible:bg-white/5;
 
     & .fi-icon {

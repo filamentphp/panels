@@ -30,4 +30,15 @@ class GlobalSearchResult
             $actions,
         );
     }
+
+    /**
+     * @return array<Action>
+     */
+    public function getVisibleActions(): array
+    {
+        return array_filter(
+            $this->actions,
+            fn (Action $action): bool => $action->isVisible(),
+        );
+    }
 }

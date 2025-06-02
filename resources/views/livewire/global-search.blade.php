@@ -81,10 +81,14 @@
                                     class="fi-global-search-result-group-results"
                                 >
                                     @foreach ($groupedResults as $result)
+                                        @php
+                                            $resultVisibleActions = $result->getVisibleActions();
+                                        @endphp
+
                                         <li
                                             @class([
                                                 'fi-global-search-result',
-                                                'fi-global-search-result-has-actions' => $result->actions,
+                                                'fi-global-search-result-has-actions' => $resultVisibleActions,
                                             ])
                                         >
                                             <a
@@ -125,14 +129,12 @@
                                                 @endif
                                             </a>
 
-                                            @if ($result->actions)
+                                            @if ($resultVisibleActions)
                                                 <div
                                                     class="fi-global-search-result-actions"
                                                 >
-                                                    @foreach ($result->actions as $action)
-                                                        @if ($action->isVisible())
-                                                            {{ $action }}
-                                                        @endif
+                                                    @foreach ($resultVisibleActions as $action)
+                                                        {{ $action }}
                                                     @endforeach
                                                 </div>
                                             @endif

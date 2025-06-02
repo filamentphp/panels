@@ -101,6 +101,10 @@ trait HasComponents
 
     protected ?bool $hasCachedComponents = null;
 
+    protected string | Closure | null $resourceCreatePageRedirect = null;
+
+    protected string | Closure | null $resourceEditPageRedirect = null;
+
     /**
      * @param  array<class-string>  $pages
      */
@@ -692,5 +696,29 @@ trait HasComponents
     public function getComponentCachePath(): string
     {
         return (config('filament.cache_path') ?? base_path('bootstrap/cache/filament')) . DIRECTORY_SEPARATOR . 'panels' . DIRECTORY_SEPARATOR . "{$this->getId()}.php";
+    }
+
+    public function resourceCreatePageRedirect(string | Closure | null $page): static
+    {
+        $this->resourceCreatePageRedirect = $page;
+
+        return $this;
+    }
+
+    public function getResourceCreatePageRedirect(): ?string
+    {
+        return $this->evaluate($this->resourceCreatePageRedirect);
+    }
+
+    public function resourceEditPageRedirect(string | Closure | null $page): static
+    {
+        $this->resourceEditPageRedirect = $page;
+
+        return $this;
+    }
+
+    public function getResourceEditPageRedirect(): ?string
+    {
+        return $this->evaluate($this->resourceEditPageRedirect);
     }
 }

@@ -124,7 +124,10 @@ trait HasGlobalSearch
                     title: static::getGlobalSearchResultTitle($record),
                     url: $url,
                     details: static::getGlobalSearchResultDetails($record),
-                    actions: static::getGlobalSearchResultActions($record),
+                    actions: array_map(
+                        fn (Action $action) => $action->hasRecord() ? $action : $action->record($record),
+                        static::getGlobalSearchResultActions($record),
+                    ),
                 );
             })
             ->filter();

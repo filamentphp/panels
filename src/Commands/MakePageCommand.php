@@ -476,7 +476,7 @@ class MakePageCommand extends Command
             'resourceFqn' => $this->resourceFqn,
             'hasViewOperation' => $this->resourceFqn::hasPage('view'),
             'isSoftDeletable' => confirm(
-                label: 'Does the model use soft deletes?',
+                label: 'Does the model use soft-deletes?',
                 default: false,
             ),
         ]));
@@ -629,7 +629,7 @@ class MakePageCommand extends Command
                 $isSoftDeletable = (filled($relatedModelFqn) && static::$shouldCheckModelsForSoftDeletes && class_exists($relatedModelFqn))
                     ? in_array(SoftDeletes::class, class_uses_recursive($relatedModelFqn))
                     : confirm(
-                        label: 'Does the related model use soft deletes?',
+                        label: 'Does the related model use soft-deletes?',
                         default: false,
                     );
 

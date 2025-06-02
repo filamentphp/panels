@@ -28,6 +28,7 @@ use function Filament\Support\original_request;
 abstract class Page extends BasePage
 {
     use Concerns\CanAuthorizeAccess;
+    use Concerns\HasErrorNotifications;
     use Concerns\HasRoutes;
     use Concerns\HasSubNavigation;
     use Concerns\InteractsWithHeaderActions;

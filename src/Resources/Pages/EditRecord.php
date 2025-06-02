@@ -9,6 +9,7 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Concerns\HasUnsavedDataChangesAlert;
@@ -350,6 +351,16 @@ class EditRecord extends Page
 
     protected function getRedirectUrl(): ?string
     {
+        $resource = static::getResource();
+
+        if (
+            filled($defaultRedirect = Filament::getResourceEditPageRedirect()) &&
+            $resource::hasPage($defaultRedirect) &&
+            (($defaultRedirect !== 'view') || $resource::canView($this->getRecord()))
+        ) {
+            return $this->getResourceUrl($defaultRedirect, $this->getRedirectUrlParameters());
+        }
+
         try {
             $this->authorizeAccess();
 
@@ -357,8 +368,6 @@ class EditRecord extends Page
         } catch (AuthorizationException | HttpExceptionInterface) {
             // Do nothing.
         }
-
-        $resource = static::getResource();
 
         if ($resource::hasPage('view') && $resource::canView($this->getRecord())) {
             return $this->getResourceUrl('view', $this->getRedirectUrlParameters());

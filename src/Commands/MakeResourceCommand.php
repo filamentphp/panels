@@ -207,7 +207,7 @@ class MakeResourceCommand extends Command
                 name: 'soft-deletes',
                 shortcut: null,
                 mode: InputOption::VALUE_NONE,
-                description: 'Indicate if the model uses soft deletes',
+                description: 'Indicate if the model uses soft-deletes',
             ),
             new InputOption(
                 name: 'view',
@@ -433,7 +433,7 @@ class MakeResourceCommand extends Command
         $this->isSoftDeletable = $this->option('soft-deletes') || ((static::$shouldCheckModelsForSoftDeletes && class_exists($this->modelFqn))
             ? in_array(SoftDeletes::class, class_uses_recursive($this->modelFqn))
             : confirm(
-                label: 'Does the model use soft deletes?',
+                label: 'Does the model use soft-deletes?',
                 default: false,
             ));
     }

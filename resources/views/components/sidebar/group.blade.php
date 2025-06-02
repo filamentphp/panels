@@ -80,7 +80,7 @@
                               }
                     "
                     x-tooltip.html="tooltip"
-                    class="fi-sidebar-group-dropdown-trigger-button"
+                    class="fi-sidebar-group-dropdown-trigger-btn"
                 >
                     {{ \Filament\Support\generate_icon_html($icon, size: \Filament\Support\Enums\IconSize::Large) }}
                 </button>

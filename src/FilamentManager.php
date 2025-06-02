@@ -650,6 +650,11 @@ class FilamentManager
         return $this->getCurrentOrDefaultPanel()->hasDatabaseNotifications();
     }
 
+    public function hasErrorNotifications(): bool
+    {
+        return $this->getCurrentOrDefaultPanel()->hasErrorNotifications();
+    }
+
     public function hasLazyLoadedDatabaseNotifications(): bool
     {
         return $this->getCurrentOrDefaultPanel()->hasLazyLoadedDatabaseNotifications();
@@ -1012,5 +1017,23 @@ class FilamentManager
     public function isAuthorizationStrict(): bool
     {
         return $this->getCurrentOrDefaultPanel()->isAuthorizationStrict();
+    }
+
+    public function getResourceCreatePageRedirect(): ?string
+    {
+        return $this->getCurrentOrDefaultPanel()->getResourceCreatePageRedirect();
+    }
+
+    public function getResourceEditPageRedirect(): ?string
+    {
+        return $this->getCurrentOrDefaultPanel()->getResourceEditPageRedirect();
+    }
+
+    /**
+     * @return array<array{ title: string | Closure, body: string | Closure | null }>
+     */
+    public function getErrorNotifications(): array
+    {
+        return $this->getCurrentOrDefaultPanel()->getErrorNotifications();
     }
 }
