@@ -38,20 +38,20 @@ trait HasRoutes
             ->first();
     }
 
-    public static function getRouteBaseName(?string $panel = null): string
+    public static function getRouteBaseName(?Panel $panel = null): string
     {
+        $panel ??= Filament::getCurrentOrDefaultPanel();
+
         if ($parentResource = static::getParentResourceRegistration()) {
             return $parentResource->getParentResource()::getRouteBaseName($panel) . '.' . $parentResource->getRouteName();
         }
 
-        $panel = $panel ? Filament::getPanel($panel) : Filament::getCurrentOrDefaultPanel();
-
-        $routeBaseName = (string) str(static::getSlug())
+        $routeBaseName = (string) str(static::getSlug($panel))
             ->replace('/', '.')
             ->prepend('resources.');
 
         if (filled($cluster = static::getCluster())) {
-            $routeBaseName = $cluster::prependClusterRouteBaseName($routeBaseName);
+            $routeBaseName = $cluster::prependClusterRouteBaseName($panel, $routeBaseName);
         }
 
         return $panel->generateRouteName($routeBaseName);
@@ -64,8 +64,8 @@ trait HasRoutes
 
     public static function routes(Panel $panel, ?Closure $registerPageRoutes = null): void
     {
-        Route::name(static::getRelativeRouteName() . '.')
-            ->prefix(static::getRoutePrefix())
+        Route::name(static::getRelativeRouteName($panel) . '.')
+            ->prefix(static::getRoutePrefix($panel))
             ->middleware(static::getRouteMiddleware($panel))
             ->withoutMiddleware(static::getWithoutRouteMiddleware($panel))
             ->group($registerPageRoutes);
@@ -92,8 +92,8 @@ trait HasRoutes
         $registerRoutes = fn () => static::routes($panel, $registerPageRoutes);
 
         if (filled($cluster = static::getCluster())) {
-            Route::name($cluster::prependClusterRouteBaseName('resources.'))
-                ->prefix($cluster::prependClusterSlug(''))
+            Route::name($cluster::prependClusterRouteBaseName($panel, 'resources.'))
+                ->prefix($cluster::prependClusterSlug($panel, ''))
                 ->group($registerRoutes);
 
             return;
@@ -102,14 +102,14 @@ trait HasRoutes
         Route::name('resources.')->group($registerRoutes);
     }
 
-    public static function getRelativeRouteName(): string
+    public static function getRelativeRouteName(Panel $panel): string
     {
-        return (string) str(static::getSlug())->replace('/', '.');
+        return (string) str(static::getSlug($panel))->replace('/', '.');
     }
 
-    public static function getRoutePrefix(): string
+    public static function getRoutePrefix(Panel $panel): string
     {
-        return static::getSlug();
+        return static::getSlug($panel);
     }
 
     /**
@@ -138,7 +138,7 @@ trait HasRoutes
         return $panel->getTenantBillingProvider()->getSubscribedMiddleware();
     }
 
-    public static function getSlug(): string
+    public static function getSlug(?Panel $panel = null): string
     {
         if (filled(static::$slug)) {
             return static::$slug;

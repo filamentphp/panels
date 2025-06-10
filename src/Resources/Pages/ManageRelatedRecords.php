@@ -15,6 +15,7 @@ use Filament\Actions\ReplicateAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Facades\Filament;
 use Filament\Resources\Concerns\InteractsWithRelationshipTable;
 use Filament\Resources\RelationManagers\RelationGroup;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -184,7 +185,7 @@ class ManageRelatedRecords extends Page implements Tables\Contracts\HasTable
     {
         return [
             'fi-resource-manage-related-records-page',
-            'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug()),
+            'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug(Filament::getCurrentOrDefaultPanel())),
             "fi-resource-record-{$this->getRecord()->getKey()}",
         ];
     }

@@ -49,11 +49,11 @@ trait CanGenerateUrls
             return static::getIndexUrl($parameters, $isAbsolute, $panel, $tenant, $shouldGuessMissingParameters);
         }
 
-        if (blank($panel) || Filament::getPanel($panel)->hasTenancy()) {
+        if (blank($panel) || ($panel = Filament::getPanel($panel))->hasTenancy()) {
             $parameters['tenant'] ??= ($tenant ?? Filament::getTenant());
         }
 
-        $routeBaseName = static::getRouteBaseName(panel: $panel);
+        $routeBaseName = static::getRouteBaseName($panel);
 
         return route("{$routeBaseName}.{$name}", $parameters, $isAbsolute);
     }

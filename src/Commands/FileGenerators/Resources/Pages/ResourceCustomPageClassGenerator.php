@@ -97,7 +97,7 @@ class ResourceCustomPageClassGenerator extends ClassGenerator
                 $this->record = $this->resolveRecord($record);
                 PHP);
         $method->addParameter('record')
-            ->setType('int | string');
+            ->setType('int|string');
 
         $this->configureMountMethod($method);
     }

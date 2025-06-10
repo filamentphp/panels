@@ -75,7 +75,7 @@ class EditProfile extends Page
         return __('filament-panels::auth/pages/edit-profile.label');
     }
 
-    public static function getRelativeRouteName(): string
+    public static function getRelativeRouteName(Panel $panel): string
     {
         return 'profile';
     }
@@ -117,8 +117,8 @@ class EditProfile extends Page
     public static function registerRoutes(Panel $panel): void
     {
         if (filled(static::getCluster())) {
-            Route::name(static::prependClusterRouteBaseName(''))
-                ->prefix(static::prependClusterSlug(''))
+            Route::name(static::prependClusterRouteBaseName($panel, ''))
+                ->prefix(static::prependClusterSlug($panel, ''))
                 ->group(fn () => static::routes($panel));
 
             return;
@@ -127,11 +127,11 @@ class EditProfile extends Page
         static::routes($panel);
     }
 
-    public static function getRouteName(?string $panel = null): string
+    public static function getRouteName(?Panel $panel = null): string
     {
-        $panel = $panel ? Filament::getPanel($panel) : Filament::getCurrentOrDefaultPanel();
+        $panel ??= Filament::getCurrentOrDefaultPanel();
 
-        return $panel->generateRouteName('auth.' . static::getRelativeRouteName());
+        return $panel->generateRouteName('auth.' . static::getRelativeRouteName($panel));
     }
 
     /**
@@ -394,7 +394,7 @@ class EditProfile extends Page
         return static::getLabel();
     }
 
-    public static function getSlug(): string
+    public static function getSlug(?Panel $panel = null): string
     {
         return static::$slug ?? 'profile';
     }

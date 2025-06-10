@@ -39,7 +39,7 @@ abstract class RegisterTenant extends SimplePage
 
     abstract public static function getLabel(): string;
 
-    public static function getRelativeRouteName(): string
+    public static function getRelativeRouteName(Panel $panel): string
     {
         return 'registration';
     }
@@ -144,7 +144,7 @@ abstract class RegisterTenant extends SimplePage
         return static::getLabel();
     }
 
-    public static function getSlug(): string
+    public static function getSlug(?Panel $panel = null): string
     {
         return static::$slug ?? 'new';
     }

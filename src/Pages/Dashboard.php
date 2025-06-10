@@ -4,6 +4,7 @@ namespace Filament\Pages;
 
 use BackedEnum;
 use Filament\Facades\Filament;
+use Filament\Panel;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Grid;
@@ -34,7 +35,7 @@ class Dashboard extends Page
             ?? (Filament::hasTopNavigation() ? Heroicon::Home : Heroicon::OutlinedHome);
     }
 
-    public static function getRoutePath(): string
+    public static function getRoutePath(Panel $panel): string
     {
         return static::$routePath;
     }

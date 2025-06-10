@@ -8,6 +8,7 @@ use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Facades\Filament;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -214,7 +215,7 @@ class ViewRecord extends Page
     {
         return [
             'fi-resource-view-record-page',
-            'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug()),
+            'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug(Filament::getCurrentOrDefaultPanel())),
             "fi-resource-record-{$this->getRecord()->getKey()}",
         ];
     }

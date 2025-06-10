@@ -442,7 +442,7 @@ class EditRecord extends Page
     {
         return [
             'fi-resource-edit-record-page',
-            'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug()),
+            'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug(Filament::getCurrentOrDefaultPanel())),
             "fi-resource-record-{$this->getRecord()->getKey()}",
         ];
     }

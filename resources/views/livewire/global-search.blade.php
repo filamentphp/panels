@@ -44,11 +44,11 @@
                 x-data="{
                     isOpen: false,
 
-                    open: function (event) {
+                    open(event) {
                         this.isOpen = true
                     },
 
-                    close: function (event) {
+                    close(event) {
                         this.isOpen = false
                     },
                 }"

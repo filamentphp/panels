@@ -7,6 +7,7 @@ use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Facades\Filament;
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
 use Filament\Resources\Concerns\HasTabs;
@@ -240,7 +241,7 @@ class ListRecords extends Page implements Tables\Contracts\HasTable
     {
         return [
             'fi-resource-list-records-page',
-            'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug()),
+            'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug(Filament::getCurrentOrDefaultPanel())),
         ];
     }
 }

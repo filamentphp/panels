@@ -386,7 +386,7 @@ class CreateRecord extends Page
     {
         return [
             'fi-resource-create-record-page',
-            'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug()),
+            'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug(Filament::getCurrentOrDefaultPanel())),
         ];
     }
 

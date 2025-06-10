@@ -1,12 +1,14 @@
 @php
     use Filament\Support\Enums\Width;
 
+    $livewire ??= null;
+
     $hasTopbar = filament()->hasTopbar();
     $isSidebarCollapsibleOnDesktop = filament()->isSidebarCollapsibleOnDesktop();
     $isSidebarFullyCollapsibleOnDesktop = filament()->isSidebarFullyCollapsibleOnDesktop();
     $hasTopNavigation = filament()->hasTopNavigation();
     $hasNavigation = filament()->hasNavigation();
-    $renderHookScopes = $livewire->getRenderHookScopes();
+    $renderHookScopes = $livewire?->getRenderHookScopes();
     $maxContentWidth ??= (filament()->getMaxContentWidth() ?? Width::SevenExtraLarge);
 
     if (! $maxContentWidth instanceof Width) {

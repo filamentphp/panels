@@ -47,16 +47,16 @@ abstract class EditTenantProfile extends Page
 
     abstract public static function getLabel(): string;
 
-    public static function getRelativeRouteName(): string
+    public static function getRelativeRouteName(Panel $panel): string
     {
         return 'profile';
     }
 
-    public static function getRouteName(?string $panel = null): string
+    public static function getRouteName(?Panel $panel = null): string
     {
-        $panel = $panel ? Filament::getPanel($panel) : Filament::getCurrentOrDefaultPanel();
+        $panel ??= Filament::getCurrentOrDefaultPanel();
 
-        return $panel->generateRouteName('tenant.' . static::getRelativeRouteName());
+        return $panel->generateRouteName('tenant.' . static::getRelativeRouteName($panel));
     }
 
     public static function isTenantSubscriptionRequired(Panel $panel): bool
@@ -212,7 +212,7 @@ abstract class EditTenantProfile extends Page
         return static::getLabel();
     }
 
-    public static function getSlug(): string
+    public static function getSlug(?Panel $panel = null): string
     {
         return static::$slug ?? 'profile';
     }

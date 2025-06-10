@@ -81,10 +81,10 @@ trait CanGenerateResourceTables
                 ->filters([
                     {$this->outputTableFilters()}
                 ]){$headerActionsOutput}
-                ->actions([
+                ->recordActions([
                     {$this->outputTableActions()}
                 ])
-                ->bulkActions([
+                ->toolbarActions([
                     {$this->simplifyFqn(BulkActionGroup::class)}::make([
                         {$this->outputTableMethodBulkActions()}
                     ]),

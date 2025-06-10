@@ -16,6 +16,7 @@ use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Clusters\Cluster;
+use Filament\Facades\Filament;
 use Filament\Navigation\NavigationItem;
 use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Pages\Page as BasePage;
@@ -53,9 +54,11 @@ abstract class Page extends BasePage
         return static::getResource()::getUrl($name, $parameters, $isAbsolute, $panel, $tenant, $shouldGuessMissingParameters);
     }
 
-    public static function getRouteName(?string $panel = null): string
+    public static function getRouteName(?Panel $panel = null): string
     {
-        $routeBaseName = static::getResource()::getRouteBaseName(panel: $panel);
+        $panel ??= Filament::getCurrentOrDefaultPanel();
+
+        $routeBaseName = static::getResource()::getRouteBaseName($panel);
 
         return $routeBaseName . '.' . static::getResourcePageName();
     }

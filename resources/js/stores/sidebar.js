@@ -3,11 +3,11 @@ export default () => ({
 
     collapsedGroups: window.Alpine.$persist(null).as('collapsedGroups'),
 
-    groupIsCollapsed: function (group) {
+    groupIsCollapsed(group) {
         return this.collapsedGroups.includes(group)
     },
 
-    collapseGroup: function (group) {
+    collapseGroup(group) {
         if (this.collapsedGroups.includes(group)) {
             return
         }
@@ -15,7 +15,7 @@ export default () => ({
         this.collapsedGroups = this.collapsedGroups.concat(group)
     },
 
-    toggleCollapsedGroup: function (group) {
+    toggleCollapsedGroup(group) {
         this.collapsedGroups = this.collapsedGroups.includes(group)
             ? this.collapsedGroups.filter(
                   (collapsedGroup) => collapsedGroup !== group,
@@ -23,11 +23,11 @@ export default () => ({
             : this.collapsedGroups.concat(group)
     },
 
-    close: function () {
+    close() {
         this.isOpen = false
     },
 
-    open: function () {
+    open() {
         this.isOpen = true
     },
 })
