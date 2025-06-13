@@ -6,7 +6,7 @@ return [
 
     'lines' => [
         'Su código de inicio de sesión es: :code',
-        'Este código expirará en un minuto.|Este código expirará en :minutos minutos.',
+        'Este código expirará en un minuto.|Este código expirará en :minutes minutos.',
     ],
 
 ];

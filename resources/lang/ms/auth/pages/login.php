@@ -43,6 +43,30 @@ return [
 
     ],
 
+    'multi_factor' => [
+
+        'heading' => 'Sahkan identiti anda',
+
+        'subheading' => 'Untuk meneruskan log masuk, anda perlu mengesahkan identiti anda.',
+
+        'form' => [
+
+            'provider' => [
+                'label' => 'Bagaimana anda ingin mengesahkan?',
+            ],
+
+            'actions' => [
+
+                'authenticate' => [
+                    'label' => 'Sahkan identiti',
+                ],
+
+            ],
+
+        ],
+
+    ],
+
     'messages' => [
 
         'failed' => 'Bukti kelayakan ini tidak sepadan dengan rekod kami.',
@@ -52,7 +76,7 @@ return [
     'notifications' => [
 
         'throttled' => [
-            'title' => 'Terlalu banyak percubaan log masuk. Sila cuba lagi dalam :seconds saat.',
+            'title' => 'Terlalu banyak percubaan log masuk',
             'body' => 'Sila cuba lagi dalam masa :seconds saat.',
         ],
 

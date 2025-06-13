@@ -32,6 +32,10 @@ return [
 
     'notifications' => [
 
+        'sent' => [
+            'body' => 'Eğer hesabınız yoksa bir e-posta almayacaksınız.',
+        ],
+
         'throttled' => [
             'title' => 'Çok fazla istek',
             'body' => 'Lütfen :seconds saniye sonra tekrar deneyin.',

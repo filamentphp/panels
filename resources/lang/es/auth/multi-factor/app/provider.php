@@ -12,7 +12,7 @@ return [
 
             'messages' => [
                 'enabled' => 'Habilitada',
-                'disabled' => 'Desabilitada',
+                'disabled' => 'Deshabilitada',
             ],
 
         ],

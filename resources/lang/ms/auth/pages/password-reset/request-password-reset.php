@@ -32,6 +32,10 @@ return [
 
     'notifications' => [
 
+        'sent' => [
+            'body' => 'Jika akaun anda tidak wujud, anda tidak akan menerima emel.',
+        ],
+
         'throttled' => [
             'title' => 'Terlalu banyak permintaan',
             'body' => 'Sila cuba lagi dalam :second saat.',

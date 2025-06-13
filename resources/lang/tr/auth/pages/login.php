@@ -43,6 +43,30 @@ return [
 
     ],
 
+    'multi_factor' => [
+
+        'heading' => 'Kimliğinizi doğrulayın',
+
+        'subheading' => 'Giriş yapmaya devam etmek için kimliğinizi doğrulamanız gerekmektedir.',
+
+        'form' => [
+
+            'provider' => [
+                'label' => 'Nasıl doğrulamak istersiniz?',
+            ],
+
+            'actions' => [
+
+                'authenticate' => [
+                    'label' => 'Girişi doğrula',
+                ],
+
+            ],
+
+        ],
+
+    ],
+
     'messages' => [
 
         'failed' => 'Bu kimlik bilgileri kayıtlarımızla eşleşmiyor.',
