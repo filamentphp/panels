@@ -286,11 +286,7 @@ class RelationManager extends Component implements HasActions, HasSchemas, HasTa
             ->when(static::getModelLabel(), fn (Table $table, string $modelLabel): Table => $table->modelLabel($modelLabel))
             ->when(static::getPluralModelLabel(), fn (Table $table, string $pluralModelLabel): Table => $table->pluralModelLabel($pluralModelLabel))
             ->when(static::getRecordTitleAttribute(), fn (Table $table, string $recordTitleAttribute): Table => $table->recordTitleAttribute($recordTitleAttribute))
-            ->heading($this->getTableHeading() ?? static::getTitle($this->getOwnerRecord(), $this->getPageClass()))
-            ->when(
-                $this->getTableRecordUrlUsing(),
-                fn (Table $table, ?Closure $using) => $table->recordUrl($using),
-            );
+            ->heading($this->getTableHeading() ?? static::getTitle($this->getOwnerRecord(), $this->getPageClass()));
     }
 
     /**

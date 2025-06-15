@@ -43,6 +43,30 @@ return [
 
     ],
 
+    'multi_factor' => [
+
+        'heading' => 'Verifica la tua identità',
+
+        'subheading' => 'Per accedere è necessario verificare la tua identità.',
+
+        'form' => [
+
+            'provider' => [
+                'label' => 'Come desideri verificare?',
+            ],
+
+            'actions' => [
+
+                'authenticate' => [
+                    'label' => 'Conferma l\'accesso',
+                ],
+
+            ],
+
+        ],
+
+    ],
+
     'messages' => [
 
         'failed' => 'I dati di accesso non sono corretti.',

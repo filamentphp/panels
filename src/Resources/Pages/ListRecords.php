@@ -20,6 +20,7 @@ use Filament\View\PanelsRenderHook;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Livewire\Attributes\Url;
 
 class ListRecords extends Page implements Tables\Contracts\HasTable
@@ -155,7 +156,7 @@ class ListRecords extends Page implements Tables\Contracts\HasTable
 
                 return null;
             })
-            ->recordUrl($this->getTableRecordUrlUsing() ?? function (Model $record, Table $table): ?string {
+            ->recordUrl(function (Model $record, Table $table): ?string {
                 foreach (['view', 'edit'] as $action) {
                     $action = $table->getAction($action);
 
@@ -206,7 +207,7 @@ class ListRecords extends Page implements Tables\Contracts\HasTable
     /**
      * @deprecated Override the `table()` method to configure the table.
      */
-    protected function getTableQuery(): ?Builder
+    protected function getTableQuery(): Builder | Relation | null
     {
         return static::getResource()::getEloquentQuery();
     }
