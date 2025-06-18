@@ -32,6 +32,10 @@ return [
 
     'notifications' => [
 
+        'sent' => [
+            'body' => 'Ha nem tartozik fiók ehhez az e-mail címhez, akkor nem fogunk üzenetet küldeni.',
+        ],
+
         'throttled' => [
             'title' => 'Túl sok próbálkozás',
             'body' => 'Kérjük, próbáld meg újra :seconds másodperc múlva.',

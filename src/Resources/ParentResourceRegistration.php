@@ -87,7 +87,7 @@ class ParentResourceRegistration
     {
         return (string) str($this->inverseRelationshipName)
             ->singular()
-            ->kebab();
+            ->snake();
     }
 
     public function getSlug(): string

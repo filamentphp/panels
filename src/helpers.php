@@ -40,9 +40,15 @@ if (! function_exists('Filament\get_authorization_response')) {
         }
 
         if (Filament::isAuthorizationStrict()) {
-            throw new Exception(blank($policy)
+            $policyClass = match (true) {
+                is_string($policy) => $policy,
+                is_object($policy) => $policy::class,
+                default => null,
+            };
+
+            throw new Exception(blank($policyClass)
                 ? "Strict authorization mode is enabled, but no policy was found for [{$model}]."
-                : "Strict authorization mode is enabled, but no [{$action}()] method was found on [{$policy}].");
+                : "Strict authorization mode is enabled, but no [{$action}()] method was found on [{$policyClass}].");
         }
 
         /** @var bool | Response | null $response */

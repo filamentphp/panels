@@ -43,6 +43,30 @@ return [
 
     ],
 
+    'multi_factor' => [
+
+        'heading' => 'Igazold a személyazonosságod',
+
+        'subheading' => 'A bejelentkezés folytatásához igazolnod kell a személyazonosságod.',
+
+        'form' => [
+
+            'provider' => [
+                'label' => 'Hogyan szeretnéd igazolni?',
+            ],
+
+            'actions' => [
+
+                'authenticate' => [
+                    'label' => 'Bejelentkezés megerősítése',
+                ],
+
+            ],
+
+        ],
+
+    ],
+
     'messages' => [
 
         'failed' => 'Hibás email cím vagy jelszó.',
