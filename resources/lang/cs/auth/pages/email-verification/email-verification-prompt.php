@@ -16,7 +16,7 @@ return [
 
     'messages' => [
         'notification_not_received' => 'Neobdrželi jste e-mail, který jsme poslali?',
-        'notification_sent' => 'Na vaši e-mailovou adresu :email jsme zaslali zprávu s pokyny pro ověření této adresy.',
+        'notification_sent' => 'Na Vaši e-mailovou adresu :email jsme zaslali zprávu s pokyny pro ověření této adresy.',
     ],
 
     'notifications' => [

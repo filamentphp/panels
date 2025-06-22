@@ -179,7 +179,7 @@ abstract class Page extends BasePage
         return static::$navigationLabel ?? static::$title ?? str(class_basename(static::class))
             ->kebab()
             ->replace('-', ' ')
-            ->title();
+            ->ucwords();
     }
 
     public static function getNavigationBadge(): ?string

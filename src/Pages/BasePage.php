@@ -81,7 +81,7 @@ abstract class BasePage extends Component implements HasActions, HasRenderHookSc
         return static::$title ?? (string) str(class_basename(static::class))
             ->kebab()
             ->replace('-', ' ')
-            ->title();
+            ->ucwords();
     }
 
     public function getMaxContentWidth(): Width | string | null

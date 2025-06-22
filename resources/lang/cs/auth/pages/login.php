@@ -43,6 +43,30 @@ return [
 
     ],
 
+    'multi_factor' => [
+
+        'heading' => 'Ověřte svou identitu',
+
+        'subheading' => 'Pro pokračování přihlášení musíte ověřit svou identitu.',
+
+        'form' => [
+
+            'provider' => [
+                'label' => 'Jak si přejete ověřit svou identitu?',
+            ],
+
+            'actions' => [
+
+                'authenticate' => [
+                    'label' => 'Potvrdit přihlášení',
+                ],
+
+            ],
+
+        ],
+
+    ],
+
     'messages' => [
 
         'failed' => 'Chybně zadané přihlašovací údaje.',

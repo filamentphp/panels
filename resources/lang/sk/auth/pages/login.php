@@ -43,6 +43,30 @@ return [
 
     ],
 
+    'multi_factor' => [
+
+        'heading' => 'Overte svoju identitu',
+
+        'subheading' => 'Na pokračovanie prihlásenia musíte overiť svoju identitu.',
+
+        'form' => [
+
+            'provider' => [
+                'label' => 'Ako si želáte overiť svoju identitu?',
+            ],
+
+            'actions' => [
+
+                'authenticate' => [
+                    'label' => 'Potvrdiť prihlásenie',
+                ],
+
+            ],
+
+        ],
+
+    ],
+
     'messages' => [
 
         'failed' => 'Zadané údaje sú nesprávne.',

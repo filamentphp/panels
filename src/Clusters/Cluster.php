@@ -75,7 +75,7 @@ class Cluster extends Page
             ->beforeLast('Cluster')
             ->kebab()
             ->replace('-', ' ')
-            ->title();
+            ->ucwords();
     }
 
     public static function getClusterBreadcrumb(): ?string
@@ -84,7 +84,7 @@ class Cluster extends Page
             ->beforeLast('Cluster')
             ->kebab()
             ->replace('-', ' ')
-            ->title();
+            ->ucwords();
     }
 
     public static function prependClusterSlug(Panel $panel, string $slug): string

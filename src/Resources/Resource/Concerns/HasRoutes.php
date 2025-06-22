@@ -80,9 +80,9 @@ trait HasRoutes
         };
 
         if ($parentResource = static::getParentResourceRegistration()) {
-            $parentResource->getParentResource()::registerRoutes($panel, function () use ($parentResource, $registerPageRoutes): void {
+            $parentResource->getParentResource()::registerRoutes($panel, function () use ($panel, $parentResource, $registerPageRoutes): void {
                 Route::name($parentResource->getRouteName() . '.')
-                    ->prefix('{' . $parentResource->getParentRouteParameterName() . '}/' . $parentResource->getSlug())
+                    ->prefix('{' . $parentResource->getParentRouteParameterName() . '}/' . static::getSlug($panel))
                     ->group($registerPageRoutes);
             });
 
@@ -142,6 +142,10 @@ trait HasRoutes
     {
         if (filled(static::$slug)) {
             return static::$slug;
+        }
+
+        if ($parentResource = static::getParentResourceRegistration()) {
+            return $parentResource->getSlug();
         }
 
         $pluralBasenameBeforeResource = (string) str(static::class)

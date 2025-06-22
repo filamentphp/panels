@@ -365,9 +365,13 @@ trait InteractsWithRelationshipTable
 
     public static function getRelationshipTitle(): string
     {
+        if ($relatedResource = static::getRelatedResource()) {
+            return $relatedResource::getTitleCasePluralModelLabel();
+        }
+
         return (string) str(static::getRelationshipName())
             ->kebab()
             ->replace('-', ' ')
-            ->headline();
+            ->ucwords();
     }
 }
