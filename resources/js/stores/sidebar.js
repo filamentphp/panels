@@ -1,5 +1,5 @@
 export default () => ({
-    isOpen: window.Alpine.$persist(true).as('isOpen'),
+    isOpen: window.Alpine.$persist(false).as('isOpen'),
 
     collapsedGroups: window.Alpine.$persist(null).as('collapsedGroups'),
 
