@@ -130,7 +130,7 @@ class RequestPasswordReset extends SimplePage
     {
         return Notification::make()
             ->title(__($status))
-            ->body(($status === Password::RESET_LINK_SENT) ? __('filament-panels::pages/auth/password-reset/request-password-reset.notifications.sent.body') : null)
+            ->body(($status === Password::RESET_LINK_SENT) ? __('filament-panels::auth/pages/password-reset/request-password-reset.notifications.sent.body') : null)
             ->success();
     }
 

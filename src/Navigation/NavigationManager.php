@@ -5,6 +5,8 @@ namespace Filament\Navigation;
 use Exception;
 use Filament\Facades\Filament;
 use Filament\Panel;
+use Filament\Support\Contracts\HasIcon;
+use Filament\Support\Contracts\HasLabel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use UnitEnum;
@@ -60,11 +62,7 @@ class NavigationManager
             ->groupBy(function (NavigationItem $item): string {
                 $group = $item->getGroup();
 
-                if ($group instanceof UnitEnum) {
-                    return $group->name;
-                }
-
-                return $group ?? '';
+                return serialize($group);
             })
             ->map(function (Collection $items, string $groupIndex) use ($groups): NavigationGroup {
                 $parentItems = $items->groupBy(fn (NavigationItem $item): string => $item->getParentItem() ?? '');
@@ -82,17 +80,26 @@ class NavigationManager
 
                 $items = $items->filter(fn (NavigationItem $item): bool => (filled($item->getChildItems()) || filled($item->getUrl())));
 
-                if (blank($groupIndex)) {
+                $groupName = unserialize($groupIndex);
+
+                if (blank($groupName)) {
                     return NavigationGroup::make()->items($items);
                 }
 
+                $groupEnum = null;
+
+                if ($groupName instanceof UnitEnum) {
+                    $groupEnum = $groupName;
+                    $groupName = $groupEnum->name;
+                }
+
                 $registeredGroup = $groups
-                    ->first(function (NavigationGroup | string $registeredGroup, string | int $registeredGroupIndex) use ($groupIndex) {
-                        if ($registeredGroupIndex === $groupIndex) {
+                    ->first(function (NavigationGroup | string $registeredGroup, string | int $registeredGroupIndex) use ($groupName) {
+                        if ($registeredGroupIndex === $groupName) {
                             return true;
                         }
 
-                        if ($registeredGroup === $groupIndex) {
+                        if ($registeredGroup === $groupName) {
                             return true;
                         }
 
@@ -100,20 +107,37 @@ class NavigationManager
                             return false;
                         }
 
-                        return $registeredGroup->getLabel() === $groupIndex;
+                        return $registeredGroup->getLabel() === $groupName;
                     });
 
                 if ($registeredGroup instanceof NavigationGroup) {
                     return $registeredGroup->items($items);
                 }
 
-                return NavigationGroup::make($registeredGroup ?? $groupIndex)
-                    ->items($items);
+                $group = NavigationGroup::make($registeredGroup ?? $groupName);
+
+                if ($groupEnum instanceof HasLabel) {
+                    $group->label($groupEnum->getLabel());
+                }
+
+                if ($groupEnum instanceof HasIcon) {
+                    $group->icon($groupEnum->getIcon());
+                }
+
+                return $group->items($items);
             })
             ->filter(fn (NavigationGroup $group): bool => filled($group->getItems()))
             ->sortBy(function (NavigationGroup $group, ?string $groupIndex): int {
                 if (blank($group->getLabel())) {
                     return -1;
+                }
+
+                $groupName = unserialize($groupIndex);
+                $groupEnum = null;
+
+                if ($groupName instanceof UnitEnum) {
+                    $groupEnum = $groupName;
+                    $groupName = $groupEnum->name;
                 }
 
                 $registeredGroups = $this->getNavigationGroups();
@@ -128,9 +152,14 @@ class NavigationManager
                 }
 
                 $sort = array_search(
-                    $groupIndex,
+                    $groupName,
                     $groupsToSearch,
                 );
+
+                if ($groupEnum) {
+                    $enumCaseSort = array_search($groupEnum, $groupEnum::cases());
+                    $sort = ($enumCaseSort !== false) ? $enumCaseSort : $sort;
+                }
 
                 if ($sort === false) {
                     return count($registeredGroups);

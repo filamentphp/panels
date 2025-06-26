@@ -355,7 +355,7 @@ class MakeRelationManagerCommand extends Command
             );
 
             if (method_exists($model, $this->relationship)) {
-                $this->relatedModelFqn = $model->{$this->relationship}()->getRelated()::class;
+                $this->relatedModelFqn = app($model)->{$this->relationship}()->getRelated()::class;
             }
 
             return;
