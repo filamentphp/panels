@@ -122,9 +122,9 @@ abstract class BasePage extends Component implements HasActions, HasRenderHookSc
         (static::$reportValidationErrorUsing)($exception);
     }
 
-    protected function halt(): void
+    protected function halt(bool $shouldRollbackDatabaseTransaction = false): void
     {
-        throw new Halt;
+        throw (new Halt)->rollBackDatabaseTransaction($shouldRollbackDatabaseTransaction);
     }
 
     protected function callHook(string $hook): void
