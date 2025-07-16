@@ -56,6 +56,10 @@ class PanelsRenderHook
 
     const PAGE_FOOTER_WIDGETS_BEFORE = 'panels::page.footer-widgets.before';
 
+    const PAGE_FOOTER_WIDGETS_END = 'panels::page.footer-widgets.end';
+
+    const PAGE_FOOTER_WIDGETS_START = 'panels::page.footer-widgets.start';
+
     const PAGE_HEADER_ACTIONS_AFTER = 'panels::page.header.actions.after';
 
     const PAGE_HEADER_ACTIONS_BEFORE = 'panels::page.header.actions.before';
@@ -63,6 +67,10 @@ class PanelsRenderHook
     const PAGE_HEADER_WIDGETS_AFTER = 'panels::page.header-widgets.after';
 
     const PAGE_HEADER_WIDGETS_BEFORE = 'panels::page.header-widgets.before';
+
+    const PAGE_HEADER_WIDGETS_END = 'panels::page.header-widgets.end';
+
+    const PAGE_HEADER_WIDGETS_START = 'panels::page.header-widgets.start';
 
     const PAGE_START = 'panels::page.start';
 

@@ -14,6 +14,7 @@ use Filament\Support\Exceptions\Halt;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 abstract class BasePage extends Component implements HasActions, HasRenderHookScopes, HasSchemas
@@ -45,6 +46,9 @@ abstract class BasePage extends Component implements HasActions, HasRenderHookSc
     public static bool $formActionsAreSticky = false;
 
     public static bool $hasInlineLabels = false;
+
+    #[On('refresh-page')]
+    public function refresh(): void {}
 
     public function render(): View
     {
