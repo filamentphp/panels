@@ -198,6 +198,12 @@ class MakeResourceCommand extends Command
                 description: 'The panel to create the resource in',
             ),
             new InputOption(
+                name: 'resource-namespace',
+                shortcut: null,
+                mode: InputOption::VALUE_NONE,
+                description: 'The namespace of the resource class, such as [App\\Filament\\Resources]',
+            ),
+            new InputOption(
                 name: 'simple',
                 shortcut: 'S',
                 mode: InputOption::VALUE_NONE,

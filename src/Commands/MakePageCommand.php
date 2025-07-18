@@ -146,6 +146,12 @@ class MakePageCommand extends Command
                 description: 'The resource to create the page in',
             ),
             new InputOption(
+                name: 'resource-namespace',
+                shortcut: null,
+                mode: InputOption::VALUE_NONE,
+                description: 'The namespace of the resource class, such as [App\\Filament\\Resources]',
+            ),
+            new InputOption(
                 name: 'type',
                 shortcut: 'T',
                 mode: InputOption::VALUE_REQUIRED,
