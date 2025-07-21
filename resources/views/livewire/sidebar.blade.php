@@ -22,7 +22,7 @@
                 class="fi-sidebar-header"
             >
                 {{ \Filament\Support\Facades\FilamentView::renderHook(\Filament\View\PanelsRenderHook::SIDEBAR_LOGO_BEFORE) }}
-	            
+
 	            @if ($homeUrl = filament()->getHomeUrl())
                     <a {{ \Filament\Support\generate_href_html($homeUrl) }}>
                         <x-filament-panels::logo />
@@ -30,12 +30,14 @@
                 @else
                     <x-filament-panels::logo />
                 @endif
-	            
+
                 {{ \Filament\Support\Facades\FilamentView::renderHook(\Filament\View\PanelsRenderHook::SIDEBAR_LOGO_AFTER) }}
             </header>
         </div>
 
-        <nav class="fi-sidebar-nav">
+        <nav
+            class="fi-sidebar-nav"
+            data-overlayscrollbars-initialize
             {{ \Filament\Support\Facades\FilamentView::renderHook(\Filament\View\PanelsRenderHook::SIDEBAR_NAV_START) }}
 
             @if (filament()->hasTenancy() && filament()->hasTenantMenu())

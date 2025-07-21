@@ -139,7 +139,6 @@
 
 .fi-sidebar-nav {
     @apply flex grow flex-col gap-y-7 overflow-x-hidden overflow-y-auto px-6 py-8;
-    scrollbar-gutter: stable;
 }
 
 .fi-sidebar-nav-groups {
