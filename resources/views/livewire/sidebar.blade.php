@@ -35,9 +35,7 @@
             </header>
         </div>
 
-        <nav
-            class="fi-sidebar-nav"
-            data-overlayscrollbars-initialize
+        <nav class="fi-sidebar-nav">
             {{ \Filament\Support\Facades\FilamentView::renderHook(\Filament\View\PanelsRenderHook::SIDEBAR_NAV_START) }}
 
             @if (filament()->hasTenancy() && filament()->hasTenantMenu())
