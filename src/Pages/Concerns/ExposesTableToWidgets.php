@@ -16,8 +16,7 @@ trait ExposesTableToWidgets /** @phpstan-ignore trait.unused */
             'tableGroupingDirection' => $this->tableGroupingDirection,
             'tableRecordsPerPage' => $this->tableRecordsPerPage,
             'tableSearch' => $this->tableSearch,
-            'tableSortColumn' => $this->tableSortColumn,
-            'tableSortDirection' => $this->tableSortDirection,
+            'tableSort' => $this->tableSort,
         ];
     }
 }
