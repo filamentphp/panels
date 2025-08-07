@@ -28,9 +28,6 @@ trait InteractsWithPageTable /** @phpstan-ignore trait.unused */
     #[Reactive]
     public ?string $tableGrouping = null;
 
-    #[Reactive]
-    public ?string $tableGroupingDirection = null;
-
     /**
      * @var array<string, mixed> | null
      */
@@ -85,7 +82,6 @@ trait InteractsWithPageTable /** @phpstan-ignore trait.unused */
             'tableColumnSearches' => $this->tableColumnSearches,
             'tableFilters' => $this->tableFilters,
             'tableGrouping' => $this->tableGrouping,
-            'tableGroupingDirection' => $this->tableGroupingDirection,
             'tableRecordsPerPage' => $this->tableRecordsPerPage,
             'tableSearch' => $this->tableSearch,
             'tableSort' => $this->tableSort,

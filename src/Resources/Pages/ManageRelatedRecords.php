@@ -57,9 +57,6 @@ class ManageRelatedRecords extends Page implements Tables\Contracts\HasTable
     #[Url(as: 'grouping')]
     public ?string $tableGrouping = null;
 
-    #[Url(as: 'groupingDirection')]
-    public ?string $tableGroupingDirection = null;
-
     /**
      * @var ?string
      */

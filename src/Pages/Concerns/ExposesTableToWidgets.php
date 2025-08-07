@@ -13,7 +13,6 @@ trait ExposesTableToWidgets /** @phpstan-ignore trait.unused */
             'tableColumnSearches' => $this->tableColumnSearches,
             'tableFilters' => $this->tableFilters,
             'tableGrouping' => $this->tableGrouping,
-            'tableGroupingDirection' => $this->tableGroupingDirection,
             'tableRecordsPerPage' => $this->tableRecordsPerPage,
             'tableSearch' => $this->tableSearch,
             'tableSort' => $this->tableSort,
