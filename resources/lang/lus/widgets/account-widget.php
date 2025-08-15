@@ -5,11 +5,11 @@ return [
     'actions' => [
 
         'logout' => [
-            'label' => 'Sair',
+            'label' => 'Sign out',
         ],
 
     ],
 
-    'welcome' => 'Bem-vindo(a)',
+    'welcome' => 'Welcome',
 
 ];

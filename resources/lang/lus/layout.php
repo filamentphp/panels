@@ -7,29 +7,29 @@ return [
     'actions' => [
 
         'billing' => [
-            'label' => 'Gerenciar assinatura',
+            'label' => 'Manage subscription',
         ],
 
         'logout' => [
-            'label' => 'Sair',
+            'label' => 'Sign out',
         ],
 
         'open_database_notifications' => [
-            'label' => 'Abrir notificações',
+            'label' => 'Notifications hawnna',
         ],
 
         'open_user_menu' => [
-            'label' => 'Menu do usuário',
+            'label' => 'User menu',
         ],
 
         'sidebar' => [
 
             'collapse' => [
-                'label' => 'Recolher barra lateral',
+                'label' => 'Sidebar kharna',
             ],
 
             'expand' => [
-                'label' => 'Expandir barra lateral',
+                'label' => 'Sidebar hawnna',
             ],
 
         ],
@@ -37,15 +37,15 @@ return [
         'theme_switcher' => [
 
             'dark' => [
-                'label' => 'Mudar para tema escuro',
+                'label' => 'Theme dum hmanna',
             ],
 
             'light' => [
-                'label' => 'Mudar para tema claro',
+                'label' => 'Theme eng hmanna',
             ],
 
             'system' => [
-                'label' => 'Mudar para tema do sistema',
+                'label' => 'System theme hmanna',
             ],
 
         ],
@@ -53,11 +53,11 @@ return [
     ],
 
     'avatar' => [
-        'alt' => 'Avatar de :name',
+        'alt' => 'Avatar of :name',
     ],
 
     'logo' => [
-        'alt' => 'Logotipo de :name',
+        'alt' => ':name logo',
     ],
 
 ];

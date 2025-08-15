@@ -2,22 +2,22 @@
 
 return [
 
-    'title' => 'Modifica :label',
+    'title' => ':Label edit na',
 
-    'breadcrumb' => 'Modifica',
+    'breadcrumb' => 'Edit',
 
-    'navigation_label' => 'Modifica',
+    'navigation_label' => 'Edit',
 
     'form' => [
 
         'actions' => [
 
             'cancel' => [
-                'label' => 'Annulla',
+                'label' => 'Cancel',
             ],
 
             'save' => [
-                'label' => 'Salva',
+                'label' => 'Tihdanglam ho save na',
             ],
 
         ],
@@ -27,7 +27,7 @@ return [
     'content' => [
 
         'tab' => [
-            'label' => 'Modifica',
+            'label' => 'Edit',
         ],
 
     ],
@@ -35,7 +35,7 @@ return [
     'notifications' => [
 
         'saved' => [
-            'title' => 'Salvato',
+            'title' => 'Saved',
         ],
 
     ],
