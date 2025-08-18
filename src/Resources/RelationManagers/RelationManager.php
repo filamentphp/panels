@@ -157,7 +157,7 @@ class RelationManager extends Component implements HasActions, HasSchemas, HasTa
             ->iconPosition(static::class::getIconPosition($ownerRecord, $pageClass));
     }
 
-    public static function getIcon(Model $ownerRecord, string $pageClass): ?string
+    public static function getIcon(Model $ownerRecord, string $pageClass): string | BackedEnum | null
     {
         return static::$icon;
     }

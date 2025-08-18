@@ -8,18 +8,17 @@ use Filament\Facades\Filament;
 trait HasTenantMenu
 {
     /**
-     * @var array<Action>
+     * @var ?array<Action>
      */
-    protected array $tenantMenuItems = [];
+    protected ?array $tenantMenuItems;
 
-    public function bootHasTenantMenu(): void
+    /**
+     * @return array<Action>
+     */
+    protected function getTenantMenuItems(): array
     {
-        if (! Filament::hasTenancy()) {
-            return;
-        }
-
-        if (! Filament::hasTenantMenu()) {
-            return;
+        if (isset($this->tenantMenuItems)) {
+            return $this->tenantMenuItems;
         }
 
         $this->tenantMenuItems = Filament::getTenantMenuItems();
@@ -29,13 +28,7 @@ trait HasTenantMenu
 
             $this->cacheAction($action);
         }
-    }
 
-    /**
-     * @return array<Action>
-     */
-    protected function getTenantMenuItems(): array
-    {
         return $this->tenantMenuItems;
     }
 }
