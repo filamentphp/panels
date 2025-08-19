@@ -187,7 +187,7 @@ trait HasRoutes
                 $tenantRoutePrefix .= '/';
             }
 
-            return url(Str::replaceEnd($this->getPath(), '/', '') . '/' . $tenantRoutePrefix . (filled($tenantSlugAttribute) ? $tenant->getAttributeValue($tenantSlugAttribute) : $tenant->getRouteKey()));
+            return url(Str::replaceEnd('/', '', $this->getPath()) . '/' . $tenantRoutePrefix . (filled($tenantSlugAttribute) ? $tenant->getAttributeValue($tenantSlugAttribute) : $tenant->getRouteKey()));
         }
 
         return url($this->getPath());
