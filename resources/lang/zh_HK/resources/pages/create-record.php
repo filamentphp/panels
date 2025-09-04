@@ -2,24 +2,24 @@
 
 return [
 
-    'title' => 'יצירת :label',
+    'title' => '建立 :label',
 
-    'breadcrumb' => 'יצירה',
+    'breadcrumb' => '建立',
 
     'form' => [
 
         'actions' => [
 
             'cancel' => [
-                'label' => 'ביטול',
+                'label' => '取消',
             ],
 
             'create' => [
-                'label' => 'יצירה',
+                'label' => '建立',
             ],
 
             'create_another' => [
-                'label' => 'צור וצור עוד אחד',
+                'label' => '建立後再建立另一個',
             ],
 
         ],
@@ -29,7 +29,7 @@ return [
     'notifications' => [
 
         'created' => [
-            'title' => 'נוצר',
+            'title' => '已建立',
         ],
 
     ],
