@@ -127,7 +127,6 @@ class NavigationManager
                 return $group->items($items);
             })
             ->filter(fn (NavigationGroup $group): bool => filled($group->getItems()))
-            ->sortBy(fn (NavigationGroup $group): ?string => $group->getLabel())
             ->sortBy(function (NavigationGroup $group, ?string $groupIndex): int {
                 if (blank($group->getLabel())) {
                     return -1;
