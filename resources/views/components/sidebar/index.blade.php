@@ -167,7 +167,7 @@
                     ).style.display = 'none'
                     group
                         .querySelector('.fi-sidebar-group-collapse-button')
-                        .classList.add('rotate-180')
+                        .classList.add('-rotate-180')
                 })
         </script>
 
