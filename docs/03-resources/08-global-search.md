@@ -65,7 +65,7 @@ public static function getGlobalSearchEloquentQuery(): Builder
 
 ## Customizing global search result URLs
 
-Global search results will link to the [Edit page](editing-records) of your resource, or the [View page](viewing-page) if the user does not have [edit permissions](editing-records#authorization). To customize this, you may override the `getGlobalSearchResultUrl()` method and return a route of your choice:
+Global search results will link to the [Edit page](editing-records) of your resource, or the [View page](viewing-records) if the user does not have [edit permissions](editing-records#authorization). To customize this, you may override the `getGlobalSearchResultUrl()` method and return a route of your choice:
 
 ```php
 public static function getGlobalSearchResultUrl(Model $record): string
@@ -128,7 +128,7 @@ protected static int $globalSearchResultsLimit = 20;
 
 As [explained above](#title), global search is automatically enabled once you set a title attribute for your resource. Sometimes you may want to specify the title attribute while not enabling global search.
 
-This can be achieved by disabling global search in the [configuration](configuration):
+This can be achieved by disabling global search in the [configuration](../configuration):
 
 ```php
 use Filament\Panel;
@@ -143,7 +143,7 @@ public function panel(Panel $panel): Panel
 
 ## Registering global search key bindings
 
-The global search field can be opened using keyboard shortcuts. To configure these, pass the `globalSearchKeyBindings()` method to the [configuration](configuration):
+The global search field can be opened using keyboard shortcuts. To configure these, pass the `globalSearchKeyBindings()` method to the [configuration](../configuration):
 
 ```php
 use Filament\Panel;
@@ -158,7 +158,7 @@ public function panel(Panel $panel): Panel
 
 ## Configuring the global search debounce
 
-Global search has a default debounce time of 500ms, to limit the number of requests that are made while the user is typing. You can alter this by using the `globalSearchDebounce()` method in the [configuration](configuration):
+Global search has a default debounce time of 500ms, to limit the number of requests that are made while the user is typing. You can alter this by using the `globalSearchDebounce()` method in the [configuration](../configuration):
 
 ```php
 use Filament\Panel;
@@ -173,7 +173,7 @@ public function panel(Panel $panel): Panel
 
 ## Configuring the global search field suffix
 
-Global search field by default doesn't include any suffix. You may customize it using the `globalSearchFieldSuffix()` method in the [configuration](configuration).
+Global search field by default doesn't include any suffix. You may customize it using the `globalSearchFieldSuffix()` method in the [configuration](../configuration).
 
 If you want to display the currently configured [global search key bindings](#registering-global-search-key-bindings) in the suffix, you can use the `globalSearchFieldKeyBindingSuffix()` method, which will display the first registered key binding as the suffix of the global search field:
 

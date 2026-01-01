@@ -372,7 +372,7 @@ public static function getNavigationParentItem(): ?string
 }
 ```
 
-> If you're reaching for a third level of navigation like this, you should consider using [clusters](clusters) instead, which are a logical grouping of resources and [custom pages](../pages), which can share their own separate navigation.
+> If you're reaching for a third level of navigation like this, you should consider using [clusters](../clusters) instead, which are a logical grouping of resources and [custom pages](../pages), which can share their own separate navigation.
 
 ## Generating URLs to resource pages
 
