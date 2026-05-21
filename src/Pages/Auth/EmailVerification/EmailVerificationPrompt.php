@@ -7,6 +7,7 @@ use DanHarrin\LivewireRateLimiting\WithRateLimiting;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
+use Filament\Forms\Concerns\RestrictsFileUploadsToFormComponents;
 use Filament\Forms\Form;
 use Filament\Notifications\Auth\VerifyEmail;
 use Filament\Notifications\Notification;
@@ -19,6 +20,7 @@ use Illuminate\Contracts\Support\Htmlable;
  */
 class EmailVerificationPrompt extends SimplePage
 {
+    use RestrictsFileUploadsToFormComponents;
     use WithRateLimiting;
 
     /**

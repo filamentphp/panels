@@ -10,6 +10,7 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Concerns\RestrictsFileUploadsToFormComponents;
 use Filament\Forms\Form;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 use Filament\Models\Contracts\FilamentUser;
@@ -27,6 +28,7 @@ use Illuminate\Validation\ValidationException;
 class Login extends SimplePage
 {
     use InteractsWithFormActions;
+    use RestrictsFileUploadsToFormComponents;
     use WithRateLimiting;
 
     /**

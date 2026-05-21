@@ -10,6 +10,7 @@ use Filament\Actions\ActionGroup;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Concerns\RestrictsFileUploadsToFormComponents;
 use Filament\Forms\Form;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Notifications\Auth\ResetPassword as ResetPasswordNotification;
@@ -28,6 +29,7 @@ use Illuminate\Support\Facades\Password;
 class RequestPasswordReset extends SimplePage
 {
     use InteractsWithFormActions;
+    use RestrictsFileUploadsToFormComponents;
     use WithRateLimiting;
 
     /**

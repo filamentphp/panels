@@ -11,6 +11,7 @@ use Filament\Events\Auth\Registered;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Concerns\RestrictsFileUploadsToFormComponents;
 use Filament\Forms\Form;
 use Filament\Http\Responses\Auth\Contracts\RegistrationResponse;
 use Filament\Notifications\Auth\VerifyEmail;
@@ -33,6 +34,7 @@ class Register extends SimplePage
 {
     use CanUseDatabaseTransactions;
     use InteractsWithFormActions;
+    use RestrictsFileUploadsToFormComponents;
     use WithRateLimiting;
 
     /**
