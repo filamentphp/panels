@@ -18,11 +18,6 @@ trait HasRoutes
 {
     protected static ?string $slug = null;
 
-    /**
-     * @var array<class-string, string>
-     */
-    protected static array $cachedDefaultSlugs = [];
-
     protected static ?string $recordRouteKeyName = null;
 
     /**
@@ -179,11 +174,6 @@ trait HasRoutes
     }
 
     public static function getDefaultSlug(): string
-    {
-        return static::$cachedDefaultSlugs[static::class] ??= static::resolveDefaultSlug();
-    }
-
-    protected static function resolveDefaultSlug(): string
     {
         if (filled(static::$slug)) {
             return static::$slug;

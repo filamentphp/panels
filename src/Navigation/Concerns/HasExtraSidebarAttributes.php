@@ -3,7 +3,6 @@
 namespace Filament\Navigation\Concerns;
 
 use Closure;
-use Filament\Support\View\ComponentAttributeBag as FilamentComponentAttributeBag;
 use Illuminate\View\ComponentAttributeBag;
 
 trait HasExtraSidebarAttributes
@@ -35,7 +34,7 @@ trait HasExtraSidebarAttributes
      */
     public function getExtraSidebarAttributes(): array
     {
-        $temporaryAttributeBag = new FilamentComponentAttributeBag;
+        $temporaryAttributeBag = new ComponentAttributeBag;
 
         foreach ($this->extraSidebarAttributes as $extraSidebarAttributes) {
             $temporaryAttributeBag = $temporaryAttributeBag->merge($this->evaluate($extraSidebarAttributes), escape: false);
@@ -46,6 +45,6 @@ trait HasExtraSidebarAttributes
 
     public function getExtraSidebarAttributeBag(): ComponentAttributeBag
     {
-        return new FilamentComponentAttributeBag($this->getExtraSidebarAttributes());
+        return new ComponentAttributeBag($this->getExtraSidebarAttributes());
     }
 }
