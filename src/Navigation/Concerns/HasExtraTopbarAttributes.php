@@ -3,7 +3,6 @@
 namespace Filament\Navigation\Concerns;
 
 use Closure;
-use Filament\Support\View\ComponentAttributeBag as FilamentComponentAttributeBag;
 use Illuminate\View\ComponentAttributeBag;
 
 trait HasExtraTopbarAttributes
@@ -35,7 +34,7 @@ trait HasExtraTopbarAttributes
      */
     public function getExtraTopbarAttributes(): array
     {
-        $temporaryAttributeBag = new FilamentComponentAttributeBag;
+        $temporaryAttributeBag = new ComponentAttributeBag;
 
         foreach ($this->extraTopbarAttributes as $extraTopbarAttributes) {
             $temporaryAttributeBag = $temporaryAttributeBag->merge($this->evaluate($extraTopbarAttributes), escape: false);
@@ -46,6 +45,6 @@ trait HasExtraTopbarAttributes
 
     public function getExtraTopbarAttributeBag(): ComponentAttributeBag
     {
-        return new FilamentComponentAttributeBag($this->getExtraTopbarAttributes());
+        return new ComponentAttributeBag($this->getExtraTopbarAttributes());
     }
 }

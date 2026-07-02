@@ -22,11 +22,6 @@ trait HasRelationManagers
     public ?string $activeRelationManager = null;
 
     /**
-     * @var array<class-string<RelationManager> | RelationGroup | RelationManagerConfiguration> | null
-     */
-    protected ?array $cachedRelationManagers = null;
-
-    /**
      * @return array<class-string<RelationManager> | RelationGroup | RelationManagerConfiguration>
      */
     protected function getAllRelationManagers(): array
@@ -37,20 +32,12 @@ trait HasRelationManagers
     /**
      * @return array<class-string<RelationManager> | RelationGroup | RelationManagerConfiguration>
      */
-    public function getCachedRelationManagers(): array
+    public function getRelationManagers(): array
     {
         if (! $this->hasRecord()) {
             return [];
         }
 
-        return $this->cachedRelationManagers ??= $this->getRelationManagers();
-    }
-
-    /**
-     * @return array<class-string<RelationManager> | RelationGroup | RelationManagerConfiguration>
-     */
-    public function getRelationManagers(): array
-    {
         $managers = $this->getAllRelationManagers();
 
         return array_filter(
@@ -80,7 +67,7 @@ trait HasRelationManagers
 
     public function renderingHasRelationManagers(): void
     {
-        $managers = $this->getCachedRelationManagers();
+        $managers = $this->getRelationManagers();
 
         if (array_key_exists($this->activeRelationManager ?? '', $managers)) {
             return;
@@ -121,7 +108,7 @@ trait HasRelationManagers
 
     public function getRelationManagersContentComponent(): Component
     {
-        $managers = $this->getCachedRelationManagers();
+        $managers = $this->getRelationManagers();
         $hasCombinedRelationManagerTabsWithContent = $this->hasCombinedRelationManagerTabsWithContent();
         $ownerRecord = $this->getRecord();
 
