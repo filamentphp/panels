@@ -23,6 +23,9 @@ class RelationGroup extends Component
      */
     protected string | array | Closure | null $badgeColor = null;
 
+    /**
+     * @deprecated Use `lazyLoadedBadge()` and `isBadgeLazyLoaded()` instead.
+     */
     protected bool | Closure $isBadgeDeferred = false;
 
     protected ?Model $ownerRecord = null;
@@ -81,11 +84,19 @@ class RelationGroup extends Component
         return $this;
     }
 
-    public function deferBadge(bool | Closure $condition = true): static
+    public function lazyLoadedBadge(bool | Closure $condition = true): static
     {
         $this->isBadgeDeferred = $condition;
 
         return $this;
+    }
+
+    /**
+     * @deprecated Use `lazyLoadedBadge()` instead.
+     */
+    public function deferBadge(bool | Closure $condition = true): static
+    {
+        return $this->lazyLoadedBadge($condition);
     }
 
     public function getLabel(): string
@@ -146,9 +157,17 @@ class RelationGroup extends Component
         ]);
     }
 
-    public function isBadgeDeferred(): bool
+    public function isBadgeLazyLoaded(): bool
     {
         return (bool) $this->evaluate($this->isBadgeDeferred);
+    }
+
+    /**
+     * @deprecated Use `isBadgeLazyLoaded()` instead.
+     */
+    public function isBadgeDeferred(): bool
+    {
+        return $this->isBadgeLazyLoaded();
     }
 
     public function getOwnerRecord(): ?Model
@@ -192,13 +211,13 @@ class RelationGroup extends Component
 
     public function getTabComponent(): Tab
     {
-        $isTabBadgeDeferred = $this->isBadgeDeferred();
+        $isTabBadgeDeferred = $this->isBadgeLazyLoaded();
 
         $tab = Tab::make($this->getLabel())
             ->badge($isTabBadgeDeferred
                 ? fn (): ?string => $this->getBadge()
                 : ($badge = $this->getBadge()))
-            ->deferBadge($isTabBadgeDeferred)
+            ->lazyLoadedBadge($isTabBadgeDeferred)
             ->badgeColor($this->getBadgeColor($badge ?? null))
             ->badgeTooltip($this->getBadgeTooltip($badge ?? null))
             ->icon($this->getIcon())
