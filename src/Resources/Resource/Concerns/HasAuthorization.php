@@ -17,9 +17,10 @@ trait HasAuthorization
     // automatically. Bulk actions use `*Any()` policy methods
     // (`deleteAny`, `forceDeleteAny`, `restoreAny`) for performance —
     // use `authorizeIndividualRecords()` if per-record checks are
-    // needed. Inline editable table columns bypass these checks —
-    // they only respect `disabled()`. Custom actions require manual
-    // authorization via `authorize()`, `visible()`, or `hidden()`.
+    // needed. Inline editable table columns require explicit `authorize()`
+    // configuration, even in strict authorization mode.
+    // Custom actions require manual authorization via `authorize()`,
+    // `visible()`, or `hidden()`.
 
     protected static bool $shouldCheckPolicyExistence = true;
 
@@ -57,10 +58,16 @@ trait HasAuthorization
         return static::getAuthorizationResponse($action, $record)->authorize();
     }
 
-    // Create, edit and view pages used to check `canCreate()`, `canEdit()`
-    // and `canView()`, so resources may override those instead of their
-    // `get*AuthorizationResponse()` counterparts. When an override exists,
-    // it can deny an allowed response.
+    /**
+     * @internal Never override or call this method. It exists only to preserve backwards
+     * compatibility for resource `canCreate()`, `canEdit()` and `canView()` overrides
+     * after page authorization switched to response methods. It intentionally does not
+     * apply to other `can*()` methods and is not a general authorization hook.
+     *
+     * Security: Policy denials are preserved; legacy overrides can only deny otherwise
+     * allowed responses. Put custom authorization in model policies or the corresponding
+     * `get*AuthorizationResponse()` methods instead.
+     */
     protected static function getAuthorizationResponseUsingMethodOverride(string $method, string $action, ?Model $record = null): Response
     {
         $key = static::class . '::' . $method;
